@@ -240,21 +240,21 @@
   }
   .pulse-card:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 6px 22px rgba(0,0,0,.28)}
 
-  /* left colored bar based on signal */
-  .pulse-card.strong-bull{border-left:3px solid #3fd17e}
-  .pulse-card.bull{border-left:3px solid rgba(63,209,126,.5)}
-  .pulse-card.bear{border-left:3px solid rgba(255,92,97,.5)}
-  .pulse-card.strong-bear{border-left:3px solid #ff5c61}
+  /* left bar — bright only for strong signals */
+  .pulse-card.strong-bull{border-left:3px solid #3fd17e;box-shadow:0 0 0 1px rgba(63,209,126,.08) inset}
+  .pulse-card.bull{border-left:1px solid var(--line)}
+  .pulse-card.bear{border-left:1px solid var(--line)}
+  .pulse-card.strong-bear{border-left:3px solid #ff5c61;box-shadow:0 0 0 1px rgba(255,92,97,.08) inset}
 
   /* card header: signal light + pair + verdict */
   .pc-header{display:flex;align-items:center;gap:10px}
   .pc-pair{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.3px;flex:1}
   .master-live-row .pc-pair{font-size:17px}
   .pc-verdict-chip{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.2px;padding:3px 8px;border-radius:10px;text-transform:uppercase;white-space:nowrap}
-  .pc-verdict-chip.strong-bull{background:rgba(63,209,126,.2);color:#3fd17e;border:1px solid rgba(63,209,126,.3)}
-  .pc-verdict-chip.bull{background:rgba(63,209,126,.1);color:#3fd17e;border:1px solid rgba(63,209,126,.2)}
-  .pc-verdict-chip.bear{background:rgba(255,92,97,.1);color:#ff5c61;border:1px solid rgba(255,92,97,.2)}
-  .pc-verdict-chip.strong-bear{background:rgba(255,92,97,.2);color:#ff5c61;border:1px solid rgba(255,92,97,.3)}
+  .pc-verdict-chip.strong-bull{background:rgba(63,209,126,.18);color:#3fd17e;border:1px solid rgba(63,209,126,.3)}
+  .pc-verdict-chip.bull{background:transparent;color:#7aaa90;border:1px solid rgba(63,209,126,.15)}
+  .pc-verdict-chip.bear{background:transparent;color:#9e7070;border:1px solid rgba(255,92,97,.15)}
+  .pc-verdict-chip.strong-bear{background:rgba(255,92,97,.18);color:#ff5c61;border:1px solid rgba(255,92,97,.3)}
 
   .pc-label{font-size:11.5px;color:var(--text-dim);line-height:1.35;margin-top:-4px}
 
@@ -267,8 +267,11 @@
   /* sma line */
   .pc-sma-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .sma-pill{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 8px;border-radius:8px;text-transform:uppercase}
-  .sma-pill.above{background:rgba(63,209,126,.12);color:#3fd17e;border:1px solid rgba(63,209,126,.25)}
-  .sma-pill.below{background:rgba(255,92,97,.12);color:#ff5c61;border:1px solid rgba(255,92,97,.25)}
+  .sma-pill.above{background:rgba(63,209,126,.06);color:#7aaa90;border:1px solid rgba(63,209,126,.14)}
+  .sma-pill.below{background:rgba(255,92,97,.06);color:#9e7070;border:1px solid rgba(255,92,97,.14)}
+  /* strong signal overrides — brighter pills */
+  .pulse-card.strong-bull .sma-pill.above{background:rgba(63,209,126,.14);color:#3fd17e;border-color:rgba(63,209,126,.28)}
+  .pulse-card.strong-bear .sma-pill.below{background:rgba(255,92,97,.14);color:#ff5c61;border-color:rgba(255,92,97,.28)}
   .sma50-txt{font-family:var(--mono);font-size:9.5px;color:var(--text-faint)}
 
   /* sparkline */
@@ -283,6 +286,15 @@
 
   /* pulse grid */
   .pulse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:11px}
+
+  /* signal group separators */
+  .signal-group-hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .signal-group-hdr:not(:first-child){margin-top:24px}
+  .sg-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;white-space:nowrap}
+  .sg-count{font-family:var(--mono);font-size:10px;color:var(--text-faint);letter-spacing:1px}
+  .sg-line{flex:1;height:1px;background:var(--line)}
+  .signal-group-hdr.bull-hdr .sg-label{color:#3fd17e}
+  .signal-group-hdr.bear-hdr .sg-label{color:#ff5c61}
 
   /* loading */
   .live-spinner-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:60px 20px;grid-column:1/-1;color:var(--text-faint);font-family:var(--mono);font-size:11px;letter-spacing:1px}
@@ -428,8 +440,8 @@
       <div class="bd-grid" id="bdGrid"></div>
     </div>
 
-    <div style="margin-top:20px;margin-bottom:6px;font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase">All 15 Ratio Cards</div>
-    <div class="pulse-grid" id="livePulseGrid">
+    <div style="margin-top:20px;margin-bottom:4px;font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase">All Ratio Cards — sorted by signal</div>
+    <div id="livePulseGrid">
       <div class="live-spinner-wrap"><div class="spinner"></div>Fetching live market data…</div>
     </div>
 
@@ -830,7 +842,9 @@ function buildCard(r,large){
     </div>`;
   }
   const {sig,bullish,above20}=r.cl;
-  const col=bullish?'#3fd17e':'#ff5c61';
+  // Only strong signals get bright green/red — regular signals use muted naturals
+  const col = sig==='strong-bull'?'#3fd17e' : sig==='strong-bear'?'#ff5c61'
+            : bullish?'#7aaa90' : '#9e7070';
   const pct=((r.curr-r.s20)/r.s20*100);
   const pctStr=(pct>=0?'+':'')+pct.toFixed(2)+'%';
   const fmt=v=>v>=100?v.toFixed(2):v>=10?v.toFixed(3):v.toFixed(4);
@@ -865,6 +879,25 @@ function buildCard(r,large){
     <div class="pc-spark">${spark(r.vals,bullish)}</div>
     <div class="pc-lens" style="border-color:${LENS_C[r.lens]};color:${LENS_C[r.lens]}">${r.lens}</div>
   </div>`;
+}
+
+/* split grid: bullish group on top, bearish below */
+function renderSplitGrid(data, id){
+  const order=['strong-bull','bull','strong-bear','bear'];
+  const bull=data.filter(r=>!r.error&&r.cl.bullish).sort((a,b)=>order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig));
+  const bear=data.filter(r=>!r.error&&!r.cl.bullish).sort((a,b)=>order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig));
+  const errs=data.filter(r=>r.error);
+  let h='';
+  if(bull.length){
+    h+=`<div class="signal-group-hdr bull-hdr"><span class="sg-label">▲ Bullish</span><span class="sg-count">${bull.length} ratio${bull.length>1?'s':''}</span><div class="sg-line"></div></div>`;
+    h+=`<div class="pulse-grid">${bull.map(r=>buildCard(r,false)).join('')}</div>`;
+  }
+  if(bear.length){
+    h+=`<div class="signal-group-hdr bear-hdr"><span class="sg-label">▼ Bearish</span><span class="sg-count">${bear.length} ratio${bear.length>1?'s':''}</span><div class="sg-line"></div></div>`;
+    h+=`<div class="pulse-grid">${bear.map(r=>buildCard(r,false)).join('')}</div>`;
+  }
+  if(errs.length) h+=`<div class="pulse-grid" style="margin-top:10px;opacity:.4">${errs.map(r=>buildCard(r,false)).join('')}</div>`;
+  document.getElementById(id).innerHTML=h||'<div class="live-error-msg">No data</div>';
 }
 
 /* render regime banner */
@@ -967,7 +1000,7 @@ async function loadLiveData(){
     renderBanner(data);
     const masters=data.filter(r=>r.master);
     document.getElementById('liveMasters').innerHTML=masters.map(r=>buildCard(r,true)).join('');
-    document.getElementById('livePulseGrid').innerHTML=data.map(r=>buildCard(r,false)).join('');
+    renderSplitGrid(data,'livePulseGrid');
 
     dot.className='live-dot on';
     stxt.textContent='live · '+new Date().toLocaleTimeString();
