@@ -9,191 +9,322 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz@0,6..72;1,6..72&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0e0f;
-    --bg-elev:#10171a;
-    --bg-card:#0d1316;
-    --line:#1d2b30;
-    --line-bright:#2a3d44;
-    --text:#dfe7e6;
-    --text-dim:#8b9b99;
-    --text-faint:#566663;
-    --amber:#f5a623;
-    --green:#3fd17e;
-    --red:#ff5c61;
-    --cyan:#46d6d2;
-    --violet:#9d8cff;
-    --gold:#e8c14a;
+    --bg:#0a0e0f;--bg-elev:#10171a;--bg-card:#0d1316;
+    --line:#1d2b30;--line-bright:#2a3d44;
+    --text:#dfe7e6;--text-dim:#8b9b99;--text-faint:#566663;
+    --amber:#f5a623;--green:#3fd17e;--red:#ff5c61;
+    --cyan:#46d6d2;--violet:#9d8cff;--gold:#e8c14a;
     --mono:'JetBrains Mono',monospace;
     --sans:'Archivo',sans-serif;
     --serif:'Newsreader',serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--sans);
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-    background-image:
-      radial-gradient(circle at 15% 0%, rgba(70,214,210,0.04), transparent 40%),
-      radial-gradient(circle at 85% 30%, rgba(245,166,35,0.04), transparent 45%);
-    background-attachment:fixed;
-  }
-  body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
-    background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.012) 0px,rgba(255,255,255,0.012) 1px,transparent 1px,transparent 3px);
-    mix-blend-mode:overlay;
-  }
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 15% 0%,rgba(70,214,210,.04),transparent 40%),radial-gradient(circle at 85% 30%,rgba(245,166,35,.04),transparent 45%);
+    background-attachment:fixed;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0px,rgba(255,255,255,.012) 1px,transparent 1px,transparent 3px);
+    mix-blend-mode:overlay;}
   .wrap{max-width:1340px;margin:0 auto;padding:0 28px;position:relative;z-index:2}
 
-  /* ---- HEADER ---- */
-  header{border-bottom:1px solid var(--line);background:rgba(10,14,15,0.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:50}
-  .head-inner{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;max-width:1340px;margin:0 auto;flex-wrap:wrap;gap:14px}
+  /* HEADER */
+  header{border-bottom:1px solid var(--line);background:rgba(10,14,15,.88);backdrop-filter:blur(10px);position:sticky;top:0;z-index:50}
+  .head-inner{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;max-width:1340px;margin:0 auto;flex-wrap:wrap;gap:12px}
   .brand{display:flex;align-items:baseline;gap:14px}
   .brand .mark{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--bg);background:var(--amber);padding:4px 9px;font-weight:700;border-radius:2px}
-  .brand h1{font-size:21px;font-weight:800;letter-spacing:-0.5px}
+  .brand h1{font-size:20px;font-weight:800;letter-spacing:-.5px}
   .brand h1 .em{color:var(--amber)}
-  .ticker-clock{font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:1px;text-align:right}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .ticker-clock{font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:1px}
   .ticker-clock b{color:var(--green);font-weight:500}
+  .live-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint)}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint);flex-shrink:0;transition:background .4s}
+  .live-dot.on{background:var(--green);animation:pulse-glow 2s infinite}
+  .live-dot.err{background:var(--red)}
+  @keyframes pulse-glow{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(63,209,126,.5)}50%{opacity:.8;box-shadow:0 0 0 5px rgba(63,209,126,0)}}
 
-  nav.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);background:var(--bg-elev);position:sticky;top:0;z-index:40}
-  nav.tabs .wrap{display:flex;gap:2px;padding-top:0;padding-bottom:0}
-  .tab{font-family:var(--mono);font-size:12px;letter-spacing:1px;color:var(--text-dim);background:none;border:none;padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all .18s;text-transform:uppercase;white-space:nowrap}
+  /* NAV */
+  nav.tabs{border-bottom:1px solid var(--line);background:var(--bg-elev);position:sticky;top:0;z-index:40;overflow-x:auto}
+  nav.tabs .wrap{display:flex;gap:0;padding-top:0;padding-bottom:0}
+  .tab{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--text-dim);background:none;border:none;padding:13px 18px;cursor:pointer;border-bottom:2px solid transparent;transition:all .18s;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
   .tab:hover{color:var(--text)}
   .tab.active{color:var(--amber);border-bottom-color:var(--amber)}
+  .tab.live-tab{position:relative}
+  .tab.live-tab.active{color:var(--green);border-bottom-color:var(--green)}
 
-  /* ---- HERO ---- */
-  .hero{padding:46px 0 30px;border-bottom:1px solid var(--line)}
-  .hero .kicker{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;margin-bottom:16px}
-  .hero h2{font-size:clamp(30px,5vw,52px);line-height:1.02;font-weight:800;letter-spacing:-1.5px;max-width:18ch}
+  /* HERO */
+  .hero{padding:42px 0 28px;border-bottom:1px solid var(--line)}
+  .hero .kicker{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;margin-bottom:14px}
+  .hero h2{font-size:clamp(28px,4.5vw,48px);line-height:1.04;font-weight:800;letter-spacing:-1.5px;max-width:18ch}
   .hero h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--amber)}
-  .hero p{margin-top:18px;max-width:60ch;color:var(--text-dim);font-size:15px}
-
-  .masters{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:34px;background:var(--line);border:1px solid var(--line)}
-  .master{background:var(--bg-card);padding:18px 18px 16px;position:relative;overflow:hidden}
-  .master .lab{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--text-faint)}
-  .master .ratio{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:8px;color:var(--text)}
-  .master .desc{font-size:12.5px;color:var(--text-dim);margin-top:8px;line-height:1.45}
+  .hero p{margin-top:16px;max-width:60ch;color:var(--text-dim);font-size:15px}
+  .masters{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:30px;background:var(--line);border:1px solid var(--line)}
+  .master{background:var(--bg-card);padding:16px 18px;position:relative;overflow:hidden}
   .master .bar{position:absolute;left:0;top:0;height:2px;width:100%}
   .master:nth-child(1) .bar{background:var(--amber)}
   .master:nth-child(2) .bar{background:var(--green)}
   .master:nth-child(3) .bar{background:var(--cyan)}
   .master:nth-child(4) .bar{background:var(--gold)}
+  .master .lab{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint)}
+  .master .ratio{font-family:var(--mono);font-size:18px;font-weight:700;margin-top:7px}
+  .master .desc{font-size:12px;color:var(--text-dim);margin-top:7px;line-height:1.45}
 
-  /* ---- SECTIONS ---- */
-  section{padding:48px 0;border-bottom:1px solid var(--line);scroll-margin-top:110px}
-  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:26px;gap:20px;flex-wrap:wrap}
-  .sec-head .num{font-family:var(--mono);font-size:12px;color:var(--text-faint);letter-spacing:2px}
-  .sec-head h3{font-size:27px;font-weight:800;letter-spacing:-0.8px;margin-top:6px}
-  .sec-head p{color:var(--text-dim);font-size:14px;max-width:54ch;margin-top:8px}
+  /* SECTIONS */
+  section{padding:46px 0;border-bottom:1px solid var(--line);scroll-margin-top:108px}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+  .sec-head .num{font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:2px}
+  .sec-head h3{font-size:25px;font-weight:800;letter-spacing:-.8px;margin-top:5px}
+  .sec-head p{color:var(--text-dim);font-size:14px;max-width:54ch;margin-top:7px}
 
-  /* ---- FILTER CHIPS ---- */
-  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.5px;padding:7px 13px;border:1px solid var(--line-bright);background:var(--bg-card);color:var(--text-dim);cursor:pointer;border-radius:3px;transition:all .15s;text-transform:uppercase}
+  /* CHIPS */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.5px;padding:6px 12px;border:1px solid var(--line-bright);background:var(--bg-card);color:var(--text-dim);cursor:pointer;border-radius:3px;transition:all .15s;text-transform:uppercase}
   .chip:hover{border-color:var(--amber);color:var(--text)}
   .chip.active{background:var(--amber);color:var(--bg);border-color:var(--amber);font-weight:700}
-  .search{font-family:var(--mono);font-size:12px;background:var(--bg-card);border:1px solid var(--line-bright);color:var(--text);padding:7px 12px;border-radius:3px;width:170px;outline:none}
+  .search{font-family:var(--mono);font-size:12px;background:var(--bg-card);border:1px solid var(--line-bright);color:var(--text);padding:6px 12px;border-radius:3px;width:170px;outline:none}
   .search:focus{border-color:var(--cyan)}
   .search::placeholder{color:var(--text-faint)}
 
-  /* ---- TABLES ---- */
+  /* TABLE */
   .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:5px;background:var(--bg-card)}
   table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
-  thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:12px 14px;border-bottom:1px solid var(--line-bright);background:var(--bg-elev);position:sticky;top:0;white-space:nowrap}
-  tbody td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-bright);background:var(--bg-elev);position:sticky;top:0;white-space:nowrap}
+  tbody td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
   tbody tr:last-child td{border-bottom:none}
   tbody tr{transition:background .12s}
-  tbody tr:hover{background:rgba(245,166,35,0.04)}
-  .tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:13.5px;letter-spacing:.5px}
-  .tk.glob{color:var(--cyan)}
-  .tk.asset{color:var(--violet)}
-  .nm{font-weight:600;color:var(--text)}
-  .sub{color:var(--text-dim);font-size:12px;line-height:1.4}
-  .aum{font-family:var(--mono);color:var(--green);font-size:12.5px;white-space:nowrap}
-  .tag{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.5px;padding:2px 7px;border-radius:2px;text-transform:uppercase;border:1px solid var(--line-bright);color:var(--text-dim);white-space:nowrap}
+  tbody tr:hover{background:rgba(245,166,35,.04)}
+  .tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:13px;letter-spacing:.5px}
+  .tk.glob{color:var(--cyan)}.tk.asset{color:var(--violet)}
+  .nm{font-weight:600}.sub{color:var(--text-dim);font-size:12px;line-height:1.4}
+  .aum{font-family:var(--mono);color:var(--green);font-size:12px;white-space:nowrap}
+  .tag{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.5px;padding:2px 7px;border-radius:2px;text-transform:uppercase;border:1px solid var(--line-bright);color:var(--text-dim);white-space:nowrap}
   .why{color:var(--text-dim);font-size:12px}
   .thin{color:var(--red);font-family:var(--mono);font-size:10px}
 
-  /* ---- RATIO CARDS ---- */
-  .ratio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
-  .rcard{background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:20px;position:relative;transition:border-color .18s,transform .18s}
+  /* RATIO CARDS */
+  .ratio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:13px}
+  .rcard{background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:18px;position:relative;transition:border-color .18s,transform .18s}
   .rcard:hover{border-color:var(--line-bright);transform:translateY(-2px)}
-  .rcard .rtop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px}
-  .rcard .formula{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text)}
+  .rcard .rtop{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:3px}
+  .rcard .formula{font-family:var(--mono);font-size:16px;font-weight:700}
   .rcard .formula .op{color:var(--text-faint)}
-  .rcard .rn{font-family:var(--mono);font-size:11px;color:var(--text-faint)}
-  .rcard .rtitle{font-size:13px;color:var(--amber);font-weight:600;margin-bottom:12px}
-  .rcard .measure{font-size:13px;color:var(--text-dim);line-height:1.5;margin-bottom:14px}
-  .signals{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:12px}
-  .sig{padding:10px 12px;background:var(--bg-elev)}
-  .sig .h{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:5px;margin-bottom:5px}
-  .sig.up .h{color:var(--green)}
-  .sig.dn .h{color:var(--red)}
+  .rcard .rtitle{font-size:13px;color:var(--amber);font-weight:600;margin-bottom:10px}
+  .rcard .measure{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin-bottom:12px}
+  .signals{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:10px}
+  .sig{padding:9px 11px;background:var(--bg-elev)}
+  .sig .h{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:5px;margin-bottom:4px}
+  .sig.up .h{color:var(--green)}.sig.dn .h{color:var(--red)}
   .sig .t{font-size:12px;color:var(--text-dim);line-height:1.4}
-  .pos{font-size:12.5px;color:var(--text);line-height:1.5;border-left:2px solid var(--amber);padding-left:11px}
-  .pos b{color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:1px;display:block;margin-bottom:3px;text-transform:uppercase;font-weight:700}
-  .lens-tag{position:absolute;top:14px;right:16px}
+  .pos{font-size:12px;color:var(--text);line-height:1.5;border-left:2px solid var(--amber);padding-left:10px}
+  .pos b{color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:1px;display:block;margin-bottom:2px;text-transform:uppercase;font-weight:700}
+  .lens-tag{position:absolute;top:13px;right:14px}
 
-  /* ---- REGIME ---- */
-  .regimes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
-  .reg{border:1px solid var(--line);border-radius:6px;padding:22px;background:var(--bg-card);position:relative;overflow:hidden}
+  /* REGIME */
+  .regimes{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:8px}
+  .reg{border:1px solid var(--line);border-radius:6px;padding:20px;background:var(--bg-card);position:relative;overflow:hidden}
   .reg .glow{position:absolute;inset:0;opacity:.07;pointer-events:none}
   .reg.on .glow{background:radial-gradient(circle at 50% 0%,var(--green),transparent 70%)}
   .reg.off .glow{background:radial-gradient(circle at 50% 0%,var(--red),transparent 70%)}
   .reg.narrow .glow{background:radial-gradient(circle at 50% 0%,var(--amber),transparent 70%)}
-  .reg h4{font-size:17px;font-weight:800;margin-bottom:4px;position:relative}
-  .reg .rlab{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;position:relative}
-  .reg.on .rlab{color:var(--green)}
-  .reg.off .rlab{color:var(--red)}
-  .reg.narrow .rlab{color:var(--amber)}
-  .reg .blk{margin-bottom:13px;position:relative}
-  .reg .blk .bh{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-bottom:5px}
-  .reg .blk .bt{font-size:12.5px;color:var(--text-dim);line-height:1.5}
+  .reg h4{font-size:16px;font-weight:800;margin-bottom:4px;position:relative}
+  .reg .rlab{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;position:relative}
+  .reg.on .rlab{color:var(--green)}.reg.off .rlab{color:var(--red)}.reg.narrow .rlab{color:var(--amber)}
+  .reg .blk{margin-bottom:12px;position:relative}
+  .reg .blk .bh{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-bottom:4px}
+  .reg .blk .bt{font-size:12px;color:var(--text-dim);line-height:1.5}
   .reg .blk .bt .hl{color:var(--text);font-weight:600}
 
-  /* ---- PLAYBOOK ---- */
-  .play{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  .step{border:1px solid var(--line);border-radius:6px;background:var(--bg-card);padding:22px;position:relative}
-  .step .sn{font-family:var(--mono);font-size:40px;font-weight:800;color:var(--line-bright);line-height:1;position:absolute;top:14px;right:18px}
-  .step h4{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--amber);max-width:16ch}
-  .step p{font-size:12.5px;color:var(--text-dim);line-height:1.55}
-  .triggers{margin-top:22px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
-  .trig{display:grid;grid-template-columns:auto 1fr;gap:16px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center}
+  /* PLAYBOOK */
+  .play{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+  .step{border:1px solid var(--line);border-radius:6px;background:var(--bg-card);padding:20px;position:relative}
+  .step .sn{font-family:var(--mono);font-size:38px;font-weight:800;color:var(--line-bright);line-height:1;position:absolute;top:14px;right:16px}
+  .step h4{font-size:14px;font-weight:700;margin-bottom:9px;color:var(--amber);max-width:16ch}
+  .step p{font-size:12px;color:var(--text-dim);line-height:1.55}
+  .triggers{margin-top:20px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .trig{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:13px 16px;border-bottom:1px solid var(--line);align-items:center}
   .trig:last-child{border-bottom:none}
   .trig:nth-child(odd){background:var(--bg-card)}
   .trig .cond{font-family:var(--mono);font-size:12px;color:var(--cyan);font-weight:500}
-  .trig .act{font-size:12.5px;color:var(--text-dim)}
+  .trig .act{font-size:12px;color:var(--text-dim)}
   .trig .act b{color:var(--text)}
 
-  /* ---- CAVEATS ---- */
-  .caveats{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
-  .cav{border:1px solid var(--line);border-left:3px solid var(--red);border-radius:4px;background:var(--bg-card);padding:16px 18px}
-  .cav h5{font-size:13px;font-weight:700;margin-bottom:6px;color:var(--text)}
-  .cav p{font-size:12.5px;color:var(--text-dim);line-height:1.5}
+  /* CAVEATS */
+  .caveats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .cav{border:1px solid var(--line);border-left:3px solid var(--red);border-radius:4px;background:var(--bg-card);padding:14px 16px}
+  .cav h5{font-size:13px;font-weight:700;margin-bottom:5px}
+  .cav p{font-size:12px;color:var(--text-dim);line-height:1.5}
 
-  footer{padding:36px 0;color:var(--text-faint);font-size:11.5px;font-family:var(--mono);line-height:1.7}
-  footer a{color:var(--text-dim)}
-
-  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:18px;font-family:var(--mono);font-size:11px;color:var(--text-dim)}
-  .legend span{display:flex;align-items:center;gap:6px}
-  .dot{width:9px;height:9px;border-radius:2px;display:inline-block}
-
+  footer{padding:34px 0;color:var(--text-faint);font-size:11px;font-family:var(--mono);line-height:1.7}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+  .legend span{display:flex;align-items:center;gap:5px}
+  .dot{width:8px;height:8px;border-radius:2px;display:inline-block}
   .hidden{display:none!important}
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+  .reveal.in{opacity:1;transform:none}
 
-  @media(max-width:900px){
-    .masters{grid-template-columns:repeat(2,1fr)}
+  /* ================================================================
+     LIVE PULSE — Signal Light System
+  ================================================================ */
+
+  /* ---- traffic light widget ---- */
+  .signal-light{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;border-radius:50%;flex-shrink:0;
+    transition:background .4s,box-shadow .4s;
+  }
+  .signal-light.green{background:#3fd17e;box-shadow:0 0 10px rgba(63,209,126,.6),0 0 20px rgba(63,209,126,.3)}
+  .signal-light.red{background:#ff5c61;box-shadow:0 0 10px rgba(255,92,97,.6),0 0 20px rgba(255,92,97,.3)}
+  .signal-light.amber{background:#f5a623;box-shadow:0 0 10px rgba(245,166,35,.6),0 0 20px rgba(245,166,35,.3)}
+  .signal-light.dim{background:var(--line-bright);box-shadow:none}
+
+  /* ---- big regime light ---- */
+  .regime-light-wrap{
+    display:flex;flex-direction:column;align-items:center;
+    gap:10px;padding:20px 24px;
+    background:var(--bg-card);border:1px solid var(--line);border-radius:12px;
+    position:relative;overflow:hidden;min-width:160px;
+  }
+  .regime-light-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.08;border-radius:12px;
+    background:radial-gradient(circle at 50% 0%,var(--rl-color,#3fd17e),transparent 65%)}
+  .rl-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase}
+  .rl-light{width:52px;height:52px;border-radius:50%;transition:background .5s,box-shadow .5s}
+  .rl-light.green{background:#3fd17e;box-shadow:0 0 22px rgba(63,209,126,.7),0 0 45px rgba(63,209,126,.35)}
+  .rl-light.red{background:#ff5c61;box-shadow:0 0 22px rgba(255,92,97,.7),0 0 45px rgba(255,92,97,.35)}
+  .rl-light.amber{background:#f5a623;box-shadow:0 0 22px rgba(245,166,35,.7),0 0 45px rgba(245,166,35,.35)}
+  .rl-light.dim{background:var(--line-bright);box-shadow:none}
+  .rl-call{font-size:15px;font-weight:800;letter-spacing:-.3px;text-align:center;transition:color .4s}
+  .rl-score{font-family:var(--mono);font-size:11px;color:var(--text-faint);text-align:center}
+
+  /* ---- regime banner row ---- */
+  .regime-banner{
+    display:grid;grid-template-columns:auto 1fr auto;
+    align-items:center;gap:22px;
+    border:1px solid var(--line);border-radius:10px;
+    background:var(--bg-card);padding:20px 24px;
+    margin-bottom:20px;position:relative;overflow:hidden;
+    transition:border-color .4s;
+  }
+  .regime-banner.bull{border-color:rgba(63,209,126,.3)}
+  .regime-banner.bear{border-color:rgba(255,92,97,.3)}
+  .regime-banner.mix{border-color:rgba(245,166,35,.25)}
+  .regime-banner::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.055;border-radius:10px;
+    background:radial-gradient(ellipse at 8% 50%,var(--rb-col,#3fd17e),transparent 50%)}
+  .rb-info{}
+  .rb-kicker{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px}
+  .rb-call{font-size:clamp(22px,3.5vw,32px);font-weight:800;letter-spacing:-.8px;line-height:1;color:var(--rb-col,#3fd17e)}
+  .rb-advice{font-size:13px;color:var(--text-dim);margin-top:7px;max-width:52ch;line-height:1.55}
+  .rb-advice b{color:var(--text)}
+  .rb-meter{}
+  .rb-meter-track{height:10px;background:var(--line);border-radius:5px;overflow:hidden;position:relative;width:100%;min-width:180px}
+  .rb-meter-fill{height:100%;border-radius:5px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+  .rb-meter-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.5px;color:var(--text-faint);margin-top:5px}
+  .rb-stats{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
+  .rb-stat{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+  .rb-stat b{color:var(--text)}
+  .rb-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .rb-score-big{font-family:var(--mono);font-size:36px;font-weight:800;line-height:1;color:var(--rb-col,#3fd17e)}
+  .rb-score-denom{font-size:16px;opacity:.5}
+  .rb-score-lbl{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint)}
+  .rb-time{font-family:var(--mono);font-size:10px;color:var(--text-faint)}
+
+  /* ---- master gauge row ---- */
+  .master-live-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+
+  /* ---- pulse card ---- */
+  .pulse-card{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:7px;
+    padding:15px 16px;position:relative;
+    transition:border-color .2s,transform .18s,box-shadow .2s;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .pulse-card:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 6px 22px rgba(0,0,0,.28)}
+
+  /* left colored bar based on signal */
+  .pulse-card.strong-bull{border-left:3px solid #3fd17e}
+  .pulse-card.bull{border-left:3px solid rgba(63,209,126,.5)}
+  .pulse-card.bear{border-left:3px solid rgba(255,92,97,.5)}
+  .pulse-card.strong-bear{border-left:3px solid #ff5c61}
+
+  /* card header: signal light + pair + verdict */
+  .pc-header{display:flex;align-items:center;gap:10px}
+  .pc-pair{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.3px;flex:1}
+  .master-live-row .pc-pair{font-size:17px}
+  .pc-verdict-chip{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.2px;padding:3px 8px;border-radius:10px;text-transform:uppercase;white-space:nowrap}
+  .pc-verdict-chip.strong-bull{background:rgba(63,209,126,.2);color:#3fd17e;border:1px solid rgba(63,209,126,.3)}
+  .pc-verdict-chip.bull{background:rgba(63,209,126,.1);color:#3fd17e;border:1px solid rgba(63,209,126,.2)}
+  .pc-verdict-chip.bear{background:rgba(255,92,97,.1);color:#ff5c61;border:1px solid rgba(255,92,97,.2)}
+  .pc-verdict-chip.strong-bear{background:rgba(255,92,97,.2);color:#ff5c61;border:1px solid rgba(255,92,97,.3)}
+
+  .pc-label{font-size:11.5px;color:var(--text-dim);line-height:1.35;margin-top:-4px}
+
+  /* val row */
+  .pc-vals{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .pc-val{background:var(--bg-elev);padding:7px 10px;text-align:center}
+  .pc-val-h{font-family:var(--mono);font-size:8.5px;letter-spacing:.8px;color:var(--text-faint);text-transform:uppercase;margin-bottom:3px}
+  .pc-val-n{font-family:var(--mono);font-size:12px;font-weight:700}
+
+  /* sma line */
+  .pc-sma-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .sma-pill{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 8px;border-radius:8px;text-transform:uppercase}
+  .sma-pill.above{background:rgba(63,209,126,.12);color:#3fd17e;border:1px solid rgba(63,209,126,.25)}
+  .sma-pill.below{background:rgba(255,92,97,.12);color:#ff5c61;border:1px solid rgba(255,92,97,.25)}
+  .sma50-txt{font-family:var(--mono);font-size:9.5px;color:var(--text-faint)}
+
+  /* sparkline */
+  .pc-spark{height:28px;display:flex;align-items:flex-end;opacity:.85}
+  .pc-spark svg{display:block}
+
+  /* master badge */
+  .pc-master-badge{position:absolute;top:10px;right:12px;font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:2px;background:var(--amber);color:var(--bg);font-weight:700;text-transform:uppercase}
+
+  /* lens dot */
+  .pc-lens{position:absolute;bottom:12px;right:12px;font-family:var(--mono);font-size:8.5px;letter-spacing:.5px;padding:2px 6px;border-radius:2px;text-transform:uppercase;border:1px solid var(--line-bright);color:var(--text-faint)}
+
+  /* pulse grid */
+  .pulse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:11px}
+
+  /* loading */
+  .live-spinner-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:60px 20px;grid-column:1/-1;color:var(--text-faint);font-family:var(--mono);font-size:11px;letter-spacing:1px}
+  .spinner{width:26px;height:26px;border:2px solid var(--line-bright);border-top-color:var(--cyan);border-radius:50%;animation:spin .85s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .live-error-msg{color:var(--red);text-align:center;padding:16px;font-family:var(--mono);font-size:11px;grid-column:1/-1}
+
+  /* refresh btn */
+  .refresh-btn{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:7px 14px;border:1px solid var(--line-bright);background:transparent;color:var(--text-dim);cursor:pointer;border-radius:4px;transition:all .15s;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+  .refresh-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+  .refresh-btn:disabled{opacity:.35;cursor:not-allowed}
+  .refresh-btn .spinner-sm{width:11px;height:11px;border:1.5px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:none}
+  .refresh-btn.loading .spinner-sm{display:inline-block}
+
+  /* score breakdown */
+  .breakdown{margin-top:18px}
+  .breakdown-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:10px}
+  .bd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px}
+  .bd-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg-card);border:1px solid var(--line);border-radius:5px}
+  .bd-light{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .bd-light.green{background:#3fd17e;box-shadow:0 0 6px rgba(63,209,126,.5)}
+  .bd-light.red{background:#ff5c61;box-shadow:0 0 6px rgba(255,92,97,.5)}
+  .bd-light.amber{background:#f5a623;box-shadow:0 0 6px rgba(245,166,35,.5)}
+  .bd-pair{font-family:var(--mono);font-size:12px;font-weight:700;min-width:82px}
+  .bd-label{font-size:11px;color:var(--text-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bd-pct{font-family:var(--mono);font-size:11px;font-weight:700;min-width:52px;text-align:right}
+
+  /* live note */
+  .live-note{margin-top:14px;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);line-height:1.7;border-left:2px solid var(--line-bright);padding-left:12px}
+
+  @media(max-width:980px){
+    .masters,.master-live-row{grid-template-columns:repeat(2,1fr)}
     .regimes,.play{grid-template-columns:1fr}
     .caveats{grid-template-columns:1fr}
+    .regime-banner{grid-template-columns:1fr;text-align:left}
+    .rb-right{align-items:flex-start}
   }
   @media(max-width:560px){
-    .wrap{padding:0 16px}.head-inner{padding:14px 16px}
-    .masters{grid-template-columns:1fr}
+    .wrap{padding:0 14px}.head-inner{padding:12px 14px}
+    .masters,.master-live-row,.pulse-grid{grid-template-columns:1fr}
     .signals{grid-template-columns:1fr}
   }
-  /* reveal */
-  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
-  .reveal.in{opacity:1;transform:none}
 </style>
 </head>
 <body>
@@ -204,9 +335,9 @@
       <span class="mark">ROT/01</span>
       <h1>ETF Rotation <span class="em">Desk</span></h1>
     </div>
-    <div class="ticker-clock">
-      INTERMARKET INTELLIGENCE · SWING DESK<br>
-      SESSION <b id="clk">--:--:--</b> · <span id="dte"></span>
+    <div class="head-right">
+      <div class="ticker-clock">INTERMARKET INTELLIGENCE · SESSION <b id="clk">--:--:--</b> · <span id="dte"></span></div>
+      <div class="live-badge"><span class="live-dot" id="liveDot"></span><span id="liveStatusTxt">connecting…</span></div>
     </div>
   </div>
 </header>
@@ -214,6 +345,7 @@
 <nav class="tabs">
   <div class="wrap">
     <button class="tab active" data-go="hero">Overview</button>
+    <button class="tab live-tab" data-go="live">⬤ Live Signal</button>
     <button class="tab" data-go="sectors">Sector ETFs</button>
     <button class="tab" data-go="ratios">Ratios</button>
     <button class="tab" data-go="regime">Regimes</button>
@@ -224,37 +356,102 @@
 
 <div class="wrap">
 
-  <!-- HERO -->
+  <!-- ======================== HERO ======================== -->
   <div class="hero" id="hero">
     <div class="kicker">// Where the money is going — and how to be early</div>
     <h2>Stop watching prices. Watch the <span class="serif">ratios.</span></h2>
-    <p>The absolute price of any ETF tells you little. The <em>relationship</em> between two ETFs tells you the regime: risk-on or risk-off, growth or defense, reflation or fear. This desk maps the most liquid fund per sector — US and worldwide — against ~15 intermarket ratios that professional traders use to spot rotation before it completes.</p>
-
+    <p>The absolute price of any ETF tells you little. The <em>relationship</em> between two ETFs tells you the regime: risk-on or risk-off, growth or defense, reflation or fear. This desk maps the most liquid fund per sector — US and worldwide — against 15 intermarket ratios that professional traders use to spot rotation before it completes.</p>
     <div class="masters">
-      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 01</div><div class="ratio">XLY / XLP</div><div class="desc">Consumer risk appetite. Discretionary over staples = the economy is wanted.</div></div>
-      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 02</div><div class="ratio">HYG / LQD</div><div class="desc">Credit appetite. The most reliable risk gauge under stress — credit leads.</div></div>
-      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 03</div><div class="ratio">SPY / TLT</div><div class="desc">Stocks vs. long bonds — the classic risk-on / risk-off switch.</div></div>
-      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 04</div><div class="ratio">Copper / Gold</div><div class="desc">Growth vs. fear. Industrial demand against the safe haven.</div></div>
+      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 01</div><div class="ratio" style="font-family:var(--mono);font-size:18px;font-weight:700;margin-top:7px">XLY / XLP</div><div class="desc">Consumer risk appetite. Discretionary over staples = the economy is wanted.</div></div>
+      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 02</div><div class="ratio" style="font-family:var(--mono);font-size:18px;font-weight:700;margin-top:7px">HYG / LQD</div><div class="desc">Credit appetite. The most reliable risk gauge under stress — credit leads.</div></div>
+      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 03</div><div class="ratio" style="font-family:var(--mono);font-size:18px;font-weight:700;margin-top:7px">SPY / TLT</div><div class="desc">Stocks vs. long bonds — the classic risk-on / risk-off switch.</div></div>
+      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 04</div><div class="ratio" style="font-family:var(--mono);font-size:18px;font-weight:700;margin-top:7px">Copper / Gold</div><div class="desc">Growth vs. fear. Industrial demand against the safe haven.</div></div>
     </div>
-    <p style="margin-top:22px;font-family:var(--mono);font-size:12px;color:var(--text-faint)">Discipline: require <b style="color:var(--amber)">≥2 of the 4 master gauges</b> to agree before sizing up. When they disagree — cut size, stand aside.</p>
+    <p style="margin-top:20px;font-family:var(--mono);font-size:12px;color:var(--text-faint)">Discipline: require <b style="color:var(--amber)">≥2 of the 4 master gauges</b> to agree before sizing up. When they disagree — cut size, stand aside.</p>
   </div>
 
-  <!-- SECTORS -->
+  <!-- ======================== LIVE SIGNAL ======================== -->
+  <section id="live">
+    <div class="sec-head">
+      <div>
+        <div class="num">SECTION 00 / LIVE SIGNAL ENGINE</div>
+        <h3>Green light / Red light — now</h3>
+        <p>Each ratio scored against its 20-day SMA (trend) and 50-day SMA (regime). Master gauges weighted ×2. Auto-refreshes every 5 min.</p>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadLiveData()">
+        <span class="spinner-sm"></span>↺ Refresh
+      </button>
+    </div>
+
+    <!-- REGIME BANNER -->
+    <div id="liveRegimeBanner">
+      <div class="regime-banner mix" style="--rb-col:var(--amber)">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="regime-light-wrap" style="--rl-color:var(--amber)">
+            <div class="rl-label">Signal</div>
+            <div class="rl-light dim" id="bigLight"></div>
+            <div class="rl-call" id="bigCall" style="color:var(--text-faint)">Loading</div>
+            <div class="rl-score" id="bigScore">—</div>
+          </div>
+        </div>
+        <div class="rb-info">
+          <div class="rb-kicker">Live Regime Score — 15 Ratios · 4 Masters ×2</div>
+          <div class="rb-call" id="rbCallText" style="color:var(--amber)">Fetching live data…</div>
+          <div class="rb-advice" id="rbAdvice">Connecting to market data feeds.</div>
+          <div class="rb-stats" id="rbStats"></div>
+        </div>
+        <div class="rb-right">
+          <div>
+            <div class="rb-score-big" id="rbScoreBig" style="color:var(--amber)">—</div>
+            <div class="rb-score-lbl">REGIME SCORE</div>
+          </div>
+          <div>
+            <div class="rb-meter-track" style="min-width:140px"><div class="rb-meter-fill" id="rbMeterFill" style="width:50%;background:var(--amber)"></div></div>
+            <div class="rb-meter-labels"><span>BEAR</span><span>NEUTRAL</span><span>BULL</span></div>
+          </div>
+          <div class="rb-time" id="rbTime">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MASTER GAUGES -->
+    <div class="master-live-row" id="liveMasters">
+      <div class="pulse-card"><div class="live-spinner-wrap" style="padding:20px"><div class="spinner"></div></div></div>
+      <div class="pulse-card"><div class="live-spinner-wrap" style="padding:20px"><div class="spinner"></div></div></div>
+      <div class="pulse-card"><div class="live-spinner-wrap" style="padding:20px"><div class="spinner"></div></div></div>
+      <div class="pulse-card"><div class="live-spinner-wrap" style="padding:20px"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ALL RATIOS -->
+    <div class="breakdown" id="liveBreakdown" style="display:none">
+      <div class="breakdown-title">All Signals at a Glance</div>
+      <div class="bd-grid" id="bdGrid"></div>
+    </div>
+
+    <div style="margin-top:20px;margin-bottom:6px;font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase">All 15 Ratio Cards</div>
+    <div class="pulse-grid" id="livePulseGrid">
+      <div class="live-spinner-wrap"><div class="spinner"></div>Fetching live market data…</div>
+    </div>
+
+    <div class="live-note">
+      Data via Yahoo Finance (delayed ~15 min) · SMA20 = 20-day SMA (trend) · SMA50 = 50-day SMA (regime) · Copper proxy = CPER ETF · Offense/Defense proxy = XLK/XLU · GLD/SPY signal is <em>inverted</em> (gold rising vs. stocks = risk-off = red light) · Not investment advice.
+    </div>
+  </section>
+
+  <!-- ======================== SECTORS ======================== -->
   <section id="sectors">
     <div class="sec-head">
       <div>
         <div class="num">SECTION 01 / SECTOR & ASSET-CLASS ETFs</div>
         <h3>The most liquid fund per industry</h3>
-        <p>One dominant vehicle per sector. US uses State Street's SPDR "XL" suite; worldwide uses the iShares Global "IX" suite (led by IXN). Plus the macro/asset-class funds that drive rotation.</p>
+        <p>One dominant vehicle per sector. US uses the SPDR "XL" suite; worldwide uses the iShares Global "IX" suite. Plus macro/asset-class funds that drive rotation.</p>
       </div>
     </div>
-
     <div class="legend">
       <span><i class="dot" style="background:var(--amber)"></i> US sector</span>
       <span><i class="dot" style="background:var(--cyan)"></i> Global sector</span>
       <span><i class="dot" style="background:var(--violet)"></i> Macro / asset class</span>
     </div>
-
     <div class="filters" id="sectorFilters">
       <button class="chip active" data-f="all">All</button>
       <button class="chip" data-f="us">US Sectors</button>
@@ -262,26 +459,24 @@
       <button class="chip" data-f="macro">Macro / Asset</button>
       <input class="search" id="sectorSearch" placeholder="search ticker / name…">
     </div>
-
     <div class="table-scroll">
       <table id="sectorTable">
         <thead><tr><th>Ticker</th><th>Fund</th><th>Category</th><th>Tracks</th><th>Approx AUM</th><th>Why it's the one</th></tr></thead>
         <tbody id="sectorBody"></tbody>
       </table>
     </div>
-    <p style="margin-top:12px;font-size:11.5px;color:var(--text-faint);font-family:var(--mono)">AUM = approximate magnitude markers (issuer sheets / stockanalysis.com / SEC filings, early–mid 2026). Verify before sizing. Only IXN, IXJ, IXC carry real trading liquidity among global sectors.</p>
+    <p style="margin-top:11px;font-size:11px;color:var(--text-faint);font-family:var(--mono)">AUM = approximate magnitude markers (early–mid 2026). Verify on issuer sheets before sizing.</p>
   </section>
 
-  <!-- RATIOS -->
+  <!-- ======================== RATIOS ======================== -->
   <section id="ratios">
     <div class="sec-head">
       <div>
         <div class="num">SECTION 02 / INTERMARKET RATIOS</div>
         <h3>What each ratio means &amp; how to position</h3>
-        <p>Rising vs. falling, and the trade. Grouped into four lenses — look for agreement across lenses before acting.</p>
+        <p>Rising vs. falling, and the trade. Four lenses — look for agreement before acting.</p>
       </div>
     </div>
-
     <div class="filters" id="ratioFilters">
       <button class="chip active" data-l="all">All Lenses</button>
       <button class="chip" data-l="equity">Equity-internal</button>
@@ -289,60 +484,48 @@
       <button class="chip" data-l="macro">Cross-asset / Macro</button>
       <button class="chip" data-l="breadth">Breadth &amp; Global</button>
     </div>
-
     <div class="ratio-grid" id="ratioGrid"></div>
   </section>
 
-  <!-- REGIME -->
+  <!-- ======================== REGIME ======================== -->
   <section id="regime">
     <div class="sec-head">
       <div>
         <div class="num">SECTION 03 / REGIME ARCHETYPES</div>
         <h3>Read them together</h3>
-        <p>Score each lens +1 (rising / risk-on) or −1 (falling / risk-off) by its 50-day MA slope. Net the score across lenses to identify which of three regimes you're in.</p>
+        <p>Score each lens +1 (rising / risk-on) or −1 (falling / risk-off) by its 50-day MA slope. Net the score to identify which regime you're in.</p>
       </div>
     </div>
     <div class="regimes">
-      <div class="reg on">
-        <div class="glow"></div>
-        <div class="rlab">REGIME A · NET POSITIVE</div>
-        <h4>Risk-On / Reflation</h4>
+      <div class="reg on"><div class="glow"></div>
+        <div class="rlab">REGIME A · NET POSITIVE</div><h4>Risk-On / Reflation</h4>
         <div class="blk"><div class="bh">Signals aligned</div><div class="bt">XLY/XLP, SMH/SPY, IWM/SPY, HYG/LQD, Copper/Gold, RSP/SPY all <span class="hl">rising</span>; SPY/TLT up.</div></div>
         <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Long cyclicals, tech, semis, small caps, EM.</span> Underweight bonds & gold. Press the leaders.</div></div>
       </div>
-      <div class="reg off">
-        <div class="glow"></div>
-        <div class="rlab">REGIME B · NET NEGATIVE</div>
-        <h4>Risk-Off / Flight to Safety</h4>
+      <div class="reg off"><div class="glow"></div>
+        <div class="rlab">REGIME B · NET NEGATIVE</div><h4>Risk-Off / Flight to Safety</h4>
         <div class="blk"><div class="bh">Signals aligned</div><div class="bt">Offense/defense & credit ratios <span class="hl">falling</span>; SPY/TLT down; GLD/SPY up; VIX rising.</div></div>
         <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Defensives (XLP, XLU, XLV), Treasuries (TLT/IEF), gold, cash.</span> Protect capital.</div></div>
       </div>
-      <div class="reg narrow">
-        <div class="glow"></div>
-        <div class="rlab">REGIME C · MIXED / FRAGILE</div>
-        <h4>Narrow / Late-Cycle</h4>
-        <div class="blk"><div class="bh">Signals diverge</div><div class="bt">Index (SPY/QQQ) <span class="hl">rising</span> but RSP/SPY & IWM/SPY <span class="hl">falling</span>; credit flat; Copper/Gold soft.</div></div>
-        <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Stay long the leaders but tighten stops.</span> Do NOT add broad beta — this is fragility, not opportunity.</div></div>
+      <div class="reg narrow"><div class="glow"></div>
+        <div class="rlab">REGIME C · MIXED / FRAGILE</div><h4>Narrow / Late-Cycle</h4>
+        <div class="blk"><div class="bh">Signals diverge</div><div class="bt">Index rising but RSP/SPY & IWM/SPY <span class="hl">falling</span>; credit flat; Copper/Gold soft.</div></div>
+        <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Stay long leaders but tighten stops.</span> Don't add broad beta — this is fragility.</div></div>
       </div>
     </div>
-    <p style="margin-top:22px;font-size:13px;color:var(--text-dim);max-width:80ch">Murphy's business-cycle sequence: <b style="color:var(--text)">bonds turn before stocks, commodities turn last.</b> A falling Copper/Gold and rising bonds while equities are still high is the classic late-cycle warning.</p>
+    <p style="margin-top:20px;font-size:13px;color:var(--text-dim);max-width:80ch">Murphy's sequence: <b style="color:var(--text)">bonds turn before stocks, commodities turn last.</b> A falling Copper/Gold and rising bonds while equities are still high = classic late-cycle warning.</p>
   </section>
 
-  <!-- PLAYBOOK -->
+  <!-- ======================== PLAYBOOK ======================== -->
   <section id="playbook">
     <div class="sec-head">
-      <div>
-        <div class="num">SECTION 04 / EXECUTION</div>
-        <h3>The rotation playbook</h3>
-        <p>Build the dashboard, define the signal, act on rotation — not prediction.</p>
-      </div>
+      <div><div class="num">SECTION 04 / EXECUTION</div><h3>The rotation playbook</h3><p>Build the dashboard, define the signal, act on rotation — not prediction.</p></div>
     </div>
     <div class="play">
       <div class="step"><div class="sn">1</div><h4>Build the core dashboard</h4><p>Chart the 11 US SPDRs + IXN as the sector layer, then the 15 ratios. Put the four master gauges on a top regime panel. Use TradingView "XLY/XLP" ratio syntax with 50- & 200-day MAs. <b style="color:var(--text)">Trade the ratio's trend, not its level.</b></p></div>
-      <div class="step"><div class="sn">2</div><h4>Define your regime signal</h4><p>Score each lens +1 / −1 on its 50-day MA slope. Net positive → risk-on playbook (XLK, IXN, SMH, IWM, XLY). Net negative → defensive (XLP, XLU, XLV, TLT, GLD, cash). Require ≥2 of 4 master gauges to agree before sizing up.</p></div>
-      <div class="step"><div class="sn">3</div><h4>Act on rotation</h4><p>SMH/SPY or HYG/LQD rolling over while QQQ/SPY still rises = early de-risk (semis & credit lead). RSP/SPY turning up after a narrow market = broaden into cyclicals & small caps. EFA/SPY or EEM/EFA breaking up = add international / EM.</p></div>
+      <div class="step"><div class="sn">2</div><h4>Define your regime signal</h4><p>Score each lens +1 / −1 on its 50-day MA slope. Net positive → risk-on (XLK, IXN, SMH, IWM, XLY). Net negative → defensive (XLP, XLU, XLV, TLT, GLD, cash). Require ≥2 of 4 masters to agree.</p></div>
+      <div class="step"><div class="sn">3</div><h4>Act on rotation</h4><p>SMH/SPY or HYG/LQD rolling over while QQQ/SPY still rises = early de-risk. RSP/SPY turning up after a narrow market = broaden into cyclicals & small caps. EFA/SPY breaking up = add international.</p></div>
     </div>
-
     <div class="triggers">
       <div class="trig"><span class="cond">SPY monthly close &lt; 200-DMA</span><span class="act">Shift to <b>defensive playbook</b> (Faber / Antonacci regime filter).</span></div>
       <div class="trig"><span class="cond">HYG/LQD breaks 200-DMA down</span><span class="act"><b>De-risk regardless of index strength</b> — credit leads equities.</span></div>
@@ -352,69 +535,60 @@
     </div>
   </section>
 
-  <!-- CAVEATS -->
+  <!-- ======================== CAVEATS ======================== -->
   <section id="caveats" style="border-bottom:none">
-    <div class="sec-head">
-      <div>
-        <div class="num">SECTION 05 / RISK NOTES</div>
-        <h3>Where this breaks</h3>
-      </div>
-    </div>
+    <div class="sec-head"><div><div class="num">SECTION 05 / RISK NOTES</div><h3>Where this breaks</h3></div></div>
     <div class="caveats">
-      <div class="cav"><h5>AUM moves with markets</h5><p>GLD net assets were $155.1B (SEC 10-Q, 3/31/2026) up from $124.5B (9/30/2025) on the gold rally; IBIT is BTC-price-driven; XLK is reported ~$103–120B. Treat all AUM as magnitude, verify on issuer sheets before sizing.</p></div>
-      <div class="cav"><h5>Global sector funds are thin</h5><p>MXI, KXI, RXI, JXI, IXP, EXI are small and thinly traded — context only, not active entries. Their precise AUM is unconfirmed; check iShares fact sheets.</p></div>
-      <div class="cav"><h5>Correlations are regime-dependent</h5><p>The Copper/Gold–yield link has weakened sharply since ~2022. Stocks & bonds can fall together in inflation (breaking SPY/TLT). Always confirm with a second lens.</p></div>
+      <div class="cav"><h5>AUM moves with markets</h5><p>GLD ~$155.1B (3/31/2026); IBIT BTC-price-driven; XLK ~$103–120B. Treat as magnitude, verify on issuer sheets before sizing.</p></div>
+      <div class="cav"><h5>Global sector funds are thin</h5><p>MXI, KXI, RXI, JXI, IXP, EXI are small and thinly traded — context only, not active entries.</p></div>
+      <div class="cav"><h5>Correlations are regime-dependent</h5><p>The Copper/Gold–yield link has weakened sharply since ~2022. Stocks & bonds can fall together in inflation. Always confirm with a second lens.</p></div>
       <div class="cav"><h5>VIX products decay</h5><p>VIXY / VXX suffer structural roll decay — tactical hedges only, never buy-and-hold.</p></div>
-      <div class="cav"><h5>No single ratio is a system</h5><p>These are context & confirmation tools layered onto price action and risk management — consistent with how Murphy, StockCharts and All Star Charts frame intermarket work.</p></div>
-      <div class="cav"><h5>Forward calls are opinions</h5><p>Any 2026 sector-outperformance projections in source material are opinions, not facts, and are excluded from the positioning logic here.</p></div>
+      <div class="cav"><h5>No single ratio is a system</h5><p>These are context & confirmation tools layered onto price action and risk management.</p></div>
+      <div class="cav"><h5>Forward calls are opinions</h5><p>Any 2026 sector-outperformance projections are opinions, not facts, and are excluded from the positioning logic here.</p></div>
     </div>
   </section>
 
   <footer>
-    ETF ROTATION DESK · Built from intermarket research (StockCharts / John Murphy, ETF.com, VettaFi/ETFdb, State Street SPDR, iShares/BlackRock, ETF Trends, Options Trading IQ, Seeking Alpha, NPR, SEC filings).<br>
-    Educational framework — not investment advice. AUM & correlations approximate and time-sensitive. Verify on issuer fact sheets before trading.
+    ETF ROTATION DESK · Research basis: StockCharts / John Murphy, ETF.com, VettaFi/ETFdb, State Street SPDR, iShares/BlackRock, SEC filings.<br>
+    Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.
   </footer>
 </div>
 
 <script>
-// ---------- clock ----------
-function tick(){
+/* ---- clock ---- */
+(function tick(){
   const n=new Date();
   document.getElementById('clk').textContent=n.toLocaleTimeString('en-GB');
   document.getElementById('dte').textContent=n.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
-}
-tick();setInterval(tick,1000);
+  setTimeout(tick,1000);
+})();
 
-// ---------- data: sectors ----------
+/* ---- sector data ---- */
 const sectors=[
-  // US sectors
-  {t:'XLK',c:'us',n:'Technology Select Sector SPDR',cat:'Technology · US',tr:'S&P 500 tech — Apple, Nvidia, Microsoft, Broadcom',aum:'~$103–120B',why:'Largest sector ETF; deep liquidity, penny spreads'},
-  {t:'XLF',c:'us',n:'Financial Select Sector SPDR',cat:'Financials · US',tr:'S&P 500 financials — JPMorgan, BofA, Berkshire',aum:'~$47B',why:'Most-traded financials ETF; rate-sensitive'},
-  {t:'XLE',c:'us',n:'Energy Select Sector SPDR',cat:'Energy · US',tr:'S&P 500 energy — Exxon, Chevron',aum:'~$42B',why:'Dominant energy-sector vehicle'},
-  {t:'XLV',c:'us',n:'Health Care Select Sector SPDR',cat:'Health Care · US',tr:'S&P 500 healthcare — UnitedHealth, Lilly, J&J',aum:'~$38B',why:'Core defensive-growth sleeve'},
+  {t:'XLK',c:'us',n:'Technology Select Sector SPDR',cat:'Technology · US',tr:'Apple, Nvidia, Microsoft, Broadcom',aum:'~$103–120B',why:'Largest sector ETF; deep liquidity, penny spreads'},
+  {t:'XLF',c:'us',n:'Financial Select Sector SPDR',cat:'Financials · US',tr:'JPMorgan, BofA, Berkshire',aum:'~$47B',why:'Most-traded financials ETF; rate-sensitive'},
+  {t:'XLE',c:'us',n:'Energy Select Sector SPDR',cat:'Energy · US',tr:'Exxon, Chevron',aum:'~$42B',why:'Dominant energy-sector vehicle'},
+  {t:'XLV',c:'us',n:'Health Care Select Sector SPDR',cat:'Health Care · US',tr:'UnitedHealth, Lilly, J&J',aum:'~$38B',why:'Core defensive-growth sleeve'},
   {t:'XLI',c:'us',n:'Industrial Select Sector SPDR',cat:'Industrials · US',tr:'S&P 500 industrials',aum:'~$28B',why:'Primary cyclical industrials play'},
-  {t:'XLC',c:'us',n:'Communication Services Select Sector SPDR',cat:'Comm Services · US',tr:'S&P 500 comm — Meta, Alphabet, Netflix',aum:'~$24B',why:'Standard comm-services vehicle (since 2018)'},
+  {t:'XLC',c:'us',n:'Communication Services Select Sector SPDR',cat:'Comm Services · US',tr:'Meta, Alphabet, Netflix',aum:'~$24B',why:'Standard comm-services vehicle'},
   {t:'XLU',c:'us',n:'Utilities Select Sector SPDR',cat:'Utilities · US',tr:'S&P 500 utilities',aum:'~$24B',why:'The defensive / "bond proxy" benchmark'},
-  {t:'XLY',c:'us',n:'Consumer Discretionary Select Sector SPDR',cat:'Discretionary · US',tr:'Amazon, Tesla, Home Depot, McDonald\'s',aum:'~$21B',why:'The "risk-on" leg of XLY/XLP'},
+  {t:'XLY',c:'us',n:'Consumer Discretionary Select Sector SPDR',cat:'Discretionary · US',tr:"Amazon, Tesla, Home Depot, McDonald's",aum:'~$21B',why:'The "risk-on" leg of XLY/XLP'},
   {t:'XLP',c:'us',n:'Consumer Staples Select Sector SPDR',cat:'Staples · US',tr:'P&G, Coca-Cola, Walmart, Costco',aum:'~$16B',why:'The defensive leg of XLY/XLP'},
-  {t:'XLRE',c:'us',n:'Real Estate Select Sector SPDR',cat:'Real Estate · US',tr:'S&P 500 REITs',aum:'~$8B',why:'Main S&P real-estate vehicle (since 2015)'},
+  {t:'XLRE',c:'us',n:'Real Estate Select Sector SPDR',cat:'Real Estate · US',tr:'S&P 500 REITs',aum:'~$8B',why:'Main S&P real-estate vehicle'},
   {t:'XLB',c:'us',n:'Materials Select Sector SPDR',cat:'Materials · US',tr:'S&P 500 materials',aum:'~$6B',why:'Primary materials sector ETF'},
-  // global
-  {t:'IXN',c:'global',n:'iShares Global Tech ETF',cat:'Technology · Global',tr:'Nvidia, Apple, Microsoft, TSMC, ASML (~143 holdings)',aum:'~$9.26B',why:'The worldwide tech ETF — global leadership view'},
+  {t:'IXN',c:'global',n:'iShares Global Tech ETF',cat:'Technology · Global',tr:'Nvidia, Apple, Microsoft, TSMC, ASML',aum:'~$9.26B',why:'The worldwide tech ETF — global leadership view'},
   {t:'IXJ',c:'global',n:'iShares Global Healthcare ETF',cat:'Health Care · Global',tr:'Global healthcare',aum:'~$3.7B',why:'Largest of the global sector funds'},
-  {t:'IXC',c:'global',n:'iShares Global Energy ETF',cat:'Energy · Global',tr:'S&P Global 1200 Energy — adds Shell, BP, TotalEnergies',aum:'~$1.9B',why:'Non-US majors included'},
-  {t:'IXG',c:'global',n:'iShares Global Financials ETF',cat:'Financials · Global',tr:'Global banks / insurers / asset mgrs',aum:'~$0.6B',why:'Global-macro context',thin:1},
-  {t:'MXI',c:'global',n:'iShares Global Materials ETF',cat:'Materials · Global',tr:'Global materials',aum:'sub-$1B *',why:'Thin liquidity — context only',thin:1},
-  {t:'KXI',c:'global',n:'iShares Global Consumer Staples ETF',cat:'Staples · Global',tr:'Global staples',aum:'~$1B *',why:'Thin liquidity — context only',thin:1},
-  {t:'RXI',c:'global',n:'iShares Global Consumer Discretionary ETF',cat:'Discretionary · Global',tr:'Global discretionary',aum:'unconfirmed *',why:'Thin liquidity — context only',thin:1},
-  {t:'JXI',c:'global',n:'iShares Global Utilities ETF',cat:'Utilities · Global',tr:'Global utilities',aum:'unconfirmed *',why:'Thin liquidity — context only',thin:1},
-  {t:'IXP',c:'global',n:'iShares Global Comm Services ETF',cat:'Comm Services · Global',tr:'Global communications',aum:'unconfirmed *',why:'Thin liquidity — context only',thin:1},
-  {t:'EXI',c:'global',n:'iShares Global Industrials ETF',cat:'Industrials · Global',tr:'Global industrials',aum:'unconfirmed *',why:'Thin liquidity — context only',thin:1},
-  // macro / asset class
+  {t:'IXC',c:'global',n:'iShares Global Energy ETF',cat:'Energy · Global',tr:'Shell, BP, TotalEnergies added',aum:'~$1.9B',why:'Non-US majors included'},
+  {t:'IXG',c:'global',n:'iShares Global Financials ETF',cat:'Financials · Global',tr:'Global banks / insurers',aum:'~$0.6B',why:'Global-macro context',thin:1},
+  {t:'MXI',c:'global',n:'iShares Global Materials ETF',cat:'Materials · Global',tr:'Global materials',aum:'sub-$1B',why:'Context only',thin:1},
+  {t:'KXI',c:'global',n:'iShares Global Consumer Staples ETF',cat:'Staples · Global',tr:'Global staples',aum:'~$1B',why:'Context only',thin:1},
+  {t:'RXI',c:'global',n:'iShares Global Consumer Discretionary ETF',cat:'Discretionary · Global',tr:'Global discretionary',aum:'unconfirmed',why:'Context only',thin:1},
+  {t:'JXI',c:'global',n:'iShares Global Utilities ETF',cat:'Utilities · Global',tr:'Global utilities',aum:'unconfirmed',why:'Context only',thin:1},
+  {t:'IXP',c:'global',n:'iShares Global Comm Services ETF',cat:'Comm Services · Global',tr:'Global communications',aum:'unconfirmed',why:'Context only',thin:1},
+  {t:'EXI',c:'global',n:'iShares Global Industrials ETF',cat:'Industrials · Global',tr:'Global industrials',aum:'unconfirmed',why:'Context only',thin:1},
   {t:'SPY',c:'macro',n:'SPDR S&P 500 ETF Trust',cat:'US Large-Cap',tr:'S&P 500',aum:'~$650–780B',why:'Most-traded equity ETF; the risk benchmark'},
   {t:'QQQ',c:'macro',n:'Invesco QQQ Trust',cat:'US Large-Cap Growth',tr:'Nasdaq-100',aum:'~$375–490B',why:'Tech / growth proxy'},
   {t:'IWM',c:'macro',n:'iShares Russell 2000 ETF',cat:'US Small-Cap',tr:'Russell 2000',aum:'~$78B',why:'Small-cap / risk-appetite gauge'},
-  {t:'DIA',c:'macro',n:'SPDR Dow Jones Industrial Average ETF',cat:'US Large-Cap',tr:'Dow 30',aum:'~$42B',why:'Blue-chip / price-weighted gauge'},
   {t:'RSP',c:'macro',n:'Invesco S&P 500 Equal Weight ETF',cat:'US Breadth',tr:'S&P 500 equal-weight',aum:'~$87B',why:'Breadth vs. SPY'},
   {t:'TLT',c:'macro',n:'iShares 20+ Year Treasury Bond ETF',cat:'Long Treasuries',tr:'20yr+ USTs',aum:'~$42B',why:'Duration / risk-off vehicle'},
   {t:'IEF',c:'macro',n:'iShares 7-10 Year Treasury Bond ETF',cat:'Intermediate Treasuries',tr:'7-10yr USTs',aum:'~$49B',why:'"Textbook" stock hedge'},
@@ -422,30 +596,24 @@ const sectors=[
   {t:'LQD',c:'macro',n:'iShares iBoxx $ Inv Grade Corp Bond ETF',cat:'IG Credit',tr:'Investment-grade corporates',aum:'~$28B',why:'Investment-grade credit'},
   {t:'HYG',c:'macro',n:'iShares iBoxx $ High Yield Corp Bond ETF',cat:'HY Credit',tr:'Junk bonds',aum:'~$16B',why:'High-yield / credit appetite'},
   {t:'GLD',c:'macro',n:'SPDR Gold Shares',cat:'Gold',tr:'Physical gold',aum:'~$155.1B',why:'Largest, most liquid gold ETF'},
-  {t:'DBC',c:'macro',n:'Invesco DB Commodity Index Tracking',cat:'Broad Commodities',tr:'14-commodity basket',aum:'~$1.7B',why:'Widely-watched broad commodity gauge'},
+  {t:'DBC',c:'macro',n:'Invesco DB Commodity Index Tracking',cat:'Broad Commodities',tr:'14-commodity basket',aum:'~$1.7B',why:'Broad commodity gauge'},
   {t:'UUP',c:'macro',n:'Invesco DB US Dollar Index Bullish',cat:'US Dollar',tr:'Long USD index futures',aum:'~$0.3B',why:'Main retail dollar proxy'},
   {t:'IBIT',c:'macro',n:'iShares Bitcoin Trust',cat:'Crypto',tr:'Spot bitcoin',aum:'~$65–70B',why:'Largest spot BTC ETF; most liquid'},
-  {t:'SMH',c:'macro',n:'VanEck Semiconductor ETF',cat:'Semiconductors',tr:'25 largest US-listed chip names — Nvidia, TSMC',aum:'~$22–50B',why:'Most-traded semis ETF; risk-on leader'},
-  {t:'SOXX',c:'macro',n:'iShares Semiconductor ETF',cat:'Semiconductors',tr:'~30 chip names, capped weights',aum:'~$12B',why:'Broader, less concentrated semis play'},
-  {t:'EEM',c:'macro',n:'iShares MSCI Emerging Markets ETF',cat:'EM Equity',tr:'MSCI EM',aum:'~$25B',why:'EM benchmark; deep options market'},
-  {t:'VWO',c:'macro',n:'Vanguard FTSE Emerging Markets ETF',cat:'EM Equity',tr:'FTSE EM',aum:'~$150B',why:'Cheapest large EM fund'},
+  {t:'SMH',c:'macro',n:'VanEck Semiconductor ETF',cat:'Semiconductors',tr:'25 largest US-listed chip names',aum:'~$22–50B',why:'Most-traded semis ETF; risk-on leader'},
+  {t:'EEM',c:'macro',n:'iShares MSCI Emerging Markets ETF',cat:'EM Equity',tr:'MSCI EM',aum:'~$25B',why:'EM benchmark'},
   {t:'EFA',c:'macro',n:'iShares MSCI EAFE ETF',cat:'Developed Intl',tr:'MSCI EAFE',aum:'~$70B',why:'Developed ex-US benchmark'},
-  {t:'VEA',c:'macro',n:'Vanguard FTSE Developed Markets ETF',cat:'Developed Intl',tr:'FTSE Developed ex-US',aum:'~$120B+',why:'Largest developed-intl fund'},
   {t:'FXI',c:'macro',n:'iShares China Large-Cap ETF',cat:'China',tr:'FTSE China 50',aum:'~$5.5B',why:'Most-traded China large-cap ETF'},
-  {t:'MCHI',c:'macro',n:'iShares MSCI China ETF',cat:'China',tr:'MSCI China',aum:'~$6B',why:'Broader China exposure'},
   {t:'VIXY',c:'macro',n:'ProShares VIX Short-Term Futures ETF',cat:'Volatility',tr:'VIX short-term futures',aum:'smaller',why:'Fear gauge — tactical only (decay)'},
   {t:'IYT',c:'macro',n:'iShares Transportation Average ETF',cat:'Transports',tr:'Dow Transports proxy',aum:'~$2B',why:'Dow Theory confirmation series'},
-  {t:'VUG',c:'macro',n:'Vanguard Growth ETF',cat:'Style — Growth',tr:'CRSP US large growth',aum:'large',why:'Growth leg of growth/value'},
-  {t:'VTV',c:'macro',n:'Vanguard Value ETF',cat:'Style — Value',tr:'CRSP US large value',aum:'~$179B',why:'Value leg of growth/value'},
-  {t:'IWF',c:'macro',n:'iShares Russell 1000 Growth ETF',cat:'Style — Growth',tr:'Russell 1000 growth',aum:'~$120B',why:'Alternate growth pair'},
-  {t:'IWD',c:'macro',n:'iShares Russell 1000 Value ETF',cat:'Style — Value',tr:'Russell 1000 value',aum:'~$70B',why:'Alternate value pair'},
+  {t:'IWF',c:'macro',n:'iShares Russell 1000 Growth ETF',cat:'Style — Growth',tr:'Russell 1000 growth',aum:'~$120B',why:'Growth leg of growth/value'},
+  {t:'IWD',c:'macro',n:'iShares Russell 1000 Value ETF',cat:'Style — Value',tr:'Russell 1000 value',aum:'~$70B',why:'Value leg of growth/value'},
 ];
 
 const sb=document.getElementById('sectorBody');
-function tkClass(c){return c==='global'?'glob':c==='macro'?'asset':''}
+function tkC(c){return c==='global'?'glob':c==='macro'?'asset':''}
 function renderSectors(list){
   sb.innerHTML=list.map(s=>`<tr data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}">
-    <td><span class="tk ${tkClass(s.c)}">${s.t}</span></td>
+    <td><span class="tk ${tkC(s.c)}">${s.t}</span></td>
     <td><div class="nm">${s.n}</div></td>
     <td><span class="tag">${s.cat}</span></td>
     <td class="sub">${s.tr}</td>
@@ -454,59 +622,55 @@ function renderSectors(list){
   </tr>`).join('');
 }
 renderSectors(sectors);
-
-let sectorF='all';
+let sF='all';
 document.querySelectorAll('#sectorFilters .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{
     document.querySelectorAll('#sectorFilters .chip').forEach(c=>c.classList.remove('active'));
-    ch.classList.add('active');sectorF=ch.dataset.f;applySector();
+    ch.classList.add('active');sF=ch.dataset.f;applyS();
   });
 });
-document.getElementById('sectorSearch').addEventListener('input',applySector);
-function applySector(){
+document.getElementById('sectorSearch').addEventListener('input',applyS);
+function applyS(){
   const q=document.getElementById('sectorSearch').value.toLowerCase();
   document.querySelectorAll('#sectorBody tr').forEach(tr=>{
-    const okF=sectorF==='all'||tr.dataset.c===sectorF;
+    const okF=sF==='all'||tr.dataset.c===sF;
     const okQ=!q||tr.dataset.s.includes(q);
     tr.classList.toggle('hidden',!(okF&&okQ));
   });
 }
 
-// ---------- data: ratios ----------
+/* ---- static ratio cards ---- */
 const ratios=[
-  {f:['XLY','XLP'],l:'equity',title:'Consumer risk appetite · MASTER',m:'Discretionary (Amazon, Tesla) over staples (Coca-Cola, P&G). Consumer spending ≈ 70% of US GDP, so this is a broad sentiment read.',up:'Risk-on — appetite for growth & the economy.',dn:'Risk-off / defensive — flight to safety.',pos:'Rising → long equities, growth, cyclicals. Falling → trim risk, add defensives/cash. Caveat: a fall can reflect inflation (staples pricing power), not just recession.'},
-  {f:['QQQ','SPY'],l:'equity',title:'Tech / growth leadership',m:'Whether mega-cap tech / Nasdaq is leading the broad market. (XLK/SPY is the equivalent pair.)',up:'Growth risk-on; tech leadership intact.',dn:'Leadership rotating away from tech.',pos:'Rising → favor QQQ, XLK, IXN, growth. Falling → reduce tech beta, look to value / cyclicals.'},
-  {f:['SMH','SPY'],l:'equity',title:'Semiconductors — the canary',m:'Semis are the most cyclical, forward-looking tech cohort — a leading indicator for tech and risk broadly.',up:'Strong risk-on; AI/tech demand robust.',dn:'Early warning the tech/risk trade is tiring.',pos:'Rising → press long tech/growth. Falling → defensive on tech even if QQQ still rising (divergence warning).'},
+  {f:['XLY','XLP'],l:'equity',title:'Consumer risk appetite · MASTER',m:'Discretionary (Amazon, Tesla) over staples (Coca-Cola, P&G). Consumer spending ≈ 70% of US GDP.',up:'Risk-on — appetite for growth & the economy.',dn:'Risk-off / defensive — flight to safety.',pos:'Rising → long equities, growth, cyclicals. Falling → trim risk, add defensives/cash.'},
+  {f:['QQQ','SPY'],l:'equity',title:'Tech / growth leadership',m:'Whether mega-cap tech / Nasdaq is leading the broad market.',up:'Growth risk-on; tech leadership intact.',dn:'Leadership rotating away from tech.',pos:'Rising → favor QQQ, XLK, IXN, growth. Falling → reduce tech beta, look to value / cyclicals.'},
+  {f:['SMH','SPY'],l:'equity',title:'Semiconductors — the canary',m:'Semis are the most cyclical, forward-looking tech cohort — a leading indicator for tech and risk broadly.',up:'Strong risk-on; AI/tech demand robust.',dn:'Early warning the tech/risk trade is tiring.',pos:'Rising → press long tech/growth. Falling → defensive on tech even if QQQ still rising.'},
   {f:['IWM','SPY'],l:'equity',title:'Small caps vs. large caps',m:'Willingness to own riskier, rate-sensitive small caps — a breadth & risk-appetite read.',up:'Risk-on, confident domestic growth, broadening rally.',dn:'Caution; narrow / defensive market.',pos:'Rising → add small-cap / high-beta. Falling → up-in-quality, mega-cap & defensives.'},
-  {f:['HYG','LQD'],l:'credit',title:'Credit risk appetite · MASTER',m:'Junk bonds vs. investment-grade — whether investors are paid to take credit risk. The most reliable risk gauge in stress. (HYG/IEF is a sister pair.)',up:'Risk-on; tight spreads; credit confirms equity rallies.',dn:'Spreads widening — risk-off; often leads equity weakness.',pos:'Rising → trust equity strength, stay long. Falling → de-risk; an early, high-quality warning.'},
-  {f:['Copper','Gold'],l:'macro',title:'Growth vs. fear · MASTER',m:'Industrial demand (copper) vs. safe-haven demand (gold); a global growth barometer historically tied to the 10Y yield. Trade via CPER/GLD or futures.',up:'Reflation / growth optimism; rising yields → cyclicals, financials, value.',dn:'Growth fear / deflation; falling yields → defensives, bonds, gold.',pos:'Rising → cyclicals (XLI, XLF, XLE, EEM). Falling → defensives + duration (XLU, XLP, TLT, GLD). Caveat: the copper/gold–yield link has weakened sharply since ~2022.'},
-  {f:['GLD','SPY'],l:'macro',title:'Gold vs. stocks — fear',m:'Safe-haven gold relative to equities.',up:'Fear, hedging, defensive regime (or debasement theme).',dn:'Risk-on, equities preferred.',pos:'Rising → raise gold/defensive allocation, tighten equity stops. Falling → favor equities.'},
-  {f:['SPY','TLT'],l:'macro',title:'Stocks vs. bonds · MASTER',m:'Equity risk vs. the safety of long Treasuries — the classic risk switch.',up:'Risk-on; capital choosing stocks over bonds.',dn:'Risk-off / flight to safety into duration.',pos:'Rising → overweight equities. Falling → rotate to Treasuries/defensives. Note: in inflation, stocks & bonds can fall together — pair with credit ratios.'},
-  {f:['IBIT','GLD'],l:'macro',title:'Bitcoin vs. Gold — speculative appetite',m:'The most speculative store-of-value (BTC) vs. the traditional one (gold).',up:'High speculative appetite, abundant liquidity — "risk-on at the frontier".',dn:'Caution; flight to traditional safety.',pos:'Rising → supportive for crypto, high-beta growth, long-duration risk. Falling → reduce speculative exposure.'},
-  {f:['RSP','SPY'],l:'breadth',title:'Equal weight vs. cap weight — breadth',m:'Whether the average stock keeps pace with the mega-cap-dominated index.',up:'Broad participation — healthy, durable rally.',dn:'Narrow rally led by a few mega-caps — fragile.',pos:'Rising → trust trend, broaden exposure. Falling → fragility warning; don\'t chase, tighten risk.'},
-  {f:['IWF','IWD'],l:'equity',title:'Growth vs. Value',m:'Growth-style leadership vs. value. (VUG/VTV is the equivalent.)',up:'Growth / duration regime (low rates, risk-on tech).',dn:'Value regime (rising rates, reflation; cyclicals, financials, energy lead).',pos:'Rising → growth/tech tilt. Falling → value / cyclical / financials tilt.'},
-  {f:['Offense','Defense'],l:'equity',title:'Offense vs. Defense sectors',m:'(XLK+XLY) / (XLP+XLU), or simply XLK/XLU. Aggregate offense (tech, discretionary) vs. defense (staples, utilities, healthcare).',up:'Risk-on, offense leading — bullish confirmation.',dn:'Defense leading — risk-off.',pos:'Healthy rallies need offense leading & defense lagging. If a rally is led by XLU/XLP/XLV, distrust it. XLK/XLU = simplest proxy.'},
-  {f:['EEM','EFA'],l:'breadth',title:'Emerging vs. Developed / Intl vs. US',m:'Global risk appetite (EM is highest-beta) and ex-US vs. US leadership. (Pair with EFA/SPY.)',up:'Global risk-on, often weak-dollar / reflation.',dn:'Risk-off; capital home to US.',pos:'EEM/EFA rising → add EM / global cyclicals. EFA/SPY rising → diversify into developed-intl; reconsider US-only tilt.'},
-  {f:['IYT','XLU'],l:'breadth',title:'Transports vs. Utilities (Dow Theory)',m:'Economically-sensitive transports vs. defensive utilities — a real-economy growth read.',up:'Cyclical strength, economic confidence.',dn:'Defensive, slowdown signal.',pos:'Rising → cyclicals / industrials. Falling → defensives. If the Dow makes new highs but transports don\'t confirm — warning.'},
-  {f:['XLK','SHY'],l:'macro',title:'Risk asset vs. cash',m:'Whether risk assets are beating the risk-free 1-3yr Treasury — a clean binary regime filter.',up:'Risk assets attractive — risk-on.',dn:'Cash / safety winning — risk-off.',pos:'Rising → be long risk. Falling → defensive / cash.'},
+  {f:['HYG','LQD'],l:'credit',title:'Credit risk appetite · MASTER',m:'Junk bonds vs. investment-grade. The most reliable risk gauge in stress.',up:'Risk-on; tight spreads; credit confirms equity rallies.',dn:'Spreads widening — risk-off; often leads equity weakness.',pos:'Rising → trust equity strength, stay long. Falling → de-risk immediately.'},
+  {f:['Copper','Gold'],l:'macro',title:'Growth vs. fear · MASTER',m:'Industrial demand (copper) vs. safe-haven demand (gold). Trade via CPER/GLD or futures.',up:'Reflation / growth optimism; rising yields → cyclicals, financials, value.',dn:'Growth fear / deflation; falling yields → defensives, bonds, gold.',pos:'Rising → cyclicals (XLI, XLF, XLE, EEM). Falling → defensives + duration (XLU, XLP, TLT, GLD).'},
+  {f:['GLD','SPY'],l:'macro',title:'Gold vs. stocks — fear',m:'Safe-haven gold relative to equities. Rising = fear / defensive regime.',up:'Fear, hedging, defensive regime (or debasement theme).',dn:'Risk-on, equities preferred.',pos:'Rising → raise gold/defensive allocation, tighten equity stops. Falling → favor equities.'},
+  {f:['SPY','TLT'],l:'macro',title:'Stocks vs. bonds · MASTER',m:'Equity risk vs. the safety of long Treasuries — the classic risk switch.',up:'Risk-on; capital choosing stocks over bonds.',dn:'Risk-off / flight to safety into duration.',pos:'Rising → overweight equities. Falling → rotate to Treasuries/defensives.'},
+  {f:['IBIT','GLD'],l:'macro',title:'Bitcoin vs. Gold — speculative appetite',m:'The most speculative store-of-value (BTC) vs. the traditional one (gold).',up:'High speculative appetite — "risk-on at the frontier".',dn:'Caution; flight to traditional safety.',pos:'Rising → supportive for crypto, high-beta growth. Falling → reduce speculative exposure.'},
+  {f:['RSP','SPY'],l:'breadth',title:'Equal weight vs. cap weight — breadth',m:'Whether the average stock keeps pace with the mega-cap-dominated index.',up:'Broad participation — healthy, durable rally.',dn:'Narrow rally led by a few mega-caps — fragile.',pos:"Rising → trust trend, broaden exposure. Falling → fragility warning, don't chase."},
+  {f:['IWF','IWD'],l:'equity',title:'Growth vs. Value',m:'Growth-style leadership vs. value.',up:'Growth / duration regime (low rates, risk-on tech).',dn:'Value regime (rising rates, reflation; cyclicals, financials, energy lead).',pos:'Rising → growth/tech tilt. Falling → value / cyclical / financials tilt.'},
+  {f:['Offense','Defense'],l:'equity',title:'Offense vs. Defense sectors',m:'(XLK+XLY) / (XLP+XLU) or XLK/XLU. Aggregate offense vs. defense.',up:'Risk-on, offense leading — bullish confirmation.',dn:'Defense leading — risk-off.',pos:'Healthy rallies need offense leading. If a rally is led by XLU/XLP/XLV, distrust it.'},
+  {f:['EEM','EFA'],l:'breadth',title:'Emerging vs. Developed Mkts',m:'Global risk appetite (EM is highest-beta) and ex-US vs. US leadership.',up:'Global risk-on, often weak-dollar / reflation.',dn:'Risk-off; capital home to US.',pos:'EEM/EFA rising → add EM / global cyclicals. EFA/SPY rising → diversify into developed-intl.'},
+  {f:['IYT','XLU'],l:'breadth',title:'Transports vs. Utilities (Dow Theory)',m:'Economically-sensitive transports vs. defensive utilities.',up:'Cyclical strength, economic confidence.',dn:'Defensive, slowdown signal.',pos:"Rising → cyclicals / industrials. Falling → defensives. Transports not confirming Dow highs = warning."},
+  {f:['XLK','SHY'],l:'macro',title:'Risk asset vs. cash',m:'Whether risk assets are beating the risk-free 1-3yr Treasury.',up:'Risk assets attractive — risk-on.',dn:'Cash / safety winning — risk-off.',pos:'Rising → be long risk. Falling → defensive / cash.'},
 ];
-const lensColor={equity:'var(--amber)',credit:'var(--green)',macro:'var(--cyan)',breadth:'var(--violet)'};
-const lensName={equity:'Equity',credit:'Credit',macro:'Macro',breadth:'Breadth'};
+const lC={equity:'var(--amber)',credit:'var(--green)',macro:'var(--cyan)',breadth:'var(--violet)'};
+const lN={equity:'Equity',credit:'Credit',macro:'Macro',breadth:'Breadth'};
 const rg=document.getElementById('ratioGrid');
-function renderRatios(list){
-  rg.innerHTML=list.map((r,i)=>`<div class="rcard" data-l="${r.l}">
-    <span class="tag lens-tag" style="border-color:${lensColor[r.l]};color:${lensColor[r.l]}">${lensName[r.l]}</span>
-    <div class="rtop"><div class="formula">${r.f[0]} <span class="op">/</span> ${r.f[1]}</div></div>
-    <div class="rtitle">${r.title}</div>
-    <div class="measure">${r.m}</div>
-    <div class="signals">
-      <div class="sig up"><div class="h">▲ Rising</div><div class="t">${r.up}</div></div>
-      <div class="sig dn"><div class="h">▼ Falling</div><div class="t">${r.dn}</div></div>
-    </div>
-    <div class="pos"><b>How to position</b>${r.pos}</div>
-  </div>`).join('');
-}
-renderRatios(ratios);
+rg.innerHTML=ratios.map(r=>`<div class="rcard" data-l="${r.l}">
+  <span class="tag lens-tag" style="border-color:${lC[r.l]};color:${lC[r.l]}">${lN[r.l]}</span>
+  <div class="rtop"><div class="formula">${r.f[0]} <span class="op">/</span> ${r.f[1]}</div></div>
+  <div class="rtitle">${r.title}</div>
+  <div class="measure">${r.m}</div>
+  <div class="signals">
+    <div class="sig up"><div class="h">▲ Rising</div><div class="t">${r.up}</div></div>
+    <div class="sig dn"><div class="h">▼ Falling</div><div class="t">${r.dn}</div></div>
+  </div>
+  <div class="pos"><b>How to position</b>${r.pos}</div>
+</div>`).join('');
 document.querySelectorAll('#ratioFilters .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{
     document.querySelectorAll('#ratioFilters .chip').forEach(c=>c.classList.remove('active'));
@@ -518,27 +682,306 @@ document.querySelectorAll('#ratioFilters .chip').forEach(ch=>{
   });
 });
 
-// ---------- tab nav + scrollspy ----------
+/* ---- tabs + scrollspy ---- */
 const tabs=document.querySelectorAll('.tab');
 tabs.forEach(t=>t.addEventListener('click',()=>{
   document.getElementById(t.dataset.go).scrollIntoView({behavior:'smooth',block:'start'});
 }));
-const ids=['hero','sectors','ratios','regime','playbook','caveats'];
 const io=new IntersectionObserver(es=>{
   es.forEach(e=>{
-    if(e.isIntersecting){
-      const id=e.target.id;
-      tabs.forEach(t=>t.classList.toggle('active',t.dataset.go===id));
-    }
+    if(e.isIntersecting) tabs.forEach(t=>t.classList.toggle('active',t.dataset.go===e.target.id));
   });
 },{rootMargin:'-45% 0px -50% 0px'});
-ids.forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
+['hero','live','sectors','ratios','regime','playbook','caveats'].forEach(id=>{
+  const el=document.getElementById(id);if(el)io.observe(el);
+});
 
-// ---------- reveal ----------
+/* ---- reveal ---- */
 const ro=new IntersectionObserver(es=>{
   es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target);}});
-},{threshold:0.08});
-document.querySelectorAll('section, .master, .rcard, .reg, .step').forEach(el=>{el.classList.add('reveal');ro.observe(el);});
+},{threshold:0.07});
+document.querySelectorAll('section,.master,.rcard,.reg,.step').forEach(el=>{el.classList.add('reveal');ro.observe(el);});
+
+/* ================================================================
+   LIVE SIGNAL ENGINE
+================================================================ */
+const SMA_S=20, SMA_L=50;
+
+// Ratio config — master gauges first (shown in master row)
+const LIVE_R=[
+  {key:'XLY/XLP', num:'XLY', den:'XLP', master:true,  inv:false, label:'Consumer Risk Appetite',       lens:'equity'},
+  {key:'HYG/LQD', num:'HYG', den:'LQD', master:true,  inv:false, label:'Credit Risk Appetite',         lens:'credit'},
+  {key:'SPY/TLT', num:'SPY', den:'TLT', master:true,  inv:false, label:'Stocks vs Long Bonds',         lens:'macro'},
+  {key:'CPER/GLD',num:'CPER',den:'GLD', master:true,  inv:false, label:'Copper/Gold (Growth vs Fear)', lens:'macro'},
+  {key:'QQQ/SPY', num:'QQQ', den:'SPY', master:false, inv:false, label:'Tech / Growth Leadership',     lens:'equity'},
+  {key:'SMH/SPY', num:'SMH', den:'SPY', master:false, inv:false, label:'Semis — the Canary',           lens:'equity'},
+  {key:'IWM/SPY', num:'IWM', den:'SPY', master:false, inv:false, label:'Small vs Large Caps',          lens:'equity'},
+  {key:'RSP/SPY', num:'RSP', den:'SPY', master:false, inv:false, label:'Breadth (Equal vs Cap Wt)',     lens:'breadth'},
+  {key:'GLD/SPY', num:'GLD', den:'SPY', master:false, inv:true,  label:'Gold vs Stocks (Fear)',        lens:'macro'},
+  {key:'IWF/IWD', num:'IWF', den:'IWD', master:false, inv:false, label:'Growth vs Value',              lens:'equity'},
+  {key:'EEM/EFA', num:'EEM', den:'EFA', master:false, inv:false, label:'EM vs Developed Mkts',         lens:'breadth'},
+  {key:'IYT/XLU', num:'IYT', den:'XLU', master:false, inv:false, label:'Transports vs Utilities',      lens:'breadth'},
+  {key:'XLK/SHY', num:'XLK', den:'SHY', master:false, inv:false, label:'Risk vs Cash',                 lens:'macro'},
+  {key:'IBIT/GLD',num:'IBIT',den:'GLD', master:false, inv:false, label:'Bitcoin vs Gold (Speculation)',lens:'macro'},
+  {key:'XLK/XLU', num:'XLK', den:'XLU', master:false, inv:false, label:'Offense vs Defense',           lens:'equity'},
+];
+
+const LENS_C={equity:'var(--amber)',credit:'var(--green)',macro:'var(--cyan)',breadth:'var(--violet)'};
+
+/* fetch */
+async function ftch(url,ms=9000){
+  const c=new AbortController();const id=setTimeout(()=>c.abort(),ms);
+  try{const r=await fetch(url,{signal:c.signal,cache:'no-store'});clearTimeout(id);return r;}
+  catch(e){clearTimeout(id);throw e;}
+}
+async function yfetch(ticker){
+  const base=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=90d`;
+  const proxies=[
+    {u:`https://corsproxy.io/?url=${encodeURIComponent(base)}`,  p:r=>r},
+    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(base)}`,p:r=>JSON.parse(r.contents)},
+    {u:base,p:r=>r},
+  ];
+  for(const px of proxies){
+    try{
+      const resp=await ftch(px.u);
+      if(!resp.ok)continue;
+      const raw=await resp.json();
+      const json=px.p(raw);
+      const res=json?.chart?.result?.[0];
+      if(!res)continue;
+      const cl=res.indicators.quote[0].close;
+      const ts=res.timestamp;
+      const data=cl.map((c,i)=>({d:new Date(ts[i]*1000).toISOString().slice(0,10),c})).filter(x=>x.c!=null&&isFinite(x.c));
+      if(data.length<15)continue;
+      return data;
+    }catch(e){/*next*/}
+  }
+  return null;
+}
+
+/* maths */
+function sma(arr,n){const s=arr.slice(-Math.min(n,arr.length));return s.reduce((a,b)=>a+b,0)/s.length;}
+function align(nD,dD){
+  const dm=new Map(dD.map(x=>[x.d,x.c]));
+  return nD.filter(x=>dm.has(x.d)).map(x=>({d:x.d,r:x.c/dm.get(x.d)}));
+}
+
+/* signal classifier — 4 levels */
+function classify(curr,s20,s50,inv){
+  let above20=curr>s20, sma20AboveSma50=s20>s50;
+  // Strong Bull: price above both SMAs and SMA20>SMA50 (uptrend established)
+  // Bull: price above SMA20 only
+  // Bear: price below SMA20 only
+  // Strong Bear: price below both and SMA20<SMA50 (downtrend established)
+  let sig= above20 && sma20AboveSma50 ? 'strong-bull'
+         : above20                    ? 'bull'
+         : !above20 && !sma20AboveSma50? 'strong-bear'
+         :                              'bear';
+  if(inv){
+    const flipMap={'strong-bull':'strong-bear','bull':'bear','bear':'bull','strong-bear':'strong-bull'};
+    sig=flipMap[sig];
+  }
+  const bullish=sig==='strong-bull'||sig==='bull';
+  const effAbove20=inv?!above20:above20;
+  return {sig,bullish,above20:effAbove20,above50:inv?!(s20>s50):sma20AboveSma50};
+}
+
+/* signal light color */
+function sigColor(sig){
+  return {
+    'strong-bull':'green','bull':'green',
+    'bear':'red','strong-bear':'red',
+  }[sig]||'amber';
+}
+
+/* signal labels */
+const SIG_LABEL={
+  'strong-bull':'▲▲ STRONG BULL',
+  'bull':       '▲ BULLISH',
+  'bear':       '▼ BEARISH',
+  'strong-bear':'▼▼ STRONG BEAR',
+};
+
+/* sparkline */
+function spark(vals,bull){
+  if(!vals||vals.length<3)return '';
+  const v=vals.slice(-20);const W=82,H=27;
+  const mn=Math.min(...v),mx=Math.max(...v),rng=mx-mn||1e-9;
+  const pts=v.map((val,i)=>`${((i/(v.length-1))*W).toFixed(1)},${(H-((val-mn)/rng)*H*.82-H*.06).toFixed(1)}`).join(' ');
+  const fillPts=`0,${H} ${pts} ${W},${H}`;
+  const col=bull?'#3fd17e':'#ff5c61';
+  const lx=((1)*W).toFixed(1);// last x
+  const lastX=((v.length-1)/(v.length-1)*W).toFixed(1);
+  const lastY=(H-((v[v.length-1]-mn)/rng)*H*.82-H*.06).toFixed(1);
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <polygon points="${fillPts}" fill="${col}" opacity="0.09"/>
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lastX}" cy="${lastY}" r="2.3" fill="${col}"/>
+  </svg>`;
+}
+
+/* build card HTML */
+function buildCard(r,large){
+  if(r.error){
+    return `<div class="pulse-card" style="opacity:.45">
+      <div class="pc-header"><div class="signal-light dim"></div><div class="pc-pair">${r.key}</div></div>
+      <div class="pc-label">${r.label}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px">Data unavailable</div>
+    </div>`;
+  }
+  const {sig,bullish,above20}=r.cl;
+  const col=bullish?'#3fd17e':'#ff5c61';
+  const pct=((r.curr-r.s20)/r.s20*100);
+  const pctStr=(pct>=0?'+':'')+pct.toFixed(2)+'%';
+  const fmt=v=>v>=100?v.toFixed(2):v>=10?v.toFixed(3):v.toFixed(4);
+  const arrowTrend=r.curr>r.prev5?'↗':'↘';
+
+  return `<div class="pulse-card ${sig}">
+    ${r.master?'<div class="pc-master-badge">MASTER</div>':''}
+    <div class="pc-header">
+      <div class="signal-light ${sigColor(sig)}"></div>
+      <div class="pc-pair">${r.key}</div>
+      <div class="pc-verdict-chip ${sig}">${SIG_LABEL[sig]}</div>
+    </div>
+    <div class="pc-label">${r.label}</div>
+    <div class="pc-vals">
+      <div class="pc-val">
+        <div class="pc-val-h">Ratio</div>
+        <div class="pc-val-n" style="color:${col}">${fmt(r.curr)}</div>
+      </div>
+      <div class="pc-val">
+        <div class="pc-val-h">SMA20</div>
+        <div class="pc-val-n">${fmt(r.s20)}</div>
+      </div>
+      <div class="pc-val">
+        <div class="pc-val-h">vs SMA20</div>
+        <div class="pc-val-n" style="color:${col}">${pctStr}</div>
+      </div>
+    </div>
+    <div class="pc-sma-row">
+      <span class="sma-pill ${above20?'above':'below'}">${arrowTrend} ${above20?'ABOVE':'BELOW'} SMA20</span>
+      <span class="sma50-txt">SMA50: ${fmt(r.s50)} ${r.s20>r.s50?'▲':'▼'}</span>
+    </div>
+    <div class="pc-spark">${spark(r.vals,bullish)}</div>
+    <div class="pc-lens" style="border-color:${LENS_C[r.lens]};color:${LENS_C[r.lens]}">${r.lens}</div>
+  </div>`;
+}
+
+/* render regime banner */
+function renderBanner(data){
+  const valid=data.filter(r=>!r.error);
+  if(!valid.length){document.getElementById('liveRegimeBanner').innerHTML='<div class="live-error-msg">Could not load live data — check your connection and try refreshing.</div>';return;}
+
+  let score=0,max=0,bullN=0,strongBullN=0;
+  valid.forEach(r=>{
+    const w=r.master?2:1;
+    if(r.cl.bullish){score+=w;bullN++;if(r.cl.sig==='strong-bull')strongBullN++;}
+    else score-=w;
+    max+=w;
+  });
+  const masters=valid.filter(r=>r.master);
+  const mBull=masters.filter(r=>r.cl.bullish).length;
+  const pctBar=(score+max)/(2*max)*100;
+
+  let call,cls,rbCol,advice;
+  if(score>=max*0.35){
+    call='RISK-ON ▲';cls='bull';rbCol='#3fd17e';
+    advice=`<b>Go long cyclicals:</b> XLK, IXN, SMH, IWM, XLY, EEM. Underweight bonds & gold. Press the leaders — <b>${mBull}/4 master gauges bullish</b>.`;
+  } else if(score<=-max*0.35){
+    call='RISK-OFF ▼';cls='bear';rbCol='#ff5c61';
+    advice=`<b>Shift to defensives:</b> XLP, XLU, XLV, TLT, GLD, cash. Protect capital. <b>${4-mBull}/4 master gauges bearish</b> — do not add equity risk.`;
+  } else {
+    call='MIXED — WATCH';cls='mix';rbCol='#f5a623';
+    advice=`<b>Stay with the leaders, tighten stops.</b> Mixed signals — do NOT add broad beta. Wait for ≥2 master gauges to agree before sizing up. <b>${mBull}/4 masters bullish</b>.`;
+  }
+
+  const scoreStr=(score>=0?'+':'')+score;
+  const lightCls=cls==='bull'?'green':cls==='bear'?'red':'amber';
+
+  document.getElementById('bigLight').className=`rl-light ${lightCls}`;
+  document.getElementById('bigCall').textContent=call.replace(' ▲','').replace(' ▼','');
+  document.getElementById('bigCall').style.color=rbCol;
+  document.getElementById('bigScore').textContent=`${bullN}/${valid.length} bullish`;
+  document.getElementById('rbCallText').textContent=call;
+  document.getElementById('rbCallText').style.color=rbCol;
+  document.getElementById('rbAdvice').innerHTML=advice;
+  document.getElementById('rbStats').innerHTML=`
+    <span class="rb-stat"><b>${bullN}</b>/${valid.length} ratios bullish</span>
+    <span class="rb-stat"><b>${mBull}</b>/4 master gauges bullish</span>
+    <span class="rb-stat"><b>${strongBullN}</b> strong-bull signals</span>
+    <span class="rb-stat">Score <b>${scoreStr}</b>/${max}</span>`;
+  document.getElementById('rbScoreBig').innerHTML=`${scoreStr}<span class="rb-score-denom">/${max}</span>`;
+  document.getElementById('rbScoreBig').style.color=rbCol;
+  document.getElementById('rbMeterFill').style.cssText=`width:${pctBar.toFixed(1)}%;background:${rbCol}`;
+  document.getElementById('rbTime').textContent='Updated '+new Date().toLocaleTimeString();
+
+  // update banner classes
+  const banner=document.querySelector('.regime-banner');
+  if(banner){banner.className=`regime-banner ${cls}`;banner.style.setProperty('--rb-col',rbCol);}
+
+  // mini breakdown
+  document.getElementById('liveBreakdown').style.display='block';
+  document.getElementById('bdGrid').innerHTML=valid.map(r=>{
+    const c=r.cl.bullish?'green':'red';
+    const pct=((r.curr-r.s20)/r.s20*100);
+    const col=r.cl.bullish?'#3fd17e':'#ff5c61';
+    return `<div class="bd-row">
+      <div class="bd-light ${c}"></div>
+      <div class="bd-pair" style="color:${col}">${r.key}</div>
+      <div class="bd-label">${r.label}</div>
+      <div class="bd-pct" style="color:${col}">${(pct>=0?'+':'')+pct.toFixed(2)}%</div>
+    </div>`;
+  }).join('');
+}
+
+/* main loader */
+let loading=false;
+async function loadLiveData(){
+  if(loading)return;loading=true;
+  const btn=document.getElementById('refreshBtn');
+  const dot=document.getElementById('liveDot');
+  const stxt=document.getElementById('liveStatusTxt');
+  if(btn){btn.disabled=true;btn.classList.add('loading');}
+  dot.className='live-dot';stxt.textContent='loading…';
+  document.getElementById('livePulseGrid').innerHTML='<div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data via Yahoo Finance…</div>';
+  document.getElementById('liveMasters').innerHTML=Array(4).fill('<div class="pulse-card"><div class="live-spinner-wrap" style="padding:18px"><div class="spinner"></div></div></div>').join('');
+
+  try{
+    const tickers=[...new Set(LIVE_R.flatMap(r=>[r.num,r.den]))];
+    const results=await Promise.allSettled(tickers.map(t=>yfetch(t)));
+    const pm={};
+    tickers.forEach((t,i)=>{if(results[i].status==='fulfilled'&&results[i].value)pm[t]=results[i].value;});
+
+    const data=LIVE_R.map(r=>{
+      const nD=pm[r.num],dD=pm[r.den];
+      if(!nD||!dD)return{...r,error:true};
+      const series=align(nD,dD);
+      if(series.length<SMA_S+5)return{...r,error:true};
+      const vals=series.map(x=>x.r);
+      const s20=sma(vals,SMA_S),s50=sma(vals,SMA_L);
+      const curr=vals[vals.length-1];
+      const prev5=vals[Math.max(0,vals.length-6)];
+      return{...r,error:false,curr,s20,s50,prev5,vals,cl:classify(curr,s20,s50,r.inv)};
+    });
+
+    renderBanner(data);
+    const masters=data.filter(r=>r.master);
+    document.getElementById('liveMasters').innerHTML=masters.map(r=>buildCard(r,true)).join('');
+    document.getElementById('livePulseGrid').innerHTML=data.map(r=>buildCard(r,false)).join('');
+
+    dot.className='live-dot on';
+    stxt.textContent='live · '+new Date().toLocaleTimeString();
+  }catch(e){
+    console.error(e);
+    document.getElementById('livePulseGrid').innerHTML=`<div class="live-error-msg">Failed to load. ${e.message||''}</div>`;
+    dot.className='live-dot err';stxt.textContent='error';
+  }
+  loading=false;
+  if(btn){btn.disabled=false;btn.classList.remove('loading');}
+}
+
+loadLiveData();
+setInterval(loadLiveData,5*60*1000);
 </script>
 </body>
 </html>
