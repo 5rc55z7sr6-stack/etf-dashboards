@@ -1080,6 +1080,8 @@ tabs.forEach(t=>t.addEventListener('click',()=>{
       wrap.style.maxHeight='none';
       const hdr=document.getElementById(hdrId);
       if(hdr)hdr.classList.add('open');
+      // Force reveal on elements that were hidden while collapsed
+      wrap.querySelectorAll('.reveal:not(.in)').forEach(el=>el.classList.add('in'));
     }
   }
   // Small delay so expand happens before scroll
@@ -2170,6 +2172,8 @@ function toggleCollapse(hdrId, wrapId){
     wrap.classList.remove('collapsed');
     wrap.style.maxHeight=wrap.scrollHeight+'px';
     hdr.classList.add('open');
+    // Force reveal animation for any elements that were hidden while collapsed
+    wrap.querySelectorAll('.reveal:not(.in)').forEach(el=>el.classList.add('in'));
     // After animation, set maxHeight to 'none' so dynamic content (renderAll) can resize
     wrap.addEventListener('transitionend',()=>{if(!wrap.classList.contains('collapsed'))wrap.style.maxHeight='none';},{once:true});
   } else {
