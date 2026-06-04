@@ -208,6 +208,14 @@
   .bd-light.green{background:#3fd17e;box-shadow:0 0 6px rgba(63,209,126,.5)}.bd-light.red{background:#ff5c61;box-shadow:0 0 6px rgba(255,92,97,.5)}.bd-light.gold{background:#e8c14a;box-shadow:0 0 6px rgba(232,193,74,.5)}
   .bd-pair{font-family:var(--mono);font-size:12px;font-weight:700;min-width:82px}.bd-label{font-size:11px;color:var(--text-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bd-pct{font-family:var(--mono);font-size:11px;font-weight:700;min-width:52px;text-align:right}
   .live-note{margin-top:14px;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);line-height:1.7;border-left:2px solid var(--line-bright);padding-left:12px}
+  /* ---- ratio cards fold ---- */
+  #ratioCardsDetails summary::-webkit-details-marker{display:none}
+  #ratioCardsDetails summary{outline:none}
+  #ratioCardsDetails summary:hover{border-color:var(--line-bright);color:var(--text)}
+  #ratioCardsDetails[open] summary{border-color:var(--line-bright);border-bottom-left-radius:0;border-bottom-right-radius:0}
+  #ratioCardsDetails[open] #ratioCardsArrow{transform:rotate(90deg)}
+  #ratioCardsDetails[open] #livePulseGrid{border:1px solid var(--line-bright);border-top:none;border-radius:0 0 6px 6px;padding:14px}
+
   /* ---- HOLDINGS ACCORDION ---- */
   .hgroup{margin-bottom:22px}
   .hgroup-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;padding-left:2px;display:flex;align-items:center;gap:10px}
@@ -343,8 +351,14 @@
       <div class="bd-grid" id="bdGrid"></div>
     </div>
 
-    <div style="margin-top:20px;margin-bottom:4px;font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase">All Ratio Cards — sorted by signal</div>
-    <div id="livePulseGrid"><div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data…</div></div>
+    <details id="ratioCardsDetails" style="margin-top:12px">
+      <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg-card);font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;user-select:none;transition:border-color .2s">
+        <span id="ratioCardsArrow" style="font-size:11px;transition:transform .2s;display:inline-block">▶</span>
+        All Ratio Cards — sorted by signal
+        <span id="ratioCardsCount" style="font-weight:400;opacity:.6"></span>
+      </summary>
+      <div style="margin-top:8px" id="livePulseGrid"><div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data…</div></div>
+    </details>
 
     <div class="live-note">Data via Yahoo Finance (~15 min delay) · SMA20 = trend · SMA50 = regime · Copper proxy = CPER · GLD/SPY inverted · Theme signals: SMH/SPY (tech themes), ITA/SPY (defense), ARKK/SPY (speculative) · Theme ETFs are high-beta — last to add, first to cut · Not investment advice.</div>
   </section>
@@ -749,6 +763,10 @@ async function loadLiveData(){
     document.getElementById('liveMasters').innerHTML=cD.filter(r=>r.master).map(r=>buildCard(r,false)).join('');
     document.getElementById('liveThemes').innerHTML=tD.map(r=>buildCard(r,true)).join('');
     renderSplitGrid(aD,'livePulseGrid');
+    // Update fold label count
+    const validN=aD.filter(r=>!r.error).length;
+    const el=document.getElementById('ratioCardsCount');
+    if(el) el.textContent=`(${validN} ratios)`;
     dot.className='live-dot on';stxt.textContent='live · '+new Date().toLocaleTimeString();
   }catch(e){
     console.error(e);document.getElementById('livePulseGrid').innerHTML=`<div class="live-error-msg">Failed to load. ${e.message||''}</div>`;
