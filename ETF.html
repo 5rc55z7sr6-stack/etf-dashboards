@@ -2187,7 +2187,7 @@ function toggleRatiosSection(){ toggleCollapse('ratiosToggleHdr','ratiosWrap'); 
 
 (function setupMobileCollapse(){
   if(window.innerWidth > 700) return;
-  const COLLAPSE_SECTIONS = ['ratios','regime','playbook','caveats','performers']; // sectors handled by universal toggle
+  const COLLAPSE_SECTIONS = ['regime','playbook','caveats','performers']; // sectors + ratios handled by universal toggle
   COLLAPSE_SECTIONS.forEach(id=>{
     const sec = document.getElementById(id);
     if(!sec) return;
