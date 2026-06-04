@@ -448,17 +448,20 @@
     .cav h5{font-size:12px}.cav p{font-size:11.5px}
 
     /* Best performers */
-    .bp-wrap{padding:14px 12px}
-    .bp-header{margin-bottom:12px}
-    .bp-title{font-size:14px}
-    .bp-row{grid-template-columns:1fr 1fr;gap:7px}
-    .bp-card{padding:10px 11px}
-    .bp-ticker{font-size:13px}
-    .bp-pct{font-size:12px}
-    .bp-meta{font-size:8px}
-    .bp-name{font-size:9.5px;-webkit-line-clamp:1}
-    .bp-spark{height:18px}
-    .bp-methodology{font-size:9px;padding:7px 10px}
+    .bp-wrap{padding:12px 10px}
+    .bp-header{margin-bottom:10px;flex-direction:column;gap:4px}
+    .bp-title{font-size:13px}
+    .bp-row{grid-template-columns:1fr 1fr;gap:6px}
+    .bp-card{padding:9px 10px}
+    .bp-ticker{font-size:12px}
+    .bp-pct{font-size:11px}
+    .bp-meta{font-size:8px;display:none}
+    .bp-name{font-size:9px;-webkit-line-clamp:1}
+    .bp-spark{height:16px}
+    .bp-methodology{display:none} /* too cluttered on mobile — hidden */
+    .bp-group-name{font-size:9px;letter-spacing:1px}
+    #performers .sec-head p{display:none} /* hide long desc on mobile */
+    #performers .sec-head{flex-direction:column;align-items:flex-start;gap:8px}
 
     /* Popups — slide up from bottom like native sheet */
     .se-overlay{padding:0;align-items:flex-end}
@@ -508,7 +511,8 @@
   .etf-more-details[open] .etf-more-toggle{color:var(--text-dim)}
   .etf-expand-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
 
-  /* ---- MOBILE COLLAPSIBLE SECTIONS ---- */
+  /* ---- UNIVERSAL COLLAPSIBLE SECTIONS ---- */
+  /* Mobile-only toggles */
   .mob-collapse-toggle{display:none}
   @media(max-width:700px){
     .mob-collapse-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;padding:0;color:inherit;text-align:left;gap:12px}
@@ -518,6 +522,20 @@
     .mob-collapsible.collapsed{max-height:0!important;opacity:0;pointer-events:none}
     section .sec-head > div > h3{pointer-events:none}
   }
+  /* ---- ALWAYS-ON COLLAPSIBLE (Theme Lights + Section 01) ---- */
+  .sec-collapse-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:12px}
+  .sec-collapse-hdr .sec-arrow{font-family:var(--mono);font-size:13px;color:var(--text-faint);transition:transform .25s;flex-shrink:0;margin-left:8px}
+  .sec-collapse-hdr.open .sec-arrow{transform:rotate(180deg);color:var(--gold)}
+  .sec-collapsible{overflow:hidden;transition:max-height .35s ease,opacity .3s ease}
+  .sec-collapsible.collapsed{max-height:0!important;opacity:0;pointer-events:none}
+  /* Section 01 header toggle */
+  .sec-head.collapsible{cursor:pointer}
+  .sec-head.collapsible:hover h3{color:var(--gold)}
+  /* Theme signal toggle header */
+  .theme-toggle-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:8px 0;margin-bottom:4px}
+  .theme-toggle-hdr .row-label{margin-bottom:0;flex:1;pointer-events:none}
+  .theme-toggle-hdr .sec-arrow{font-family:var(--mono);font-size:13px;color:var(--text-faint);transition:transform .25s;flex-shrink:0}
+  .theme-toggle-hdr.open .sec-arrow{transform:rotate(180deg);color:var(--gold)}
 
   /* ---- SIGNAL EXPLAIN POPUP ---- */
   .se-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -639,11 +657,16 @@
       <div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
     </div>
 
-    <div class="row-label" style="color:var(--gold)">⬤ Theme Signal Lights — Green = add exposure · Red = cut first</div>
-    <div class="theme-live-row" id="liveThemes">
-      <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
-      <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
-      <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
+    <div class="theme-toggle-hdr" id="themeToggleHdr" onclick="toggleThemeSection()" title="Click to expand / collapse">
+      <div class="row-label" style="color:var(--gold);margin-bottom:0">⬤ Theme Signal Lights — Green = add exposure · Red = cut first</div>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-collapsible collapsed" id="themeSignalsWrap" style="max-height:0">
+      <div class="theme-live-row" id="liveThemes">
+        <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
+        <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
+        <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
+      </div>
     </div>
 
     <div class="breakdown" id="liveBreakdown" style="display:none">
@@ -672,13 +695,15 @@
 
   <!-- SECTORS -->
   <section id="sectors">
-    <div class="sec-head">
+    <div class="sec-head sec-collapse-hdr" id="sectorsToggleHdr" onclick="toggleSectorsSection()" title="Click to expand / collapse">
       <div>
         <div class="num">SECTION 01 / SECTOR · ASSET-CLASS · THEME ETFs</div>
         <h3>The most liquid fund per industry &amp; theme</h3>
         <p>US sectors, global ETFs, macro asset classes — plus trending thematic industries (defense, space, quantum, AI, nuclear and more) that cut across GICS sectors.</p>
       </div>
+      <span class="sec-arrow">▼</span>
     </div>
+    <div class="sec-collapsible collapsed" id="sectorsWrap" style="max-height:0">
     <div class="legend">
       <span><i class="dot" style="background:var(--amber)"></i> US sector</span>
       <span><i class="dot" style="background:var(--cyan)"></i> Global sector</span>
@@ -698,6 +723,7 @@
       <tbody id="sectorBody"></tbody></table>
     </div>
     <p style="margin-top:11px;font-size:11px;color:var(--text-faint);font-family:var(--mono)">AUM approximate (early–mid 2026). Trending themes are <b style="color:var(--text-dim)">not GICS sectors</b> — higher-beta, rotate faster. Verify before sizing.</p>
+    </div><!-- /sectorsWrap -->
   </section>
 
   <!-- RATIOS -->
@@ -2111,6 +2137,30 @@ document.addEventListener('click', function(e) {
 });
 
 // ---- MOBILE COLLAPSIBLE SECTIONS ----
+/* ---- UNIVERSAL SECTION COLLAPSE (Theme Signals + Section 01) ---- */
+function toggleCollapse(hdrId, wrapId){
+  const hdr=document.getElementById(hdrId);
+  const wrap=document.getElementById(wrapId);
+  if(!hdr||!wrap)return;
+  const isCollapsed=wrap.classList.contains('collapsed');
+  if(isCollapsed){
+    wrap.classList.remove('collapsed');
+    wrap.style.maxHeight=wrap.scrollHeight+'px';
+    hdr.classList.add('open');
+    // After animation, set maxHeight to 'none' so dynamic content (renderAll) can resize
+    wrap.addEventListener('transitionend',()=>{if(!wrap.classList.contains('collapsed'))wrap.style.maxHeight='none';},{once:true});
+  } else {
+    wrap.style.maxHeight=wrap.scrollHeight+'px';
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{wrap.style.maxHeight='0px';});
+    });
+    wrap.classList.add('collapsed');
+    hdr.classList.remove('open');
+  }
+}
+function toggleThemeSection(){ toggleCollapse('themeToggleHdr','themeSignalsWrap'); }
+function toggleSectorsSection(){ toggleCollapse('sectorsToggleHdr','sectorsWrap'); }
+
 (function setupMobileCollapse(){
   if(window.innerWidth > 700) return;
   const COLLAPSE_SECTIONS = ['sectors','ratios','regime','playbook','caveats','performers'];
