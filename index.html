@@ -2193,6 +2193,8 @@ function toggleRatiosSection(){ toggleCollapse('ratiosToggleHdr','ratiosWrap'); 
     if(!sec) return;
     const head = sec.querySelector('.sec-head');
     if(!head) return;
+    // Skip sections already using the universal collapse toggle
+    if(head.classList.contains('sec-collapse-hdr')) return;
     // Wrap everything after sec-head in a collapsible div
     const children = Array.from(sec.children).filter(c=>c!==head);
     if(!children.length) return;
