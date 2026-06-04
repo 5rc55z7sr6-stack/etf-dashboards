@@ -323,6 +323,29 @@
 
   @media(max-width:980px){.masters,.master-live-row{grid-template-columns:repeat(2,1fr)}.theme-live-row{grid-template-columns:repeat(2,1fr)}.regimes,.play{grid-template-columns:1fr}.caveats{grid-template-columns:1fr}.regime-banner{grid-template-columns:1fr}.rb-right{align-items:flex-start}}
   @media(max-width:560px){.wrap{padding:0 14px}.head-inner{padding:12px 14px}.masters,.master-live-row,.pulse-grid{grid-template-columns:1fr}.signals{grid-template-columns:1fr}}
+
+  /* ---- SIGNAL EXPLAIN POPUP ---- */
+  .se-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+  .se-overlay.open{opacity:1;pointer-events:auto}
+  .se-box{background:#10191c;border:1px solid #2a3d44;border-radius:14px;max-width:480px;width:100%;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.6);transform:translateY(10px) scale(.98);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+  .se-overlay.open .se-box{transform:none}
+  .se-top{padding:22px 24px 0}
+  .se-verdict{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
+  .se-verdict .se-dot{width:10px;height:10px;border-radius:50%}
+  .se-pair{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+  .se-label{font-size:13px;color:var(--text-dim);margin-bottom:18px}
+  .se-divider{height:1px;background:var(--line);margin:0 24px}
+  .se-body{padding:20px 24px}
+  .se-headline{font-size:15px;font-weight:700;margin-bottom:10px;line-height:1.4}
+  .se-explain{font-size:14px;color:#b0c4c2;line-height:1.65;margin-bottom:16px}
+  .se-what{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font-size:13px;color:var(--text-dim);line-height:1.6}
+  .se-what strong{color:var(--text);font-weight:600}
+  .se-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text-faint);font-size:20px;cursor:pointer;line-height:1;padding:4px 8px;border-radius:4px;transition:color .15s,background .15s}
+  .se-close:hover{color:var(--text);background:rgba(255,255,255,.07)}
+  .se-footer{padding:0 24px 20px;display:flex;justify-content:flex-end}
+  .se-dismiss{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:8px 18px;border:1px solid var(--line-bright);background:transparent;color:var(--text-dim);cursor:pointer;border-radius:5px;transition:all .15s;text-transform:uppercase}
+  .se-dismiss:hover{border-color:var(--gold);color:var(--gold)}
+  .pulse-card{cursor:pointer}
 </style>
 </head>
 <body>
@@ -1396,6 +1419,142 @@ function filterHoldings(){renderHoldings(document.getElementById('hSearch').valu
 
 // Initial render
 renderHoldings();
+
+// ---- SIGNAL EXPLAIN POPUP ----
+const SIGNAL_EXPLAINS = {
+  'XLY/XLP': {
+    headline: '🛒 Are people spending freely or playing it safe?',
+    explain: 'This compares two types of everyday companies. <strong>XLY</strong> holds brands like Amazon, Tesla, and Nike — things people buy when they feel good about money. <strong>XLP</strong> holds companies like Procter & Gamble, Coca-Cola, and Walmart — things people buy no matter what.\n\nWhen this signal is <em>bullish</em>, more money is flowing into the "feel good" spending stocks. When it\'s <em>bearish</em>, investors are quietly shifting money into the boring-but-safe stocks — a sign they\'re getting nervous.',
+    what: '<strong>In plain English:</strong> Think of it like this — when people feel rich, they eat at restaurants (XLY). When they feel worried, they stock up on toilet paper (XLP). This signal tells you which mood is winning right now.'
+  },
+  'QQQ/SPY': {
+    headline: '💻 Is Big Tech leading the market, or falling behind?',
+    explain: '<strong>QQQ</strong> is basically the top 100 tech and growth companies — Apple, Microsoft, Nvidia, Meta, Google. <strong>SPY</strong> is the whole US stock market.\n\nWhen this is <em>bullish</em>, tech is outrunning everything else — investors are feeling optimistic and betting on growth. When it\'s <em>bearish</em>, money is rotating out of tech and into other parts of the market.',
+    what: '<strong>In plain English:</strong> Tech stocks go up fast but also fall fast. When this signal turns red, it means investors are saying "we\'ve had enough tech for now" and moving money elsewhere — like banks, healthcare, or energy.'
+  },
+  'SMH/SPY': {
+    headline: '🔬 Are chip stocks (the engine of AI) in demand?',
+    explain: '<strong>SMH</strong> holds the companies that make semiconductors — the tiny chips inside every smartphone, AI server, and electric car. Think Nvidia, TSMC, AMD.\n\nWhen this is <em>bullish</em>, demand for AI and technology is strong. When it\'s <em>bearish</em>, it\'s an early warning that the whole tech sector could slow down — chips are usually the first to feel it.',
+    what: '<strong>In plain English:</strong> Chip companies are like the factories that build everything digital. If their stocks are falling relative to the market, it\'s like seeing fewer orders at a factory — a warning sign for the whole tech economy.'
+  },
+  'IWM/SPY': {
+    headline: '🏘️ Are small American companies keeping up with the big ones?',
+    explain: '<strong>IWM</strong> holds about 2,000 small US companies — local businesses, regional banks, smaller manufacturers. <strong>SPY</strong> is the big names everyone knows.\n\nWhen this is <em>bullish</em>, even the little guys are doing well — that\'s a healthy, broad market. When it\'s <em>bearish</em>, only the big companies are holding up, which usually means investors are getting cautious.',
+    what: '<strong>In plain English:</strong> Small companies are more sensitive to the economy — they borrow more, have less cushion. If they\'re underperforming, it\'s a sign investors are worried about the real economy, not just the big tech names.'
+  },
+  'HYG/LQD': {
+    headline: '⚠️ Are investors willing to lend money to risky companies?',
+    explain: '<strong>HYG</strong> holds "junk bonds" — loans to companies with shaky finances that pay higher interest. <strong>LQD</strong> holds bonds from rock-solid companies.\n\nWhen this is <em>bullish</em>, investors are comfortable taking risk — they\'re chasing the higher interest from riskier loans. When it\'s <em>bearish</em>, they\'re pulling money out of risky debt and hiding in safe bonds. This is one of the earliest warning signals before stock markets drop.',
+    what: '<strong>In plain English:</strong> Imagine two borrowers — one is a stable bank (LQD), the other is a startup with debt (HYG). When people stop lending to the startup, it means they\'re getting scared. This often happens before the stock market notices trouble.'
+  },
+  'Copper/Gold': {
+    headline: '🏗️ Is the global economy growing, or are people scared?',
+    explain: '<strong>Copper</strong> is used in everything — buildings, cars, electronics, power lines. When copper prices rise, it means factories and construction are busy. <strong>Gold</strong> is the classic safe haven — people buy it when they\'re frightened.\n\nWhen this ratio is <em>bullish</em>, copper is winning — the world economy is humming. When it\'s <em>bearish</em>, gold is winning — fear is taking over.',
+    what: '<strong>In plain English:</strong> Copper = optimism about building things. Gold = fear and hiding. This ratio is like a global mood ring — rising copper/gold means "let\'s grow," falling means "protect yourself."'
+  },
+  'SPY/TLT': {
+    headline: '📈 Are stocks winning over safe government bonds?',
+    explain: '<strong>SPY</strong> is the US stock market. <strong>TLT</strong> holds long-term US government bonds — the ultimate "safe" investment.\n\nWhen this is <em>bullish</em>, stocks are outperforming bonds — investors are risk-on and chasing growth. When it\'s <em>bearish</em>, money is flooding into government bonds — classic "flight to safety," the kind of move you see when people get really worried.',
+    what: '<strong>In plain English:</strong> Stocks vs. government IOUs. When people trust the economy, they own stocks. When they get scared, they lend money to the government instead. This signal shows which way that tide is flowing.'
+  },
+  'GLD/SPY': {
+    headline: '🥇 Is gold outrunning stocks? (Fear gauge)',
+    explain: '<strong>GLD</strong> tracks the gold price. When gold beats the stock market, it means investors are prioritising safety over growth.\n\nWhen this is <em>bearish</em> (gold underperforming), it\'s actually good news — people prefer stocks. When it\'s <em>bullish</em> here, it means gold is surging relative to stocks — a sign of rising fear or inflation worries.',
+    what: '<strong>In plain English:</strong> Gold goes up when people are scared or don\'t trust paper money. If this signal is flashing, money is moving from growth stocks into the oldest safe haven in history.'
+  },
+  'ITA/SPY': {
+    headline: '🛡️ Are defence stocks outperforming? (Geopolitical tension)',
+    explain: '<strong>ITA</strong> holds defence companies — Lockheed Martin, Raytheon, Northrop Grumman. These stocks do well when governments increase military spending, often due to geopolitical tensions.\n\nThis signal can be <em>bullish</em> even when the rest of the market is weak, because defence spending doesn\'t depend on the economy.',
+    what: '<strong>In plain English:</strong> When the world gets tense — wars, conflicts, military buildups — defence company profits go up. This signal tells you if that money flow is happening right now.'
+  },
+  'ARKK/SPY': {
+    headline: '🚀 Are speculative "moonshot" stocks back in favour?',
+    explain: '<strong>ARKK</strong> holds highly speculative innovation stocks — companies that might change the world but aren\'t profitable yet. Think early-stage biotech, space companies, disruptive tech.\n\nWhen this is <em>bullish</em>, investors are in full risk-on mode, chasing big potential gains. When it\'s <em>bearish</em>, these are the first stocks people sell when they get nervous — they\'re considered last-in, first-out.',
+    what: '<strong>In plain English:</strong> ARKK stocks are the "lottery tickets" of the market. People only buy them when they feel great about the future. When this turns red, it means confidence is fading and people are selling the riskiest bets first.'
+  },
+  'XLF/SPY': {
+    headline: '🏦 Are banks and financial stocks leading?',
+    explain: '<strong>XLF</strong> holds big banks, insurance companies, and financial firms — JPMorgan, Goldman Sachs, Berkshire Hathaway.\n\nWhen banks outperform, it often signals rising interest rates and a healthy lending environment. When they underperform, it can mean the economy is slowing or credit is tightening.',
+    what: '<strong>In plain English:</strong> Banks make money when the economy is active — people borrow to buy homes and businesses take loans to grow. Strong banks = healthy economy. Weak banks = people are borrowing less and being cautious.'
+  },
+  'XLE/SPY': {
+    headline: '⛽ Are energy stocks (oil & gas) outperforming?',
+    explain: '<strong>XLE</strong> holds energy companies — ExxonMobil, Chevron, ConocoPhillips. Energy stocks tend to rise when oil prices climb, often linked to geopolitical events or growing global demand.\n\nEnergy is a classic "defensive" sector during inflation — companies pass rising costs onto consumers.',
+    what: '<strong>In plain English:</strong> When you see petrol prices rising at the pump, energy company profits usually go up too. This signal tells you if the market is betting on higher energy prices ahead.'
+  }
+};
+
+const VERDICT_TEXT = {
+  'strong-bull': { label: '▲▲ STRONG BULL', color: '#3fd17e', summary: 'Money is flowing strongly into this area. Investors are confident.' },
+  'bull': { label: '▲ BULLISH', color: '#7aaa90', summary: 'Positive trend — this area is gently outperforming.' },
+  'bear': { label: '▼ BEARISH', color: '#9e7070', summary: 'Negative trend — money is quietly moving away from here.' },
+  'strong-bear': { label: '▼▼ STRONG BEAR', color: '#ff5c61', summary: 'Money is flowing strongly out of this area. Investors are cautious or worried.' }
+};
+
+function openSignalPopup(key, label, sig) {
+  const info = SIGNAL_EXPLAINS[key] || {
+    headline: label,
+    explain: 'This ratio compares the performance of two market segments to gauge investor sentiment.',
+    what: '<strong>Rising:</strong> money flowing into the first asset. <strong>Falling:</strong> money flowing into the second asset.'
+  };
+  const vt = VERDICT_TEXT[sig] || VERDICT_TEXT['bull'];
+  const overlay = document.getElementById('seOverlay');
+  overlay.querySelector('.se-verdict').innerHTML = `<span class="se-dot" style="background:${vt.color};box-shadow:0 0 8px ${vt.color}66"></span><span style="color:${vt.color}">${vt.label}</span>`;
+  overlay.querySelector('.se-pair').textContent = key;
+  overlay.querySelector('.se-label').textContent = label;
+  overlay.querySelector('.se-verdict-summary').textContent = vt.summary;
+  overlay.querySelector('.se-headline').textContent = info.headline;
+  overlay.querySelector('.se-explain').innerHTML = info.explain.replace(/\n/g,'<br>');
+  overlay.querySelector('.se-what').innerHTML = info.what;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSignalPopup() {
+  document.getElementById('seOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('seOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeSignalPopup();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeSignalPopup();
+});
+
+// Delegate click on pulse cards
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('.pulse-card');
+  if (!card) return;
+  const pair = card.querySelector('.pc-pair');
+  const labelEl = card.querySelector('.pc-label');
+  const chipEl = card.querySelector('.pc-verdict-chip');
+  if (!pair || !chipEl) return;
+  const sig = ['strong-bull','bull','bear','strong-bear'].find(s => chipEl.classList.contains(s));
+  if (sig) openSignalPopup(pair.textContent.trim(), labelEl ? labelEl.textContent.trim() : '', sig);
+});
 </script>
+
+<!-- Signal Explain Popup -->
+<div class="se-overlay" id="seOverlay" role="dialog" aria-modal="true">
+  <div class="se-box">
+    <button class="se-close" onclick="closeSignalPopup()" aria-label="Close">✕</button>
+    <div class="se-top">
+      <div class="se-verdict"></div>
+      <div class="se-pair"></div>
+      <div class="se-label"></div>
+      <div class="se-verdict-summary" style="font-size:13px;color:var(--text-dim);margin-bottom:16px;font-style:italic"></div>
+    </div>
+    <div class="se-divider"></div>
+    <div class="se-body">
+      <div class="se-headline"></div>
+      <div class="se-explain"></div>
+      <div class="se-what"></div>
+    </div>
+    <div class="se-footer">
+      <button class="se-dismiss" onclick="closeSignalPopup()">Got it</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
