@@ -916,6 +916,7 @@ const sectors=[
   {t:'TUR',c:'global',n:'iShares MSCI Turkey ETF',cat:'Global Sector',tr:'MSCI Turkey Index — top 25–30 Turkish large/mid-cap stocks',aum:'~$0.4B',why:'Turkey: high-beta EM play on domestic growth + inflation regime. Banks, consumer staples, industrials. Tracks lira/USD closely — weak lira = headwind for USD investors.'},
 ];
 const sb=document.getElementById('sectorBody');
+let HOLDINGS_MAP=new Map(); // populated after HOLDINGS data loads below
 function tkC(c){return c==='global'?'glob':c==='macro'?'asset':c==='theme'?'theme':''}
 
 function buildExpandRow(s){
@@ -1727,7 +1728,7 @@ const HOLDINGS=[
 
 
 // ---- HOLDINGS POPUP ----
-const HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
+HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
 
 function holdingsBar(w,max){
   const pct=Math.min(100,(w/max)*100).toFixed(1);
@@ -2157,4 +2158,3 @@ document.addEventListener('click', function(e) {
 </script>
 </body>
 </html>
-<!-- deploy Thu Jun  4 15:51:19 +03 2026 -->
