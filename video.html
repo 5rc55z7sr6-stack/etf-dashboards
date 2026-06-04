@@ -11,13 +11,14 @@
     background: #000;
     font-family: 'Segoe UI', system-ui, sans-serif;
     overflow: hidden;
-    width: 1280px;
-    height: 720px;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
   }
 
   #presentation {
-    width: 1280px;
-    height: 720px;
+    width: 100vw;
+    height: 100vh;
     position: relative;
     background: #0a0e1a;
     overflow: hidden;
@@ -55,12 +56,58 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    height: 3px;
+    height: 5px;
     background: linear-gradient(90deg, #00c896, #00a8ff);
     width: 0%;
     transition: width 0.3s linear;
     z-index: 100;
-    box-shadow: 0 0 8px #00c896;
+    box-shadow: 0 0 10px #00c896, 0 0 20px rgba(0,200,150,0.4);
+  }
+  #timeline-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 44px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    z-index: 99;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 8px;
+    padding-left: 14px;
+    padding-right: 14px;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 0.4s;
+  }
+  #timeline-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  #timeline-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00c896, #00a8ff);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s linear;
+    box-shadow: 0 0 6px #00c896;
+  }
+  #timeline-time {
+    font-family: monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+    min-width: 72px;
+    text-align: right;
+  }
+  #slide-pip {
+    font-family: monospace;
+    font-size: 11px;
+    color: rgba(0,200,150,0.8);
+    white-space: nowrap;
   }
 
   /* ─── PHASE BADGE ─── */
@@ -82,31 +129,30 @@
   }
 
   /* ─── TIMER ─── */
-  #timer {
-    position: absolute;
-    top: 30px;
-    right: 40px;
-    color: rgba(255,255,255,0.3);
-    font-size: 12px;
-    font-family: monospace;
-    z-index: 50;
-  }
+  #timer { display: none; }
 
   /* ─── CONTROL BAR ─── */
   #controls {
     position: fixed;
-    bottom: 14px;
+    bottom: 54px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     gap: 12px;
     align-items: center;
     z-index: 200;
-    background: rgba(10,14,26,0.85);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(10,14,26,0.88);
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 40px;
     padding: 8px 20px;
     backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  #controls.visible {
+    opacity: 1;
+    pointer-events: auto;
   }
   #controls button {
     background: rgba(0,200,150,0.15);
@@ -892,8 +938,13 @@
     <div class="voiceover">"Stop guessing where the market is going. Explore the dashboard below and start tracking the money flow today."</div>
   </div>
 
-  <!-- ─── PROGRESS BAR ─── -->
+  <!-- ─── PROGRESS BAR + TIMELINE ─── -->
   <div id="progress-bar"></div>
+  <div id="timeline-bar">
+    <span id="slide-pip">SLIDE 1/6</span>
+    <div id="timeline-track"><div id="timeline-fill"></div></div>
+    <span id="timeline-time">0:00 / --:--</span>
+  </div>
 
   <!-- ─── CONTROLS ─── -->
   <div id="controls">
@@ -1059,13 +1110,72 @@
   `;
   document.getElementById('presentation').appendChild(overlay);
 
-  overlay.addEventListener('click', () => {
+  // Auto-start if inside iframe or ?autostart param
+  function doStart() {
     overlay.remove();
     showSlide(0, true);
     startTick();
-  });
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('autostart') === '1' || window.self !== window.top) {
+    // Inside iframe → auto-dismiss overlay immediately (click needed for audio)
+    overlay.addEventListener('click', doStart, {once:true});
+    // Try auto-start anyway (will be silently blocked if no user gesture)
+    setTimeout(doStart, 100);
+  } else {
+    overlay.addEventListener('click', doStart, {once:true});
+  }
 
   startTick();
+
+  // ── Auto-hide controls ────────────────────────────────────────────────
+  let hideTimer = null;
+  function showControls() {
+    document.getElementById('controls').classList.add('visible');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      document.getElementById('controls').classList.remove('visible');
+    }, 3000);
+  }
+  document.addEventListener('mousemove', showControls);
+  document.addEventListener('touchstart', showControls);
+  // Show briefly on start
+  showControls();
+
+  // ── Timeline update ───────────────────────────────────────────────────
+  const origUpdateTimer = updateTimer;
+  function updateTimer() {
+    origUpdateTimer();
+    // Update timeline fill
+    const a = activeAudio;
+    if (a && a.duration) {
+      let done = 0;
+      for (let i = 0; i < currentSlide; i++) {
+        const prev = document.getElementById(audioIds[i]);
+        if (prev && prev.duration) done += prev.duration;
+      }
+      let total = 0;
+      audioIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.duration) total += el.duration;
+      });
+      if (total > 0) {
+        const pct = Math.min(100, ((done + a.currentTime) / total) * 100);
+        const fill = document.getElementById('timeline-fill');
+        if (fill) fill.style.width = pct + '%';
+        const timeEl = document.getElementById('timeline-time');
+        if (timeEl) {
+          const cur = Math.floor(done + a.currentTime);
+          const tot = Math.floor(total);
+          const fmt = s => Math.floor(s/60) + ':' + (s%60).toString().padStart(2,'0');
+          timeEl.textContent = fmt(cur) + ' / ' + fmt(tot);
+        }
+      }
+    }
+    const pip = document.getElementById('slide-pip');
+    if (pip) pip.textContent = 'SLIDE ' + (currentSlide+1) + '/' + totalSlides;
+  }
 </script>
 
 <!-- ── Embedded Neural Voiceovers ── -->
