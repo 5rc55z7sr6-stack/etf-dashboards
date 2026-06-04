@@ -2163,7 +2163,7 @@ function toggleSectorsSection(){ toggleCollapse('sectorsToggleHdr','sectorsWrap'
 
 (function setupMobileCollapse(){
   if(window.innerWidth > 700) return;
-  const COLLAPSE_SECTIONS = ['sectors','ratios','regime','playbook','caveats','performers'];
+  const COLLAPSE_SECTIONS = ['ratios','regime','playbook','caveats','performers']; // sectors handled by universal toggle
   COLLAPSE_SECTIONS.forEach(id=>{
     const sec = document.getElementById(id);
     if(!sec) return;
