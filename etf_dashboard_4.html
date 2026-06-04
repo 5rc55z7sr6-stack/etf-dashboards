@@ -226,7 +226,8 @@
   .bp-group-line{flex:1;height:1px;background:var(--line)}
   .bp-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
   .bp-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:7px;padding:12px 13px;position:relative;transition:border-color .18s,transform .16s,box-shadow .18s}
-  .bp-card:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.25)}
+  .bp-card{cursor:pointer}
+  .bp-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.25)}
   .bp-card.rank-1{border-color:rgba(232,193,74,.4);background:rgba(232,193,74,.04)}
   .bp-card.strong-bull{border-top:2px solid #3fd17e}
   .bp-card.bull{border-top:2px solid rgba(63,209,126,.3)}
@@ -370,7 +371,6 @@
     <button class="tab" data-go="playbook">Playbook</button>
     <button class="tab" data-go="caveats">Caveats</button>
     <button class="tab" data-go="performers">🏆 Best Performers</button>
-    <button class="tab" data-go="holdings">Holdings</button>
   </div>
 </nav>
 
@@ -598,23 +598,7 @@
     </div>
   </section>
 
-  <!-- HOLDINGS -->
-  <section id="holdings" style="border-bottom:none">
-    <div class="sec-head">
-      <div>
-        <div class="num">SECTION 06 / ETF HOLDINGS</div>
-        <h3>Top 10 stocks inside each ETF</h3>
-        <p>Click any ETF to expand its top 10 holdings with approximate weight. Data is approximate (mid-2026 fact sheets). Always verify on issuer website before trading.</p>
-      </div>
-    </div>
-    <div class="holdings-search-row">
-      <input class="h-search" id="hSearch" placeholder="search ETF ticker or name…" oninput="filterHoldings()">
-      <div class="h-filter-chips" id="hChips"></div>
-    </div>
-    <div id="holdingsContainer"></div>
-  </section>
-
-  <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
+    <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
 </div>
 
 <script>
@@ -1398,80 +1382,74 @@ const HOLDINGS=[
    note:'Rare earths + lithium for AI chips, EVs, defense. China controls ~85% of processing — geopolitical choke point. Defense demand + EV demand = structural tailwind.'},
 ];
 
-// Group order for display
-const GROUP_ORDER=['US Sectors','Global Sectors','Macro / Asset Class','Trending Themes'];
-const GROUP_COLORS={'US Sectors':'var(--amber)','Global Sectors':'var(--cyan)','Macro / Asset Class':'var(--violet)','Trending Themes':'var(--gold)'};
+// ---- HOLDINGS POPUP ----
+const HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
 
 function holdingsBar(w,max){
   const pct=Math.min(100,(w/max)*100).toFixed(1);
   return `<span class="h-wt-bar"><span class="h-wt-fill" style="width:${pct}%"></span></span>`;
 }
 
-function renderHoldings(filter='', groupFilter=''){
-  const container=document.getElementById('holdingsContainer');
-  const q=filter.toLowerCase();
-  let html='';
-  GROUP_ORDER.forEach(grp=>{
-    if(groupFilter && groupFilter!==grp) return;
-    const etfs=HOLDINGS.filter(e=>e.group===grp && (!q||(e.t.toLowerCase().includes(q)||e.n.toLowerCase().includes(q)||e.cat.toLowerCase().includes(q))));
-    if(!etfs.length) return;
-    html+=`<div class="hgroup" data-group="${grp}">`;
-    html+=`<div class="hgroup-title" style="color:${GROUP_COLORS[grp]||'var(--text-faint)'}">${grp} <span style="font-weight:400;color:var(--text-faint)">(${etfs.length})</span></div>`;
-    etfs.forEach(e=>{
-      const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
-      const rows=e.h.map((r,i)=>{
-        const w=parseFloat(r[2]);
-        const wStr=!isNaN(w)?`${w.toFixed(1)}%`:(r[2]||'—');
-        const bar=!isNaN(w)?holdingsBar(w,maxW):'';
-        return `<tr>
-          <td class="h-rank">${i+1}</td>
-          <td class="h-tk">${r[0]}</td>
-          <td class="h-co">${r[1]}</td>
-          <td class="h-wt">${wStr}${bar}</td>
-        </tr>`;
-      }).join('');
-      html+=`<details class="haccard">
-        <summary class="hac-trigger">
-          <span class="hac-tk">${e.t}</span>
-          <span class="hac-name">${e.n}</span>
-          <span class="hac-cat">${e.cat}</span>
-          <span class="hac-arrow">▶</span>
-        </summary>
-        <div class="hac-body">
-          <table class="holdings-table">
-            <thead><tr><th>#</th><th>Ticker</th><th>Company / Security</th><th style="text-align:right">Weight</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-          ${e.note?`<div class="hac-note">${e.note}</div>`:''}
-        </div>
-      </details>`;
-    });
-    html+='</div>';
-  });
-  container.innerHTML=html||`<div style="color:var(--text-faint);font-family:var(--mono);font-size:12px;padding:24px 0">No ETFs match your search.</div>`;
+function openHoldingsPopup(ticker){
+  const e=HOLDINGS_MAP.get(ticker);
+  const overlay=document.getElementById('holdingsOverlay');
+  if(!e){
+    // No holdings data — show a minimal popup
+    overlay.querySelector('.ho-ticker').textContent=ticker;
+    overlay.querySelector('.ho-name').textContent='';
+    overlay.querySelector('.ho-cat').textContent='';
+    overlay.querySelector('.ho-table-wrap').innerHTML=`<div style="color:var(--text-faint);font-family:var(--mono);font-size:12px;padding:20px 0;text-align:center">No holdings data available for ${ticker}.</div>`;
+    overlay.querySelector('.ho-note').textContent='';
+    overlay.classList.add('open');
+    document.body.style.overflow='hidden';
+    return;
+  }
+  const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
+  const rows=e.h.map((r,i)=>{
+    const w=parseFloat(r[2]);
+    const wStr=!isNaN(w)?`${w.toFixed(1)}%`:(r[2]||'—');
+    const bar=!isNaN(w)?holdingsBar(w,maxW):'';
+    return `<tr><td class="h-rank">${i+1}</td><td class="h-tk">${r[0]}</td><td class="h-co">${r[1]}</td><td class="h-wt">${wStr}${bar}</td></tr>`;
+  }).join('');
+  overlay.querySelector('.ho-ticker').textContent=e.t;
+  overlay.querySelector('.ho-name').textContent=e.n;
+  overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
+  overlay.querySelector('.ho-table-wrap').innerHTML=`<table class="holdings-table"><thead><tr><th>#</th><th>Ticker</th><th>Company / Security</th><th style="text-align:right">Weight</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const noteEl=overlay.querySelector('.ho-note');
+  noteEl.textContent=e.note||'';
+  noteEl.style.display=e.note?'block':'none';
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
 }
 
-// Group filter chips
-let activeGroupFilter='';
-(function buildChips(){
-  const c=document.getElementById('hChips');
-  if(!c) return;
-  const all=document.createElement('button');
-  all.className='chip active';all.textContent='All';
-  all.onclick=()=>{activeGroupFilter='';document.querySelectorAll('#hChips .chip').forEach(x=>x.classList.remove('active'));all.classList.add('active');renderHoldings(document.getElementById('hSearch').value,activeGroupFilter);};
-  c.appendChild(all);
-  GROUP_ORDER.forEach(g=>{
-    const btn=document.createElement('button');
-    btn.className='chip';btn.textContent=g;
-    btn.onclick=()=>{activeGroupFilter=g;document.querySelectorAll('#hChips .chip').forEach(x=>x.classList.remove('active'));btn.classList.add('active');renderHoldings(document.getElementById('hSearch').value,activeGroupFilter);};
-    c.appendChild(btn);
-  });
-})();
+function closeHoldingsPopup(){
+  document.getElementById('holdingsOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
 
-function filterHoldings(){renderHoldings(document.getElementById('hSearch').value,activeGroupFilter);}
+document.addEventListener('DOMContentLoaded',function(){
+  const ho=document.getElementById('holdingsOverlay');
+  if(ho){
+    ho.addEventListener('click',function(ev){if(ev.target===this)closeHoldingsPopup();});
+  }
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeHoldingsPopup();});
 
-// Initial render
-renderHoldings();
+// Click delegation for Best Performers cards and ETF universe table rows
+document.addEventListener('click',function(e){
+  // Best performers bp-card
+  const bpCard=e.target.closest('.bp-card');
+  if(bpCard){
+    const tk=bpCard.querySelector('.bp-ticker');
+    if(tk)openHoldingsPopup(tk.textContent.trim());
+    return;
+  }
+  // ETF universe table rows (ticker cell)
+  const tkCell=e.target.closest('td.tk');
+  if(tkCell){
+    openHoldingsPopup(tkCell.textContent.trim());
+  }
+});
 
 // ---- SIGNAL EXPLAIN POPUP ----
 const SIGNAL_EXPLAINS = {
@@ -1587,6 +1565,28 @@ document.addEventListener('click', function(e) {
   if (sig) openSignalPopup(pair.textContent.trim(), labelEl ? labelEl.textContent.trim() : '', sig);
 });
 </script>
+
+<!-- Holdings Popup -->
+<div class="se-overlay" id="holdingsOverlay" role="dialog" aria-modal="true">
+  <div class="se-box" style="max-width:560px">
+    <button class="se-close" onclick="closeHoldingsPopup()" aria-label="Close">✕</button>
+    <div class="se-top">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px">Top 10 Holdings</div>
+      <div class="ho-ticker" style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--gold)"></div>
+      <div class="ho-name" style="font-size:13px;color:var(--text);font-weight:600;margin-top:2px"></div>
+      <div class="ho-cat" style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:4px;margin-bottom:16px"></div>
+    </div>
+    <div class="se-divider"></div>
+    <div class="se-body" style="padding:16px 24px">
+      <div class="ho-table-wrap"></div>
+      <div class="ho-note hac-note" style="margin-top:12px;display:none"></div>
+    </div>
+    <div class="se-footer">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-faint);flex:1">Data approximate · mid-2026 · verify on issuer website</span>
+      <button class="se-dismiss" onclick="closeHoldingsPopup()">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- Signal Explain Popup -->
 <div class="se-overlay" id="seOverlay" role="dialog" aria-modal="true">
