@@ -43,6 +43,11 @@
   .tab:hover{color:var(--text)}.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
   .tab.live-tab.active{color:var(--green);border-bottom-color:var(--green)}
   .hero{padding:42px 0 28px;border-bottom:1px solid var(--line)}
+  .hero-inner{display:grid;grid-template-columns:1fr 420px;gap:36px;align-items:start}
+  .hero-text{min-width:0}
+  .hero-video{position:relative;flex-shrink:0}
+  .hero-video-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:8px}
+  .hero-video iframe{width:100%;height:236px;border-radius:8px;border:1px solid var(--line);display:block;background:var(--bg-card)}
   .hero .kicker{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
   .hero h2{font-size:clamp(28px,4.5vw,48px);line-height:1.04;font-weight:800;letter-spacing:-1.5px;max-width:22ch}
   .hero h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--gold)}
@@ -324,6 +329,7 @@
   .h-filter-chips{display:flex;gap:6px;flex-wrap:wrap}
 
   @media(max-width:980px){.masters,.master-live-row{grid-template-columns:repeat(2,1fr)}.theme-live-row{grid-template-columns:repeat(2,1fr)}.regimes,.play{grid-template-columns:1fr}.caveats{grid-template-columns:1fr}.regime-banner{grid-template-columns:1fr}.rb-right{align-items:flex-start}}
+  @media(max-width:860px){.hero-inner{grid-template-columns:1fr}.hero-video iframe{height:210px}}
   @media(max-width:560px){.wrap{padding:0 14px}.head-inner{padding:12px 14px}.masters,.master-live-row,.pulse-grid{grid-template-columns:1fr}.signals{grid-template-columns:1fr}}
 
   /* ============================================================
@@ -351,6 +357,8 @@
 
     /* Hero */
     .hero{padding:22px 0 16px}
+    .hero-inner{grid-template-columns:1fr;gap:20px}
+    .hero-video iframe{height:200px}
     .hero .kicker{font-size:9px;letter-spacing:1.5px;margin-bottom:8px}
     .hero h2{font-size:clamp(21px,6.5vw,30px);letter-spacing:-1px}
     .hero p{font-size:12.5px}
@@ -527,16 +535,24 @@
 <div class="wrap">
 
   <div class="hero" id="hero">
-    <div class="kicker">// Where the money is going — and how to be early</div>
-    <h2>Stop watching prices. Watch the <span class="serif">ratios.</span></h2>
-    <p>The absolute price of any ETF tells you little. The <em>relationship</em> between two ETFs tells you the regime: risk-on or risk-off, growth or defense, reflation or fear. This desk maps the most liquid fund per sector — US and worldwide — against 15 intermarket ratios that professional traders use to spot rotation before it completes.</p>
-    <div class="masters">
-      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 01</div><div class="ratio">XLY / XLP</div><div class="desc">Consumer risk appetite. Discretionary over staples = the economy is wanted.</div></div>
-      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 02</div><div class="ratio">HYG / LQD</div><div class="desc">Credit appetite. The most reliable risk gauge under stress — credit leads.</div></div>
-      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 03</div><div class="ratio">SPY / TLT</div><div class="desc">Stocks vs. long bonds — the classic risk-on / risk-off switch.</div></div>
-      <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 04</div><div class="ratio">Copper / Gold</div><div class="desc">Growth vs. fear. Industrial demand against the safe haven.</div></div>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="kicker">// Where the money is going — and how to be early</div>
+        <h2>Stop watching prices. Watch the <span class="serif">ratios.</span></h2>
+        <p>The absolute price of any ETF tells you little. The <em>relationship</em> between two ETFs tells you the regime: risk-on or risk-off, growth or defense, reflation or fear. This desk maps the most liquid fund per sector — US and worldwide — against 15 intermarket ratios that professional traders use to spot rotation before it completes.</p>
+        <div class="masters">
+          <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 01</div><div class="ratio">XLY / XLP</div><div class="desc">Consumer risk appetite. Discretionary over staples = the economy is wanted.</div></div>
+          <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 02</div><div class="ratio">HYG / LQD</div><div class="desc">Credit appetite. The most reliable risk gauge under stress — credit leads.</div></div>
+          <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 03</div><div class="ratio">SPY / TLT</div><div class="desc">Stocks vs. long bonds — the classic risk-on / risk-off switch.</div></div>
+          <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 04</div><div class="ratio">Copper / Gold</div><div class="desc">Growth vs. fear. Industrial demand against the safe haven.</div></div>
+        </div>
+        <p style="margin-top:20px;font-family:var(--mono);font-size:12px;color:var(--text-faint)">Rule: <b style="color:var(--gold)">≥2 of the 4 master gauges must be bullish</b> before adding any thematic exposure. Theme ETFs amplify the regime — last to add, first to cut.</p>
+      </div>
+      <div class="hero-video">
+        <div class="hero-video-label">▶ INTRO</div>
+        <iframe src="video.html" scrolling="no" frameborder="0" allowfullscreen title="ETF Ratio Dashboard Introduction"></iframe>
+      </div>
     </div>
-    <p style="margin-top:20px;font-family:var(--mono);font-size:12px;color:var(--text-faint)">Rule: <b style="color:var(--gold)">≥2 of the 4 master gauges must be bullish</b> before adding any thematic exposure. Theme ETFs amplify the regime — last to add, first to cut.</p>
   </div>
 
   <!-- LIVE SIGNAL -->
