@@ -313,9 +313,9 @@
   .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);min-width:22px}
   .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;min-width:62px}
   .h-co{color:var(--text)}
-  .h-wt{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--gold);text-align:right;white-space:nowrap;min-width:54px}
-  .h-wt-wrap{display:flex;align-items:center;justify-content:flex-end;gap:8px}
-  .h-wt-bar{display:inline-block;width:80px;height:7px;background:var(--line);border-radius:4px;position:relative;overflow:hidden;flex-shrink:0}
+  .h-wt{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--gold);white-space:nowrap;min-width:46px;flex-shrink:0}
+  .h-wt-wrap{display:flex;align-items:center;gap:10px}
+  .h-wt-bar{display:inline-block;width:90px;height:7px;background:var(--line);border-radius:4px;position:relative;overflow:hidden;flex-shrink:0}
   .h-wt-fill{position:absolute;left:0;top:0;height:100%;background:var(--gold);border-radius:4px;opacity:.85}
   .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
   .holdings-search-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
@@ -604,7 +604,7 @@
 
 <!-- Holdings Popup -->
 <div class="se-overlay" id="holdingsOverlay" role="dialog" aria-modal="true">
-  <div class="se-box" style="max-width:560px">
+  <div class="se-box" style="max-width:640px;width:100%">
     <button class="se-close" onclick="closeHoldingsPopup()" aria-label="Close">✕</button>
     <div class="se-top">
       <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px">Top 10 Holdings</div>
@@ -614,7 +614,7 @@
     </div>
     <div class="se-divider"></div>
     <div class="se-body" style="padding:16px 24px">
-      <div class="ho-table-wrap"></div>
+      <div class="ho-table-wrap" style="overflow-x:auto"></div>
       <div class="ho-note hac-note" style="margin-top:12px;display:none"></div>
     </div>
     <div class="se-footer">
@@ -1440,9 +1440,12 @@ function holdingsBar(w,max){
   return `<span class="h-wt-bar"><span class="h-wt-fill" style="width:${pct}%"></span></span>`;
 }
 function holdingsWt(w,max){
-  const wStr=!isNaN(w)?`${w.toFixed(1)}%`:'—';
-  const bar=!isNaN(w)?holdingsBar(w,max):'';
-  return `<div class="h-wt-wrap">${bar}<span class="h-wt">${wStr}</span></div>`;
+  if(isNaN(w)) return `<span class="h-wt">—</span>`;
+  const pct=Math.min(100,(w/max)*100).toFixed(1);
+  return `<div class="h-wt-wrap">
+    <span class="h-wt">${w.toFixed(1)}%</span>
+    <span class="h-wt-bar"><span class="h-wt-fill" style="width:${pct}%"></span></span>
+  </div>`;
 }
 
 function openHoldingsPopup(ticker){
