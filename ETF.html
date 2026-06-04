@@ -1454,15 +1454,24 @@ function renderAll(aD){
 /* ── loadDataJson: fetch data.json pre-computed by GitHub Action (same-origin, instant) ── */
 async function loadDataJson(){
   try{
-    // Cache-bust per 10-min bucket so browsers don't serve stale copy
     const res=await fetch('./data.json?_='+Math.floor(Date.now()/600000));
     if(!res.ok)return null;
     const json=await res.json();
     if(!json.data||json.data.length<10)return null;
-    // Attach .cl object shape expected by renderAll (Python writes cl as string)
-    json.data=json.data.map(r=>r.error?r:{...r,cl:classify(r.curr,r.s20,r.s50,r.inv)});
+    // Rebuild each row into the same shape renderAll expects:
+    // - cl must be the full object {sig, bullish, above20}  (not a plain string)
+    // - vals must exist (empty array is fine — sparklines just won't render)
+    // - merge with the matching ALL_R config so label/master/lens etc. are present
+    const cfgMap=new Map(ALL_R.map(r=>[`${r.key}|${r.theme?1:0}`,r]));
+    json.data=json.data.map(r=>{
+      if(r.error)return r;
+      const cfg=cfgMap.get(`${r.key}|${r.theme?1:0}`)||{};
+      const cl=classify(r.curr,r.s20,r.s50,r.inv??cfg.inv??false);
+      return{...cfg,...r,vals:[],cl};
+    }).filter(Boolean);
+    if(json.data.length<10)return null;
     return json;
-  }catch(e){return null;}
+  }catch(e){console.warn('loadDataJson failed:',e);return null;}
 }
 
 async function loadLiveData(){
