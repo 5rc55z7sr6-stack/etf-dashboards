@@ -34,6 +34,8 @@
   .live-dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint);flex-shrink:0;transition:background .4s}
   .live-dot.on{background:var(--green);animation:pulse-glow 2s infinite}
   .live-dot.err{background:var(--red)}
+  .live-dot.amber{background:var(--amber);animation:pulse-glow-amber 2s infinite}
+  @keyframes pulse-glow-amber{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(245,166,35,.5)}50%{opacity:.8;box-shadow:0 0 0 5px rgba(245,166,35,0)}}
   @keyframes pulse-glow{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(63,209,126,.5)}50%{opacity:.8;box-shadow:0 0 0 5px rgba(63,209,126,0)}}
   nav.tabs{border-bottom:1px solid var(--line);background:var(--bg-elev);position:sticky;top:0;z-index:40;overflow-x:auto}
   nav.tabs .wrap{display:flex;padding-top:0;padding-bottom:0}
@@ -339,6 +341,12 @@
         <p>15 intermarket ratios + 3 theme signal lights vs. SMA20 &amp; SMA50. Masters ×2 in score. Theme row shows which categories have a green light right now.</p>
       </div>
       <button class="refresh-btn" id="refreshBtn" onclick="loadLiveData()"><span class="spinner-sm"></span>↺ Refresh</button>
+    </div>
+
+    <div id="staleBanner" style="display:none;align-items:center;gap:12px;padding:10px 16px;margin-bottom:14px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.25);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--amber)">
+      <span style="font-size:14px">⚠</span>
+      <span>Data proxies temporarily unavailable — showing cached data. &nbsp;<span class="stale-age"></span></span>
+      <button onclick="loadLiveData()" style="margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 10px;border:1px solid rgba(245,166,35,.4);background:transparent;color:var(--amber);border-radius:3px;cursor:pointer">↺ Retry</button>
     </div>
 
     <div id="liveRegimeBanner">
@@ -685,12 +693,69 @@ const ALL_R=[...CORE_R,...THEME_R];
 const LENS_C={equity:'var(--amber)',credit:'var(--green)',macro:'var(--cyan)',breadth:'var(--violet)'};
 const SIG_LABEL={'strong-bull':'▲▲ STRONG BULL','bull':'▲ BULLISH','bear':'▼ BEARISH','strong-bear':'▼▼ STRONG BEAR'};
 
-async function ftch(url,ms=9000){const c=new AbortController();const id=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{signal:c.signal,cache:'no-store'});clearTimeout(id);return r;}catch(e){clearTimeout(id);throw e;}}
+async function ftch(url,ms=12000){const c=new AbortController();const id=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{signal:c.signal,cache:'no-store'});clearTimeout(id);return r;}catch(e){clearTimeout(id);throw e;}}
 async function yfetch(ticker){
-  const base=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=150d`; // 150d ensures full 50-bar SMA
-  const proxies=[{u:`https://corsproxy.io/?url=${encodeURIComponent(base)}`,p:r=>r},{u:`https://api.allorigins.win/get?url=${encodeURIComponent(base)}`,p:r=>JSON.parse(r.contents)},{u:base,p:r=>r}];
-  for(const px of proxies){try{const resp=await ftch(px.u);if(!resp.ok)continue;const raw=await resp.json();const json=px.p(raw);const res=json?.chart?.result?.[0];if(!res)continue;const cl=res.indicators.quote[0].close,ts=res.timestamp;const data=cl.map((c,i)=>({d:new Date(ts[i]*1000).toISOString().slice(0,10),c})).filter(x=>x.c!=null&&isFinite(x.c));if(data.length<15)continue;return data;}catch(e){}}
+  const q1=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=150d`;
+  const q2=`https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=150d`;
+  const proxies=[
+    {u:`https://corsproxy.io/?url=${encodeURIComponent(q1)}`,          p:r=>r},
+    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q1)}`, p:r=>JSON.parse(r.contents)},
+    {u:`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(q1)}`, p:r=>r},
+    {u:`https://corsproxy.io/?url=${encodeURIComponent(q2)}`,          p:r=>r},
+    {u:q2, p:r=>r},
+    {u:q1, p:r=>r},
+  ];
+  for(const px of proxies){
+    try{
+      const resp=await ftch(px.u);if(!resp.ok)continue;
+      const raw=await resp.json();const json=px.p(raw);
+      const res=json?.chart?.result?.[0];if(!res)continue;
+      const cl=res.indicators.quote[0].close,ts=res.timestamp;
+      const data=cl.map((c,i)=>({d:new Date(ts[i]*1000).toISOString().slice(0,10),c})).filter(x=>x.c!=null&&isFinite(x.c));
+      if(data.length<15)continue;
+      return data;
+    }catch(e){/* try next proxy */}
+  }
   return null;
+}
+
+/* ---- localStorage cache ---- */
+const CACHE_KEY='etf_ratio_cache_v2';
+function saveCache(aD){
+  try{
+    const compact=aD.map(r=>({
+      key:r.key, theme:r.theme?1:0, error:r.error?1:0,
+      curr:r.curr, s20:r.s20, s50:r.s50, prev5:r.prev5,
+      vals:r.error?null:(r.vals||[]).slice(-22),
+      sig:r.cl?.sig, bull:r.cl?.bullish?1:0, ab20:r.cl?.above20?1:0
+    }));
+    localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),d:compact}));
+  }catch(e){}
+}
+function loadCache(){
+  try{
+    const raw=localStorage.getItem(CACHE_KEY);
+    if(!raw)return null;
+    const{ts,d}=JSON.parse(raw);
+    if(!d?.length)return null;
+    const cfgMap=new Map(ALL_R.map(r=>[`${r.key}|${r.theme?1:0}`,r]));
+    const restored=d.map(c=>{
+      const cfg=cfgMap.get(`${c.key}|${c.theme}`);
+      if(!cfg)return null;
+      return{...cfg,error:!!c.error,curr:c.curr,s20:c.s20,s50:c.s50,prev5:c.prev5,
+             vals:c.vals||[],cl:{sig:c.sig,bullish:!!c.bull,above20:!!c.ab20}};
+    }).filter(Boolean);
+    if(!restored.length)return null;
+    return{ts,ageMin:Math.round((Date.now()-ts)/60000),data:restored};
+  }catch(e){return null;}
+}
+function showStaleBanner(ageMin){
+  const ago=ageMin<60?`${ageMin} min ago`:`${(ageMin/60).toFixed(1)}h ago`;
+  const b=document.getElementById('staleBanner');
+  if(b){b.style.display='flex';b.querySelector('.stale-age').textContent=`Last successful update: ${ago}`;}
+}
+function hideStaleBanner(){
+  const b=document.getElementById('staleBanner');if(b)b.style.display='none';
 }
 function sma(arr,n){const s=arr.slice(-Math.min(n,arr.length));return s.reduce((a,b)=>a+b,0)/s.length;}
 function align(nD,dD){const dm=new Map(dD.map(x=>[x.d,x.c]));return nD.filter(x=>dm.has(x.d)).map(x=>({d:x.d,r:x.c/dm.get(x.d)}));}
@@ -782,18 +847,45 @@ function renderBanner(data){
 }
 
 let loading=false;
+function renderAll(aD){
+  const cD=aD.filter(r=>CORE_R.some(x=>x.key===r.key&&!r.theme));
+  const tD=aD.filter(r=>r.theme);
+  renderBanner(aD);
+  document.getElementById('liveMasters').innerHTML=cD.filter(r=>r.master).map(r=>buildCard(r,false)).join('');
+  document.getElementById('liveThemes').innerHTML=tD.map(r=>buildCard(r,true)).join('');
+  renderSplitGrid(aD,'livePulseGrid');
+  const validN=aD.filter(r=>!r.error).length;
+  const el=document.getElementById('ratioCardsCount');
+  if(el)el.textContent=`(${validN} ratios)`;
+}
+
 async function loadLiveData(){
   if(loading)return;loading=true;
   const btn=document.getElementById('refreshBtn'),dot=document.getElementById('liveDot'),stxt=document.getElementById('liveStatusTxt');
   if(btn){btn.disabled=true;btn.classList.add('loading');}
   dot.className='live-dot';stxt.textContent='loading…';
-  document.getElementById('livePulseGrid').innerHTML='<div class="live-spinner-wrap"><div class="spinner"></div>Fetching live data…</div>';
-  document.getElementById('liveMasters').innerHTML=Array(4).fill('<div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>').join('');
-  document.getElementById('liveThemes').innerHTML=Array(4).fill('<div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>').join('');
+
+  // If we have cached data, render it immediately while fetching fresh data
+  const cached=loadCache();
+  if(cached&&cached.data.length){
+    renderAll(cached.data);
+    showStaleBanner(cached.ageMin);
+    dot.className='live-dot amber';stxt.textContent='refreshing…';
+  } else {
+    document.getElementById('livePulseGrid').innerHTML='<div class="live-spinner-wrap"><div class="spinner"></div>Fetching live data…</div>';
+    document.getElementById('liveMasters').innerHTML=Array(4).fill('<div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>').join('');
+    document.getElementById('liveThemes').innerHTML=Array(4).fill('<div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>').join('');
+  }
+
   try{
     const tickers=[...new Set(ALL_R.flatMap(r=>[r.num,r.den]))];
     const results=await Promise.allSettled(tickers.map(t=>yfetch(t)));
     const pm={};tickers.forEach((t,i)=>{if(results[i].status==='fulfilled'&&results[i].value)pm[t]=results[i].value;});
+
+    // Require at least 4 tickers to have succeeded before accepting the result
+    const succeeded=Object.keys(pm).length;
+    if(succeeded<4)throw new Error(`Only ${succeeded} tickers fetched — proxy likely down`);
+
     const compute=rs=>rs.map(r=>{
       const nD=pm[r.num],dD=pm[r.den];if(!nD||!dD)return{...r,error:true};
       const series=align(nD,dD);if(series.length<SMA_S+5)return{...r,error:true};
@@ -801,20 +893,31 @@ async function loadLiveData(){
       return{...r,error:false,curr,s20,s50,prev5,vals,cl:classify(curr,s20,s50,r.inv)};
     });
     const cD=compute(CORE_R),tD=compute(THEME_R),aD=[...cD,...tD];
-    // Fix: warn if CPER master gauge silently missing from score
-    if(aD.find(r=>r.key==='CPER/GLD'&&r.error)) console.warn('⚠️ CPER/GLD unavailable — copper master gauge excluded from regime score');
-    renderBanner(aD);
-    document.getElementById('liveMasters').innerHTML=cD.filter(r=>r.master).map(r=>buildCard(r,false)).join('');
-    document.getElementById('liveThemes').innerHTML=tD.map(r=>buildCard(r,true)).join('');
-    renderSplitGrid(aD,'livePulseGrid');
-    // Update fold label count
-    const validN=aD.filter(r=>!r.error).length;
-    const el=document.getElementById('ratioCardsCount');
-    if(el) el.textContent=`(${validN} ratios)`;
+    if(aD.find(r=>r.key==='CPER/GLD'&&r.error))console.warn('⚠️ CPER/GLD unavailable');
+
+    renderAll(aD);
+    saveCache(aD);
+    hideStaleBanner();
     dot.className='live-dot on';stxt.textContent='live · '+new Date().toLocaleTimeString();
   }catch(e){
-    console.error(e);document.getElementById('livePulseGrid').innerHTML=`<div class="live-error-msg">Failed to load. ${e.message||''}</div>`;
-    dot.className='live-dot err';stxt.textContent='error';
+    console.error('Live fetch failed:',e.message);
+    const fallback=loadCache();
+    if(fallback&&fallback.data.length){
+      // Already rendered above if we had cache; just update the status
+      renderAll(fallback.data);
+      showStaleBanner(fallback.ageMin);
+      dot.className='live-dot amber';
+      stxt.textContent='cached · '+new Date(Date.now()-fallback.ageMin*60000).toLocaleTimeString();
+    } else {
+      document.getElementById('liveRegimeBanner').innerHTML=
+        `<div style="border:1px solid rgba(255,92,97,.3);border-radius:8px;background:var(--bg-card);padding:20px 24px;font-family:var(--mono);font-size:12px;color:var(--text-dim)">
+          <div style="color:var(--red);font-size:14px;font-weight:700;margin-bottom:8px">⚠ Live data unavailable</div>
+          All 6 data proxies failed — this is usually temporary. <b style="color:var(--text)">Try refreshing in 30–60 seconds.</b><br>
+          <span style="opacity:.6;font-size:11px">Error: ${e.message||'network timeout'}</span>
+        </div>`;
+      document.getElementById('livePulseGrid').innerHTML='';
+      dot.className='live-dot err';stxt.textContent='offline';
+    }
   }
   loading=false;if(btn){btn.disabled=false;btn.classList.remove('loading');}
 }
@@ -1032,9 +1135,6 @@ function filterHoldings(){renderHoldings(document.getElementById('hSearch').valu
 
 // Initial render
 renderHoldings();
-
-loadLiveData();
-setInterval(loadLiveData,5*60*1000);
 </script>
 </body>
 </html>
