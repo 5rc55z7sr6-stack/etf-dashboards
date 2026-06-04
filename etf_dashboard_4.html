@@ -711,6 +711,7 @@ const sectors=[
   {t:'SKYY',c:'theme',n:'First Trust Cloud Computing ETF',cat:'Cloud / SaaS',tr:'Amazon, Microsoft, Alphabet, Salesforce, Oracle, Snowflake, Cloudflare, Datadog',aum:'~$4B',why:'AI monetisation phase: hyperscalers + SaaS are where AI revenue shows up. SKYY vs SMH shows hardware vs. software cycle'},
   {t:'FINX',c:'theme',n:'Global X FinTech ETF',cat:'Fintech',tr:'Visa, Mastercard, PayPal, Block, Intuit, Fiserv, Adyen, Affirm, Coinbase, SoFi',aum:'~$1B',why:'Payments + digital banking + crypto-adjacent. Outperforms in risk-on cycles; highly rate-sensitive'},
   {t:'REMX',c:'theme',n:'VanEck Rare Earth/Strategic Metals ETF',cat:'Critical Minerals',tr:'MP Materials, Lynas, Pilbara Minerals, Albemarle, Ganfeng Lithium, Energy Fuels',aum:'~$0.8B',why:'Critical minerals for AI chips, EVs, defense — choke-point supply chain. China controls ~85% of rare earth processing'},
+  {t:'TUR',c:'global',n:'iShares MSCI Turkey ETF',cat:'Global Sector',tr:'MSCI Turkey Index — top 25–30 Turkish large/mid-cap stocks',aum:'~$0.4B',why:'Turkey: high-beta EM play on domestic growth + inflation regime. Banks, consumer staples, industrials. Tracks lira/USD closely — weak lira = headwind for USD investors.'},
 ];
 const sb=document.getElementById('sectorBody');
 function tkC(c){return c==='global'?'glob':c==='macro'?'asset':c==='theme'?'theme':''}
@@ -764,7 +765,7 @@ const ratios=[
 ];
 const lC={equity:'var(--amber)',credit:'var(--green)',macro:'var(--cyan)',breadth:'var(--violet)'};
 const lN={equity:'Equity',credit:'Credit',macro:'Macro',breadth:'Breadth'};
-document.getElementById('ratioGrid').innerHTML=ratios.map(r=>`<div class="rcard" data-l="${r.l}">
+document.getElementById('ratioGrid').innerHTML=ratios.map(r=>`<div class="rcard" data-l="${r.l}" data-ratio="${r.f[0]}/${r.f[1]}" style="cursor:pointer" title="Click for plain-English explanation">
   <span class="tag lens-tag" style="border-color:${lC[r.l]};color:${lC[r.l]}">${lN[r.l]}</span>
   <div class="rtop"><div class="formula">${r.f[0]} <span class="op">/</span> ${r.f[1]}</div></div>
   <div class="rtitle">${r.title}</div><div class="measure">${r.m}</div>
@@ -773,6 +774,7 @@ document.getElementById('ratioGrid').innerHTML=ratios.map(r=>`<div class="rcard"
     <div class="sig dn"><div class="h">▼ Falling</div><div class="t">${r.dn}</div></div>
   </div>
   <div class="pos"><b>How to position</b>${r.pos}</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--text-faint);letter-spacing:.5px">↗ click for beginner explanation</div>
 </div>`).join('');
 document.querySelectorAll('#ratioFilters .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{document.querySelectorAll('#ratioFilters .chip').forEach(c=>c.classList.remove('active'));ch.classList.add('active');const l=ch.dataset.l;document.querySelectorAll('#ratioGrid .rcard').forEach(c=>c.classList.toggle('hidden',!(l==='all'||c.dataset.l===l)));});
@@ -1421,6 +1423,9 @@ const HOLDINGS=[
   {t:'FINX',n:'Global X FinTech ETF',cat:'Fintech',group:'Trending Themes',
    h:[['V','Visa',9.4],['MA','Mastercard',8.8],['PYPL','PayPal',7.6],['SQ','Block (Square)',6.3],['INTU','Intuit',5.8],['FI','Fiserv',5.4],['ADYEN','Adyen (AMS)',4.3],['AFRM','Affirm',4.1],['COIN','Coinbase',3.8],['SOFI','SoFi Technologies',3.6]],
    note:'Payments + digital banking + crypto-adjacent. Highly rate-sensitive — outperforms in rate-cut cycles. Visa/Mastercard provide stability; Affirm/SoFi provide beta.'},
+  {t:'TUR',n:'iShares MSCI Turkey ETF',cat:'Global Sector',group:'Global Sectors',
+   h:[['AKBNK','Akbank',9.1],['GARAN','Garanti BBVA',8.8],['THYAO','Turkish Airlines',7.4],['EREGL','Ereğli Demir Çelik',6.2],['KCHOL','Koç Holding',5.9],['SAHOL','Sabancı Holding',5.3],['BIMAS','BİM Birleşik Mağazalar',4.8],['TCELL','Turkcell',4.1],['ASELS','Aselsan',3.6],['SISE','Şişe Cam',3.2]],
+   note:'Heavy weight in banks (~35%) and industrials. USD investors face lira/USD currency risk — Turkish lira weakness directly reduces USD returns. High-beta EM play; tracks inflation and CBRT policy closely.'},
   {t:'REMX',n:'VanEck Rare Earth/Strategic Metals ETF',cat:'Critical Minerals',group:'Trending Themes',
    h:[['MP','MP Materials',9.8],['LYC','Lynas Rare Earths',8.4],['PLS','Pilbara Minerals',7.2],['ALB','Albemarle',6.8],['1772.HK','Ganfeng Lithium',5.9],['LTHM','Livent Corp',5.3],['NMG','Nouveau Monde',4.2],['NEO','neo Performance Materials',3.8],['UUUU','Energy Fuels',3.6],['CC','Chemours',3.2]],
    note:'Rare earths + lithium for AI chips, EVs, defense. China controls ~85% of processing — geopolitical choke point. Defense demand + EV demand = structural tailwind.'},
@@ -1481,11 +1486,20 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeHolding
 
 // Click delegation for Best Performers cards and ETF universe table rows
 document.addEventListener('click',function(e){
-  // Best performers bp-card
+  // Section 02 ratio cards
+  const rcard=e.target.closest('.rcard[data-ratio]');
+  if(rcard){
+    const key=rcard.dataset.ratio;
+    const titleEl=rcard.querySelector('.rtitle');
+    openSignalPopup(key, titleEl?titleEl.textContent.trim():'', 'bull');
+    return;
+  }
+  // Best performers bp-card — open signal explain popup
   const bpCard=e.target.closest('.bp-card');
   if(bpCard){
     const tk=bpCard.querySelector('.bp-ticker');
-    if(tk)openHoldingsPopup(tk.textContent.trim());
+    const name=bpCard.querySelector('.bp-name');
+    if(tk) openHoldingsPopup(tk.textContent.trim());
     return;
   }
   // ETF universe table rows
