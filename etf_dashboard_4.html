@@ -208,6 +208,39 @@
   .bd-light.green{background:#3fd17e;box-shadow:0 0 6px rgba(63,209,126,.5)}.bd-light.red{background:#ff5c61;box-shadow:0 0 6px rgba(255,92,97,.5)}.bd-light.gold{background:#e8c14a;box-shadow:0 0 6px rgba(232,193,74,.5)}
   .bd-pair{font-family:var(--mono);font-size:12px;font-weight:700;min-width:82px}.bd-label{font-size:11px;color:var(--text-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bd-pct{font-family:var(--mono);font-size:11px;font-weight:700;min-width:52px;text-align:right}
   .live-note{margin-top:14px;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);line-height:1.7;border-left:2px solid var(--line-bright);padding-left:12px}
+  /* ---- HOLDINGS ACCORDION ---- */
+  .hgroup{margin-bottom:22px}
+  .hgroup-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;padding-left:2px;display:flex;align-items:center;gap:10px}
+  .hgroup-title::after{content:'';flex:1;height:1px;background:var(--line)}
+  .haccard{border:1px solid var(--line);border-radius:6px;background:var(--bg-card);overflow:hidden;margin-bottom:6px;transition:border-color .2s}
+  .haccard:hover{border-color:var(--line-bright)}
+  .hac-trigger{display:flex;align-items:center;gap:14px;padding:13px 16px;cursor:pointer;user-select:none;width:100%}
+  .hac-trigger::-webkit-details-marker{display:none}
+  .hac-tk{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold);letter-spacing:.5px;min-width:54px}
+  .hac-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+  .hac-cat{font-family:var(--mono);font-size:9px;letter-spacing:.5px;padding:2px 7px;border-radius:2px;text-transform:uppercase;border:1px solid var(--line-bright);color:var(--text-faint);white-space:nowrap}
+  .hac-arrow{font-family:var(--mono);font-size:12px;color:var(--text-faint);transition:transform .2s;margin-left:auto;padding-left:8px}
+  details[open] .hac-arrow{transform:rotate(90deg)}
+  details[open] .haccard{border-color:var(--gold)}
+  .hac-body{padding:0 16px 14px}
+  .holdings-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .holdings-table th{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--bg-elev)}
+  .holdings-table th:last-child{text-align:right}
+  .holdings-table td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--text-dim)}
+  .holdings-table tr:last-child td{border-bottom:none}
+  .holdings-table tr:hover td{background:rgba(232,193,74,.035)}
+  .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);min-width:22px}
+  .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;min-width:62px}
+  .h-co{color:var(--text)}
+  .h-wt{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);text-align:right;white-space:nowrap}
+  .h-wt-bar{display:inline-block;width:48px;height:4px;background:var(--line);border-radius:2px;vertical-align:middle;margin-left:8px;position:relative;overflow:hidden}
+  .h-wt-fill{position:absolute;left:0;top:0;height:100%;background:var(--gold);border-radius:2px}
+  .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
+  .holdings-search-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .h-search{font-family:var(--mono);font-size:12px;background:var(--bg-card);border:1px solid var(--line-bright);color:var(--text);padding:7px 12px;border-radius:3px;width:220px;outline:none}
+  .h-search:focus{border-color:var(--gold)}.h-search::placeholder{color:var(--text-faint)}
+  .h-filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+
   @media(max-width:980px){.masters,.master-live-row{grid-template-columns:repeat(2,1fr)}.theme-live-row{grid-template-columns:1fr}.regimes,.play{grid-template-columns:1fr}.caveats{grid-template-columns:1fr}.regime-banner{grid-template-columns:1fr}.rb-right{align-items:flex-start}}
   @media(max-width:560px){.wrap{padding:0 14px}.head-inner{padding:12px 14px}.masters,.master-live-row,.pulse-grid{grid-template-columns:1fr}.signals{grid-template-columns:1fr}}
 </style>
@@ -233,6 +266,7 @@
     <button class="tab" data-go="regime">Regimes</button>
     <button class="tab" data-go="playbook">Playbook</button>
     <button class="tab" data-go="caveats">Caveats</button>
+    <button class="tab" data-go="holdings">Holdings</button>
   </div>
 </nav>
 
@@ -417,6 +451,22 @@
     </div>
   </section>
 
+  <!-- HOLDINGS -->
+  <section id="holdings" style="border-bottom:none">
+    <div class="sec-head">
+      <div>
+        <div class="num">SECTION 06 / ETF HOLDINGS</div>
+        <h3>Top 10 stocks inside each ETF</h3>
+        <p>Click any ETF to expand its top 10 holdings with approximate weight. Data is approximate (mid-2026 fact sheets). Always verify on issuer website before trading.</p>
+      </div>
+    </div>
+    <div class="holdings-search-row">
+      <input class="h-search" id="hSearch" placeholder="search ETF ticker or name…" oninput="filterHoldings()">
+      <div class="h-filter-chips" id="hChips"></div>
+    </div>
+    <div id="holdingsContainer"></div>
+  </section>
+
   <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
 </div>
 
@@ -529,7 +579,7 @@ document.querySelectorAll('#ratioFilters .chip').forEach(ch=>{
 const tabs=document.querySelectorAll('.tab');
 tabs.forEach(t=>t.addEventListener('click',()=>document.getElementById(t.dataset.go).scrollIntoView({behavior:'smooth',block:'start'})));
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)tabs.forEach(t=>t.classList.toggle('active',t.dataset.go===e.target.id));});},{rootMargin:'-45% 0px -50% 0px'});
-['hero','live','sectors','ratios','regime','playbook','caveats'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
+['hero','live','sectors','ratios','regime','playbook','caveats','holdings'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
 const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target);}});},{threshold:0.07});
 document.querySelectorAll('section,.master,.rcard,.reg,.step').forEach(el=>{el.classList.add('reveal');ro.observe(el);});
 
@@ -563,7 +613,7 @@ const SIG_LABEL={'strong-bull':'▲▲ STRONG BULL','bull':'▲ BULLISH','bear':
 
 async function ftch(url,ms=9000){const c=new AbortController();const id=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{signal:c.signal,cache:'no-store'});clearTimeout(id);return r;}catch(e){clearTimeout(id);throw e;}}
 async function yfetch(ticker){
-  const base=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=90d`;
+  const base=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=150d`; // 150d ensures full 50-bar SMA
   const proxies=[{u:`https://corsproxy.io/?url=${encodeURIComponent(base)}`,p:r=>r},{u:`https://api.allorigins.win/get?url=${encodeURIComponent(base)}`,p:r=>JSON.parse(r.contents)},{u:base,p:r=>r}];
   for(const px of proxies){try{const resp=await ftch(px.u);if(!resp.ok)continue;const raw=await resp.json();const json=px.p(raw);const res=json?.chart?.result?.[0];if(!res)continue;const cl=res.indicators.quote[0].close,ts=res.timestamp;const data=cl.map((c,i)=>({d:new Date(ts[i]*1000).toISOString().slice(0,10),c})).filter(x=>x.c!=null&&isFinite(x.c));if(data.length<15)continue;return data;}catch(e){}}
   return null;
@@ -585,7 +635,10 @@ function buildCard(r,isThemeBig){
   if(r.error)return `<div class="pulse-card${isThemeBig?' theme-card':''}"><div class="pc-header"><div class="signal-light dim"></div><div class="pc-pair">${r.key}</div></div><div class="pc-label">${r.label}</div><div style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px">Data unavailable</div></div>`;
   const{sig,bullish,above20}=r.cl;
   const col=sig==='strong-bull'?'#3fd17e':sig==='strong-bear'?'#ff5c61':bullish?'#7aaa90':'#9e7070';
-  const pct=((r.curr-r.s20)/r.s20*100);const fmt=v=>v>=100?v.toFixed(2):v>=10?v.toFixed(3):v.toFixed(4);
+  // Fix: invert pct sign for GLD/SPY so displayed % matches the bullish/bearish verdict
+  const rawPct=((r.curr-r.s20)/r.s20*100);
+  const pct=r.inv?-rawPct:rawPct;
+  const fmt=v=>v>=100?v.toFixed(2):v>=10?v.toFixed(3):v.toFixed(4);
   const arr=r.curr>r.prev5?'↗':'↘';
   const tExtra=r.themeDesc?`<div style="font-family:var(--mono);font-size:9.5px;color:${col};margin-top:-4px;line-height:1.5;border-left:2px solid ${col};padding-left:8px">${r.themeDesc}</div>`:'';
   return `<div class="pulse-card ${sig}${isThemeBig?' theme-card':''}">
@@ -674,6 +727,8 @@ async function loadLiveData(){
       return{...r,error:false,curr,s20,s50,prev5,vals,cl:classify(curr,s20,s50,r.inv)};
     });
     const cD=compute(CORE_R),tD=compute(THEME_R),aD=[...cD,...tD];
+    // Fix: warn if CPER master gauge silently missing from score
+    if(aD.find(r=>r.key==='CPER/GLD'&&r.error)) console.warn('⚠️ CPER/GLD unavailable — copper master gauge excluded from regime score');
     renderBanner(aD);
     document.getElementById('liveMasters').innerHTML=cD.filter(r=>r.master).map(r=>buildCard(r,false)).join('');
     document.getElementById('liveThemes').innerHTML=tD.map(r=>buildCard(r,true)).join('');
@@ -685,6 +740,221 @@ async function loadLiveData(){
   }
   loading=false;if(btn){btn.disabled=false;btn.classList.remove('loading');}
 }
+loadLiveData();
+setInterval(loadLiveData,5*60*1000);
+
+/* ================================================================
+   HOLDINGS DATA & ACCORDION
+   Weights are approximate (mid-2026). Verify on issuer fact sheets.
+================================================================ */
+const HOLDINGS=[
+  // ---- US SECTORS ----
+  {t:'XLK',n:'Technology Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['AAPL','Apple',22.1],['NVDA','NVIDIA',21.4],['MSFT','Microsoft',20.8],['AVGO','Broadcom',4.9],['META','Meta',3.3],['AMD','AMD',2.1],['CRM','Salesforce',1.9],['ADBE','Adobe',1.8],['AMAT','Applied Materials',1.5],['QCOM','Qualcomm',1.4]],
+   note:'Heavily concentrated — top 3 names are ~64% of the fund.'},
+  {t:'XLF',n:'Financial Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['BRK.B','Berkshire Hathaway',13.9],['JPM','JPMorgan Chase',11.5],['V','Visa',8.5],['MA','Mastercard',7.2],['BAC','Bank of America',3.9],['WFC','Wells Fargo',3.6],['GS','Goldman Sachs',3.2],['MS','Morgan Stanley',2.9],['BLK','BlackRock',2.5],['SPGI','S&P Global',2.2]],
+   note:'Rate-sensitive; JPM + Berkshire dominate. Watch 10Y yield for direction.'},
+  {t:'XLE',n:'Energy Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['XOM','Exxon Mobil',22.3],['CVX','Chevron',17.1],['COP','ConocoPhillips',8.2],['EOG','EOG Resources',5.1],['SLB','Schlumberger',5.0],['MPC','Marathon Petroleum',4.2],['VLO','Valero Energy',3.7],['PSX','Phillips 66',3.3],['OXY','Occidental Petroleum',3.1],['PXD','Pioneer Natural Res.',2.9]],
+   note:'Crude oil price is the primary driver — track WTI/Brent alongside XLE.'},
+  {t:'XLV',n:'Health Care Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['UNH','UnitedHealth Group',10.2],['LLY','Eli Lilly',9.5],['JNJ','Johnson & Johnson',7.1],['ABBV','AbbVie',6.3],['MRK','Merck',5.6],['PFE','Pfizer',4.6],['TMO','Thermo Fisher',4.1],['DHR','Danaher',3.6],['ABT','Abbott Labs',3.3],['ISRG','Intuitive Surgical',3.1]],
+   note:'Defensive-growth mix. LLY weight surged on GLP-1 drug demand.'},
+  {t:'XLI',n:'Industrial Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['GEV','GE Aerospace',5.2],['RTX','RTX Corp',4.6],['CAT','Caterpillar',4.5],['HON','Honeywell',4.1],['DE','Deere & Company',3.6],['LMT','Lockheed Martin',3.1],['PH','Parker Hannifin',2.9],['NOC','Northrop Grumman',2.6],['ETN','Eaton',2.6],['UNP','Union Pacific',2.4]],
+   note:'Cyclical sector — sensitive to PMI, capex cycles, and defense budgets.'},
+  {t:'XLC',n:'Communication Services Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['META','Meta Platforms',23.1],['GOOGL','Alphabet A',15.4],['GOOG','Alphabet C',13.2],['NFLX','Netflix',5.3],['TMUS','T-Mobile US',4.2],['CMCSA','Comcast',4.0],['DIS','Walt Disney',3.2],['T','AT&T',2.6],['CHTR','Charter Comm.',2.1],['EA','Electronic Arts',1.9]],
+   note:'Meta + Alphabet = ~52%. Effectively a mega-cap tech/social proxy.'},
+  {t:'XLU',n:'Utilities Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['NEE','NextEra Energy',14.8],['SO','Southern Company',7.2],['DUK','Duke Energy',6.6],['SRE','Sempra',5.1],['D','Dominion Energy',4.6],['AEP','Am. Electric Power',4.1],['EXC','Exelon',4.0],['ED','Consolidated Edison',3.1],['XEL','Xcel Energy',3.0],['WEC','WEC Energy',2.6]],
+   note:'Bond proxy — rises when rates fall. Watch 10Y Treasury yield inversely.'},
+  {t:'XLY',n:'Consumer Discretionary Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['AMZN','Amazon',24.2],['TSLA','Tesla',15.8],['HD','Home Depot',9.1],['MCD',"McDonald's",4.6],['LOW',"Lowe's",4.1],['TJX','TJX Companies',3.6],['BKNG','Booking Holdings',3.1],['NKE','Nike',2.6],['SBUX','Starbucks',2.1],['TGT','Target',1.9]],
+   note:'Amazon + Tesla = ~40%. The purest "risk-on consumer" gauge vs. XLP.'},
+  {t:'XLP',n:'Consumer Staples Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['PG','Procter & Gamble',14.9],['COST','Costco',12.3],['WMT','Walmart',10.1],['KO','Coca-Cola',9.2],['PEP','PepsiCo',8.1],['PM','Philip Morris',4.2],['MDLZ','Mondelez',3.6],['CL','Colgate-Palmolive',3.1],['EL','Estée Lauder',2.6],['GIS','General Mills',2.1]],
+   note:'Defensive leg of the XLY/XLP ratio. Outperforms in recessions and risk-off.'},
+  {t:'XLRE',n:'Real Estate Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['PLD','Prologis',10.3],['AMT','American Tower',8.4],['EQIX','Equinix',8.1],['SPG','Simon Property',5.2],['CCI','Crown Castle',5.0],['SBAC','SBA Comms.',4.3],['DLR','Digital Realty',4.1],['PSA','Public Storage',3.6],['O','Realty Income',3.2],['WELL','Welltower',3.1]],
+   note:'Rate-sensitive. Digital infrastructure (towers, data centers) now ~40% of fund.'},
+  {t:'XLB',n:'Materials Select Sector SPDR',cat:'US Sector',group:'US Sectors',
+   h:[['LIN','Linde',18.2],['SHW','Sherwin-Williams',5.4],['APD','Air Products',5.1],['ECL','Ecolab',4.6],['NUE','Nucor',4.1],['FCX','Freeport-McMoRan',4.0],['BALL','Ball Corp',3.6],['LYB','LyondellBasell',3.1],['CF','CF Industries',2.6],['IFF','Intl. Flavors',2.5]],
+   note:'Cyclical. Copper/commodities price is the leading macro driver for XLB.'},
+
+  // ---- GLOBAL SECTORS ----
+  {t:'IXN',n:'iShares Global Tech ETF',cat:'Global Sector',group:'Global Sectors',
+   h:[['NVDA','NVIDIA',15.1],['AAPL','Apple',12.4],['MSFT','Microsoft',11.2],['TSM','TSMC',6.3],['005930','Samsung',3.2],['ASML','ASML',3.1],['AVGO','Broadcom',3.0],['META','Meta',2.9],['GOOGL','Alphabet',2.6],['SAP','SAP SE',2.1]],
+   note:'~60% US-based. Adds TSMC, ASML, Samsung vs. US-only XLK.'},
+  {t:'IXJ',n:'iShares Global Healthcare ETF',cat:'Global Sector',group:'Global Sectors',
+   h:[['UNH','UnitedHealth',6.3],['LLY','Eli Lilly',6.1],['JNJ','Johnson & Johnson',5.2],['NVS','Novartis',4.4],['AZN','AstraZeneca',4.3],['ROG','Roche',4.1],['ABBV','AbbVie',3.6],['MRK','Merck',3.5],['PFE','Pfizer',3.2],['SAN','Sanofi',2.6]],
+   note:'Adds European pharma (Novartis, Roche, AZ) vs. US-only XLV.'},
+  {t:'IXC',n:'iShares Global Energy ETF',cat:'Global Sector',group:'Global Sectors',
+   h:[['XOM','Exxon Mobil',16.1],['CVX','Chevron',13.2],['SHEL','Shell',9.3],['BP','BP',5.2],['TTE','TotalEnergies',5.1],['COP','ConocoPhillips',5.0],['EOG','EOG Resources',4.1],['EQNR','Equinor',3.2],['2222.SR','Saudi Aramco',2.6],['883.HK','CNOOC',2.1]],
+   note:'European and Middle Eastern majors differentiate this from XLE.'},
+
+  // ---- MACRO / ASSET CLASS ----
+  {t:'SPY',n:'SPDR S&P 500 ETF Trust',cat:'Macro',group:'Macro / Asset Class',
+   h:[['AAPL','Apple',7.1],['NVDA','NVIDIA',6.9],['MSFT','Microsoft',6.6],['AMZN','Amazon',3.9],['META','Meta Platforms',2.8],['GOOGL','Alphabet A',2.4],['BRK.B','Berkshire Hathaway',1.9],['GOOG','Alphabet C',1.8],['TSLA','Tesla',1.7],['AVGO','Broadcom',1.6]],
+   note:'The benchmark. Top 10 = ~37% of the fund. Rest = 490 stocks at tiny weights.'},
+  {t:'QQQ',n:'Invesco QQQ Trust (Nasdaq-100)',cat:'Macro',group:'Macro / Asset Class',
+   h:[['AAPL','Apple',10.3],['NVDA','NVIDIA',8.4],['MSFT','Microsoft',8.2],['AMZN','Amazon',5.1],['META','Meta',4.3],['AVGO','Broadcom',3.6],['TSLA','Tesla',2.9],['GOOGL','Alphabet A',2.6],['COST','Costco',2.3],['GOOG','Alphabet C',2.2]],
+   note:'No financials vs. SPY. Top-heavy tech/growth index — highest beta of the big 3.'},
+  {t:'SMH',n:'VanEck Semiconductor ETF',cat:'Macro',group:'Macro / Asset Class',
+   h:[['NVDA','NVIDIA',20.8],['TSM','TSMC',14.1],['AVGO','Broadcom',8.3],['ASML','ASML',5.2],['TXN','Texas Instruments',4.4],['AMAT','Applied Materials',4.2],['LRCX','Lam Research',4.0],['KLAC','KLA Corp',3.2],['MRVL','Marvell Technology',3.1],['QCOM','Qualcomm',2.6]],
+   note:'NVDA alone is ~21%. The canary for AI capex demand — moves first.'},
+  {t:'IWM',n:'iShares Russell 2000 ETF',cat:'Macro',group:'Macro / Asset Class',
+   h:[['SMCI','Super Micro Computer',0.5],['AXON','Axon Enterprise',0.5],['MSTR','MicroStrategy',0.4],['SAIA','Saia Inc.',0.4],['CELH','Celsius Holdings',0.4],['SPSC','SPS Commerce',0.4],['RMBS','Rambus',0.3],['VRRM','Verra Mobility',0.3],['HWC','Hancock Whitney',0.3],['IDCC','InterDigital',0.3]],
+   note:'~2,000 holdings — no single name >0.5%. Breadth & risk-appetite gauge, not a concentration bet.'},
+  {t:'TLT',n:'iShares 20+ Year Treasury Bond ETF',cat:'Macro',group:'Macro / Asset Class',
+   h:[['US 30Y','US Treasury 30Y Bond (4.25% 2054)',12.3],['US 30Y','US Treasury 30Y Bond (4.75% 2053)',10.2],['US 30Y','US Treasury 30Y Bond (3.875% 2043)',9.4],['US 30Y','US Treasury 30Y Bond (4.50% 2039)',8.6],['US 20Y','US Treasury 20Y Bond (3.5% 2042)',7.8],['US 30Y','US Treasury 30Y Bond (3.625% 2053)',7.1],['US 30Y','US Treasury 30Y Bond (4.00% 2052)',6.8],['US 20Y','US Treasury 20Y Bond (4.0% 2043)',6.3],['US 30Y','US Treasury 30Y Bond (4.125% 2054)',5.9],['US 30Y','US Treasury 30Y Bond (3.00% 2048)',5.2]],
+   note:'Pure US government duration. Moves inversely to 20-30Y yields. The "flight to safety" vehicle.'},
+  {t:'GLD',n:'SPDR Gold Shares',cat:'Macro',group:'Macro / Asset Class',
+   h:[['GOLD','Physical Gold Bullion (LBMA)',100.0],['—','Held in HSBC Bank vault (London)','—'],['—','No equity exposure','—'],['—','Tracks spot gold price minus fee','—'],['—','0.40% annual expense ratio','—'],['—','~$155B AUM (3/31/2026)','—'],['—','~900 tonnes gold held','—'],['—','Created/redeemed in 100,000-share blocks','—'],['—','Most liquid gold vehicle','—'],['—','No leverage, no counterparty risk','—']],
+   note:'100% physical gold. AUM fluctuates with gold price. The safe-haven "anti-equity" allocation.'},
+  {t:'IBIT',n:'iShares Bitcoin Trust',cat:'Macro',group:'Macro / Asset Class',
+   h:[['BTC','Bitcoin (spot)',100.0],['—','Custodian: Coinbase Custody','—'],['—','Tracks spot BTC price minus 0.25% fee','—'],['—','~$65–70B AUM (mid-2026)','—'],['—','Most liquid spot BTC ETF','—'],['—','No leverage, no altcoin exposure','—'],['—','Created/redeemed via Authorized Participants','—'],['—','Trades on Nasdaq','—'],['—','Highly volatile — track HYG/LQD for risk context','—'],['—','Correlates with Nasdaq in risk-off events','—']],
+   note:'100% Bitcoin. Speculative asset — correlates with risk-on/off cycle and liquidity.'},
+  {t:'EEM',n:'iShares MSCI Emerging Markets ETF',cat:'Macro',group:'Macro / Asset Class',
+   h:[['TSM','TSMC (Taiwan)',4.3],['005930','Samsung Electronics (Korea)',4.1],['BABA','Alibaba Group (China)',3.2],['0700','Tencent Holdings (China)',3.1],['RELIANCE','Reliance Industries (India)',2.1],['000660','SK Hynix (Korea)',1.6],['ICICIBANK','ICICI Bank (India)',1.5],['INFY','Infosys (India)',1.4],['3690','Meituan (China)',1.4],['2318','Ping An Insurance (China)',1.2]],
+   note:'China ~25%, India ~20%, Taiwan ~17%, Korea ~12%. Weak USD is typically the tailwind.'},
+  {t:'EFA',n:'iShares MSCI EAFE ETF',cat:'Macro',group:'Macro / Asset Class',
+   h:[['NESN','Nestlé (Switzerland)',2.1],['ASML','ASML (Netherlands)',2.0],['MC','LVMH (France)',1.9],['SAP','SAP SE (Germany)',1.8],['SHEL','Shell (UK)',1.6],['NOVO B','Novo Nordisk (Denmark)',1.5],['NVS','Novartis (Switzerland)',1.5],['ROG','Roche (Switzerland)',1.4],['SIE','Siemens (Germany)',1.3],['005930','Samsung (Korea)',1.3]],
+   note:'21 developed markets ex-US/Canada. Japan ~22%, UK ~14%, France ~11%, Switzerland ~10%.'},
+
+  // ---- THEMES ----
+  {t:'ITA',n:'iShares U.S. Aerospace & Defense ETF',cat:'Theme — Defense',group:'Trending Themes',
+   h:[['RTX','RTX Corp',17.1],['LHX','L3Harris Technologies',8.3],['NOC','Northrop Grumman',7.4],['LMT','Lockheed Martin',7.2],['GEV','GE Aerospace',6.1],['BA','Boeing',5.3],['TDG','TransDigm Group',5.1],['HWM','Howmet Aerospace',4.2],['HEI','HEICO Corp',4.1],['TXT','Textron',3.6]],
+   note:'Most liquid defense ETF. Geopolitical premium — can rise even in broad risk-off.'},
+  {t:'XAR',n:'SPDR S&P Aerospace & Defense ETF',cat:'Theme — Defense',group:'Trending Themes',
+   h:[['RTX','RTX Corp',3.2],['LHX','L3Harris',3.1],['NOC','Northrop Grumman',3.0],['LMT','Lockheed Martin',3.0],['BA','Boeing',3.0],['SPR','Spirit AeroSystems',3.0],['MRCY','Mercury Systems',2.9],['CW','Curtiss-Wright',2.8],['FLIR','Teledyne FLIR',2.8],['DCO','Ducommun',2.7]],
+   note:'Equal-weight — more mid/small-cap upside (and more volatility) than ITA.'},
+  {t:'SHLD',n:'Global X Defense Tech ETF',cat:'Theme — Defense',group:'Trending Themes',
+   h:[['PLTR','Palantir',9.8],['RTX','RTX Corp',8.1],['LHX','L3Harris',7.3],['BA','BAE Systems',6.4],['RHM','Rheinmetall',5.9],['NOC','Northrop Grumman',5.2],['LDOS','Leidos Holdings',5.0],['LDO','Leonardo SpA',4.1],['SAAB B','Saab',4.0],['009830','Hanwha',3.2]],
+   note:'Adds European defense (Rheinmetall, BAE, Leonardo) + Palantir AI exposure.'},
+  {t:'NASA',n:'Tema Space Innovators ETF',cat:'Theme — Space',group:'Trending Themes',
+   h:[['RKLB','Rocket Lab',8.2],['MAXR','Maxar Technologies',7.6],['PL','Planet Labs',6.4],['IRDM','Iridium Comms.',5.3],['VSAT','Viasat',5.1],['ASTS','AST SpaceMobile',4.6],['KTOS','Kratos Defense',4.3],['GSAT','Globalstar',3.8],['EB','Eventbrite',3.2],['SPCE','Virgin Galactic',3.1]],
+   note:'Only ETF with SpaceX exposure (via private share trust). Highly volatile — small names.'},
+  {t:'UFO',n:'Procure Space ETF',cat:'Theme — Space',group:'Trending Themes',
+   h:[['RKLB','Rocket Lab',11.3],['PL','Planet Labs',9.1],['ASTS','AST SpaceMobile',8.4],['SPIR','Spire Global',6.2],['IRDM','Iridium Comms.',5.4],['VSAT','Viasat',4.8],['MAXR','Maxar Technologies',4.3],['BSFC','Blue Safari',3.2],['AIR','Airbus SE',3.1],['LHX','L3Harris',2.9]],
+   note:'Purest commercial-space play — revenue-weighted, highest-purity space ETF.'},
+  {t:'ARKX',n:'ARK Space Exploration & Innovation ETF',cat:'Theme — Space',group:'Trending Themes',
+   h:[['RKLB','Rocket Lab',10.8],['LHX','L3Harris',8.2],['TRMB','Trimble',7.4],['KTOS','Kratos Defense',6.3],['JOBY','Joby Aviation',5.2],['MKF','Markforged',4.8],['PATH','UiPath',4.2],['PROTO','Proto Labs',4.1],['DE','Deere & Company',3.6],['SPIR','Spire Global',3.2]],
+   note:'Active ARK fund — broader tech stack, not pure-play space. Holdings change frequently.'},
+  {t:'QTUM',n:'Defiance Quantum ETF',cat:'Theme — Quantum',group:'Trending Themes',
+   h:[['IONQ','IonQ',5.3],['QBTS','D-Wave Quantum',5.1],['RGTI','Rigetti Computing',4.8],['IBM','IBM',4.4],['GOOGL','Alphabet',4.2],['HON','Honeywell',4.0],['MSFT','Microsoft',3.6],['LMT','Lockheed Martin',3.2],['NVDA','NVIDIA',3.1],['ARQQ','Arqit Quantum',2.9]],
+   note:'First and largest quantum ETF. Pure-play quantum names are tiny — IBM/GOOGL provide liquidity.'},
+  {t:'AIQ',n:'Global X AI & Technology ETF',cat:'Theme — AI',group:'Trending Themes',
+   h:[['NVDA','NVIDIA',6.4],['GOOGL','Alphabet',5.3],['META','Meta Platforms',5.1],['BIDU','Baidu',4.6],['MSFT','Microsoft',4.2],['005930','Samsung',3.6],['ACN','Accenture',3.2],['0700','Tencent',3.1],['NOW','ServiceNow',2.6],['PLTR','Palantir',2.5]],
+   note:'Broad AI — includes Chinese AI names (Baidu, Tencent). 84 holdings, well diversified.'},
+  {t:'CHAT',n:'Roundhill Generative AI & Technology ETF',cat:'Theme — AI',group:'Trending Themes',
+   h:[['NVDA','NVIDIA',8.1],['MSFT','Microsoft',7.4],['GOOGL','Alphabet',6.3],['META','Meta Platforms',6.1],['AMZN','Amazon',5.2],['CRM','Salesforce',3.6],['ORCL','Oracle',3.4],['PLTR','Palantir',3.2],['ADBE','Adobe',3.0],['SNOW','Snowflake',2.8]],
+   note:'Active fund. Revenue-purity screen for genAI — holdings subject to manager discretion.'},
+  {t:'BOTZ',n:'Global X Robotics & AI ETF',cat:'Theme — Robotics',group:'Trending Themes',
+   h:[['NVDA','NVIDIA',9.3],['ISRG','Intuitive Surgical',8.4],['6861','Keyence (Japan)',7.2],['6954','Fanuc (Japan)',6.1],['ABB','ABB Ltd',6.0],['AVAV','AeroVironment',5.3],['6273','SMC Corp (Japan)',4.2],['IRBT','iRobot',3.8],['ZBRA','Zebra Technologies',3.6],['CGNX','Cognex',3.2]],
+   note:'~30% Japanese robotics names (Fanuc, Keyence, SMC). Exposed to JPY/USD FX.'},
+  {t:'CIBR',n:'First Trust Nasdaq Cybersecurity ETF',cat:'Theme — Cyber',group:'Trending Themes',
+   h:[['CRWD','CrowdStrike',10.2],['CSCO','Cisco Systems',9.4],['AVGO','Broadcom',8.1],['PANW','Palo Alto Networks',7.8],['FTNT','Fortinet',5.4],['ZS','Zscaler',5.1],['OKTA','Okta',4.3],['S','SentinelOne',4.1],['GEN','Gen Digital',3.2],['TENB','Tenable',3.1]],
+   note:'Deepest liquidity of the cyber ETFs. CRWD + CSCO + Broadcom = ~28%.'},
+  {t:'URA',n:'Global X Uranium ETF',cat:'Theme — Nuclear',group:'Trending Themes',
+   h:[['CCJ','Cameco',23.4],['NXE','NexGen Energy',8.2],['PDN','Paladin Energy',7.4],['KAP','Kazatomprom',7.1],['URC','Uranium Royalty Corp',5.3],['DNN','Denison Mines',5.1],['EFR','Energy Fuels',4.2],['EU','enCore Energy',3.4],['UEC','Uranium Energy',3.2],['YCA','Yellow Cake plc',3.1]],
+   note:'Cameco alone = ~23%. Physical uranium exposure + miners. Driven by nuclear power demand thesis.'},
+  {t:'BLOK',n:'Amplify Transformational Data Sharing ETF',cat:'Theme — Blockchain',group:'Trending Themes',
+   h:[['RIOT','Riot Platforms',6.3],['MARA','Marathon Digital',6.1],['COIN','Coinbase',6.0],['GLXY','Galaxy Digital',5.2],['HUT','Hut 8 Mining',4.4],['CORZ','Core Scientific',4.1],['MSTR','MicroStrategy',3.8],['DGHI','Digihost Tech.',3.2],['BAKKT','Bakkt Holdings',3.1],['BTBT','Bit Digital',2.9]],
+   note:'Active fund. High correlation to BTC price — not the same as owning crypto directly.'},
+  {t:'ICLN',n:'iShares Global Clean Energy ETF',cat:'Theme — Clean Energy',group:'Trending Themes',
+   h:[['VWS','Vestas Wind Systems',6.2],['ED','Consolidated Edison',5.4],['NXT','Nextracker',5.1],['FSLR','First Solar',5.0],['ORSTED','Orsted',4.3],['ENPH','Enphase Energy',4.2],['SEDG','SolarEdge',4.1],['EDPR','EDP Renewables',3.3],['BEP','Brookfield Renewable',3.1],['NEE','NextEra Energy',3.0]],
+   note:'Global — ~35% European utilities. Sensitive to interest rates and government policy.'},
+  {t:'TAN',n:'Invesco Solar ETF',cat:'Theme — Clean Energy',group:'Trending Themes',
+   h:[['ENPH','Enphase Energy',12.4],['FSLR','First Solar',11.2],['SEDG','SolarEdge',10.1],['ARRY','Array Technologies',7.3],['SHLS','Shoals Technologies',6.2],['NXT','Nextracker',6.1],['RUN','Sunrun',5.3],['CSIQ','Canadian Solar',4.2],['DQ','Daqo New Energy',4.0],['SPWR','SunPower',3.2]],
+   note:'Pure-play solar — high beta, policy-sensitive. Top 3 = ~34%.'},
+  {t:'LIT',n:'Global X Lithium & Battery Tech ETF',cat:'Theme — Batteries/EV',group:'Trending Themes',
+   h:[['ALB','Albemarle',10.2],['SQM','SQM Chile',10.0],['LTHM','Livent Corp',8.1],['PLS','Pilbara Minerals',6.4],['1772','Ganfeng Lithium',6.2],['6752','Panasonic',5.3],['1211','BYD',5.1],['006400','Samsung SDI',4.3],['300750','CATL',4.2],['PLL','Piedmont Lithium',3.4]],
+   note:'Li price is the primary driver. Chinese battery names = ~20% of exposure.'},
+  {t:'ARKG',n:'ARK Genomic Revolution ETF',cat:'Theme — Genomics',group:'Trending Themes',
+   h:[['CRSP','CRISPR Therapeutics',12.3],['EXAS','Exact Sciences',9.2],['PACB','Pacific Biosciences',8.4],['PSNL','Personalis',7.1],['TWST','Twist Bioscience',6.3],['FATE','Fate Therapeutics',5.2],['CDNA','CareDx',5.1],['RGEN','Repligen',4.3],['VCYT','Veracyte',4.1],['NTLA','Intellia Therapeutics',4.0]],
+   note:'Active ARK fund. Highest-risk theme ETF — binary outcomes on clinical trials.'},
+  {t:'ARKK',n:'ARK Innovation ETF',cat:'Theme — Innovation',group:'Trending Themes',
+   h:[['TSLA','Tesla',12.4],['COIN','Coinbase',9.1],['ROKU','Roku',7.3],['PATH','UiPath',6.2],['ZM','Zoom Video',5.4],['SQ','Block (Square)',5.2],['PLTR','Palantir',5.1],['SPOT','Spotify',4.3],['DKNG','DraftKings',4.2],['SHOP','Shopify',4.1]],
+   note:'Active ARK flagship. The purest "speculative risk appetite" barometer — watch ARKK/SPY ratio.'},
+];
+
+// Group order for display
+const GROUP_ORDER=['US Sectors','Global Sectors','Macro / Asset Class','Trending Themes'];
+const GROUP_COLORS={'US Sectors':'var(--amber)','Global Sectors':'var(--cyan)','Macro / Asset Class':'var(--violet)','Trending Themes':'var(--gold)'};
+
+function holdingsBar(w,max){
+  const pct=Math.min(100,(w/max)*100).toFixed(1);
+  return `<span class="h-wt-bar"><span class="h-wt-fill" style="width:${pct}%"></span></span>`;
+}
+
+function renderHoldings(filter='', groupFilter=''){
+  const container=document.getElementById('holdingsContainer');
+  const q=filter.toLowerCase();
+  let html='';
+  GROUP_ORDER.forEach(grp=>{
+    if(groupFilter && groupFilter!==grp) return;
+    const etfs=HOLDINGS.filter(e=>e.group===grp && (!q||(e.t.toLowerCase().includes(q)||e.n.toLowerCase().includes(q)||e.cat.toLowerCase().includes(q))));
+    if(!etfs.length) return;
+    html+=`<div class="hgroup" data-group="${grp}">`;
+    html+=`<div class="hgroup-title" style="color:${GROUP_COLORS[grp]||'var(--text-faint)'}">${grp} <span style="font-weight:400;color:var(--text-faint)">(${etfs.length})</span></div>`;
+    etfs.forEach(e=>{
+      const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
+      const rows=e.h.map((r,i)=>{
+        const w=parseFloat(r[2]);
+        const wStr=!isNaN(w)?`${w.toFixed(1)}%`:(r[2]||'—');
+        const bar=!isNaN(w)?holdingsBar(w,maxW):'';
+        return `<tr>
+          <td class="h-rank">${i+1}</td>
+          <td class="h-tk">${r[0]}</td>
+          <td class="h-co">${r[1]}</td>
+          <td class="h-wt">${wStr}${bar}</td>
+        </tr>`;
+      }).join('');
+      html+=`<details class="haccard">
+        <summary class="hac-trigger">
+          <span class="hac-tk">${e.t}</span>
+          <span class="hac-name">${e.n}</span>
+          <span class="hac-cat">${e.cat}</span>
+          <span class="hac-arrow">▶</span>
+        </summary>
+        <div class="hac-body">
+          <table class="holdings-table">
+            <thead><tr><th>#</th><th>Ticker</th><th>Company / Security</th><th style="text-align:right">Weight</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          ${e.note?`<div class="hac-note">${e.note}</div>`:''}
+        </div>
+      </details>`;
+    });
+    html+='</div>';
+  });
+  container.innerHTML=html||`<div style="color:var(--text-faint);font-family:var(--mono);font-size:12px;padding:24px 0">No ETFs match your search.</div>`;
+}
+
+// Group filter chips
+let activeGroupFilter='';
+(function buildChips(){
+  const c=document.getElementById('hChips');
+  if(!c) return;
+  const all=document.createElement('button');
+  all.className='chip active';all.textContent='All';
+  all.onclick=()=>{activeGroupFilter='';document.querySelectorAll('#hChips .chip').forEach(x=>x.classList.remove('active'));all.classList.add('active');renderHoldings(document.getElementById('hSearch').value,activeGroupFilter);};
+  c.appendChild(all);
+  GROUP_ORDER.forEach(g=>{
+    const btn=document.createElement('button');
+    btn.className='chip';btn.textContent=g;
+    btn.onclick=()=>{activeGroupFilter=g;document.querySelectorAll('#hChips .chip').forEach(x=>x.classList.remove('active'));btn.classList.add('active');renderHoldings(document.getElementById('hSearch').value,activeGroupFilter);};
+    c.appendChild(btn);
+  });
+})();
+
+function filterHoldings(){renderHoldings(document.getElementById('hSearch').value,activeGroupFilter);}
+
+// Initial render
+renderHoldings();
+
 loadLiveData();
 setInterval(loadLiveData,5*60*1000);
 </script>
