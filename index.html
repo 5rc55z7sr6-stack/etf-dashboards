@@ -1451,61 +1451,30 @@ function renderAll(aD){
   if(el)el.textContent=`(${validN} ratios)`;
 }
 
-/* ── loadDataJson: fetch data.json pre-computed by GitHub Action (same-origin, instant) ── */
-async function loadDataJson(){
-  try{
-    // Cache-bust per 10-min bucket so browsers don't serve stale copy
-    const res=await fetch('./data.json?_='+Math.floor(Date.now()/600000));
-    if(!res.ok)return null;
-    const json=await res.json();
-    if(!json.data||json.data.length<10)return null;
-    // Attach .cl object shape expected by renderAll (Python writes cl as string)
-    json.data=json.data.map(r=>r.error?r:{...r,cl:classify(r.curr,r.s20,r.s50,r.inv)});
-    return json;
-  }catch(e){return null;}
-}
-
 async function loadLiveData(){
   if(loading)return;loading=true;
   const btn=document.getElementById('refreshBtn'),dot=document.getElementById('liveDot'),stxt=document.getElementById('liveStatusTxt');
   if(btn){btn.disabled=true;btn.classList.add('loading');}
   dot.className='live-dot';stxt.textContent='loading…';
 
-  /* ── STEP 1: Show data instantly ──────────────────────────────────────────
-     Priority: data.json (GitHub Action, refreshed every 30 min, same-origin)
-               → localStorage cache (user's own previous fetch)
-               → built-in seedData snapshot (hardcoded fallback)              */
-  let shownFromServer=false;
-  const dj=await loadDataJson();
-  if(dj&&dj.data.length>=10){
-    renderAll(dj.data);
-    saveCache(dj.data);                       // save into localStorage too
-    const ageMin=Math.round((Date.now()-dj.ts)/60000);
-    if(ageMin>45){showStaleBanner(ageMin);}else{hideStaleBanner();}
-    dot.className='live-dot on';
-    stxt.textContent='updated · '+new Date(dj.ts).toLocaleTimeString();
-    shownFromServer=true;
+  // Show cached data immediately — fall back to built-in snapshot so new visitors never see blank spinners
+  const cached=loadCache();
+  if(cached&&cached.data.length){
+    renderAll(cached.data);
+    showStaleBanner(cached.ageMin);
+    dot.className='live-dot amber';stxt.textContent='refreshing…';
   } else {
-    const cached=loadCache();
-    if(cached&&cached.data.length){
-      renderAll(cached.data);
-      showStaleBanner(cached.ageMin);
-      dot.className='live-dot amber';stxt.textContent='refreshing…';
-    } else {
-      renderAll(seedData());
-      showDemoBanner();
-      dot.className='live-dot amber';stxt.textContent='loading…';
-    }
+    renderAll(seedData());
+    showDemoBanner();
+    dot.className='live-dot amber';stxt.textContent='loading…';
   }
 
-  /* ── STEP 2: Background-fetch live data via CORS proxies ──────────────────
-     If it succeeds it silently updates the view with even fresher data.
-     If it fails, whatever we showed in step 1 stays — no error banner.       */
   try{
     const tickers=[...new Set(ALL_R.flatMap(r=>[r.num,r.den]))];
     const results=await Promise.allSettled(tickers.map(t=>yfetch(t)));
     const pm={};tickers.forEach((t,i)=>{if(results[i].status==='fulfilled'&&results[i].value)pm[t]=results[i].value;});
 
+    // Require at least 4 tickers to have succeeded before accepting the result
     const succeeded=Object.keys(pm).length;
     if(succeeded<4)throw new Error(`Only ${succeeded} tickers fetched — proxy likely down`);
 
@@ -1523,20 +1492,19 @@ async function loadLiveData(){
     hideStaleBanner();
     dot.className='live-dot on';stxt.textContent='live · '+new Date().toLocaleTimeString();
   }catch(e){
-    console.warn('Live proxy fetch failed:',e.message);
-    // If data.json was shown successfully, stay quiet — data is good enough
-    if(!shownFromServer){
-      const fallback=loadCache();
-      if(fallback&&fallback.data.length){
-        renderAll(fallback.data);
-        showStaleBanner(fallback.ageMin);
-        dot.className='live-dot amber';
-        stxt.textContent='cached · '+new Date(Date.now()-fallback.ageMin*60000).toLocaleTimeString();
-      } else {
-        renderAll(seedData());
-        showDemoBanner();
-        dot.className='live-dot amber';stxt.textContent='snapshot';
-      }
+    console.error('Live fetch failed:',e.message);
+    const fallback=loadCache();
+    if(fallback&&fallback.data.length){
+      renderAll(fallback.data);
+      showStaleBanner(fallback.ageMin);
+      dot.className='live-dot amber';
+      stxt.textContent='cached · '+new Date(Date.now()-fallback.ageMin*60000).toLocaleTimeString();
+    } else {
+      // No localStorage cache — show built-in snapshot so new visitors see a working dashboard
+      const demo=seedData();
+      renderAll(demo);
+      showDemoBanner();
+      dot.className='live-dot amber';stxt.textContent='snapshot';
     }
   }
   loading=false;if(btn){btn.disabled=false;btn.classList.remove('loading');}
