@@ -62,8 +62,9 @@
   .vm-box{position:relative;width:min(1100px,92vw);aspect-ratio:16/9;border-radius:10px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.7);transform:scale(.96);transition:transform .25s cubic-bezier(.4,0,.2,1);border:1px solid rgba(63,209,126,.2)}
   .vm-overlay.open .vm-box{transform:scale(1)}
   .vm-box iframe{width:100%;height:100%;display:block;border:none}
-  .vm-close{position:absolute;top:12px;right:14px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:18px;line-height:1;padding:5px 10px;border-radius:6px;cursor:pointer;z-index:10;transition:background .15s}
-  .vm-close:hover{background:rgba(255,92,97,.5)}
+  .vm-controls{position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10}
+  .vm-ctrl-btn{background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.15);color:#fff;width:34px;height:34px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;transition:background .15s,border-color .15s}
+  .vm-ctrl-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35)}
   .hero .kicker{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
   .hero h2{font-size:clamp(28px,4.5vw,48px);line-height:1.04;font-weight:800;letter-spacing:-1.5px;max-width:22ch}
   .hero h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--gold)}
@@ -500,6 +501,39 @@
     footer{font-size:9.5px;line-height:1.6;padding:18px 0}
   }
 
+  /* ---- ETF INLINE EXPAND ---- */
+  .etf-main-row{cursor:pointer;transition:background .15s}
+  .etf-main-row:hover{background:rgba(232,193,74,.06) !important}
+  .etf-main-row.expanded{background:rgba(232,193,74,.04) !important}
+  .etf-expand-hint{font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-left:6px;white-space:nowrap;transition:color .15s}
+  .etf-main-row.expanded .etf-expand-hint{color:var(--gold)}
+  .etf-expand-row{background:var(--bg-elev)}
+  .etf-expand-row.hidden{display:none}
+  .etf-expand-body{border-top:2px solid var(--gold);animation:expandIn .18s ease}
+  @keyframes expandIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  .etf-expand-cols{padding:16px 16px 8px}
+  .etf-expand-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px}
+  .etf-h-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .etf-h-table tr:hover td{background:rgba(232,193,74,.04)}
+  .etf-h-top td{color:var(--text)}
+  .etf-h-rest td{color:var(--text-dim)}
+  .etf-more-details{margin-top:10px}
+  .etf-more-toggle{font-family:var(--mono);font-size:10px;color:var(--text-faint);cursor:pointer;padding:6px 0;list-style:none;letter-spacing:.5px}
+  .etf-more-toggle::-webkit-details-marker{display:none}
+  .etf-more-details[open] .etf-more-toggle{color:var(--text-dim)}
+  .etf-expand-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
+
+  /* ---- MOBILE COLLAPSIBLE SECTIONS ---- */
+  .mob-collapse-toggle{display:none}
+  @media(max-width:700px){
+    .mob-collapse-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;padding:0;color:inherit;text-align:left;gap:12px}
+    .mob-collapse-toggle .mob-arrow{font-family:var(--mono);font-size:13px;color:var(--text-faint);transition:transform .2s;flex-shrink:0}
+    .mob-collapse-toggle.open .mob-arrow{transform:rotate(180deg);color:var(--gold)}
+    .mob-collapsible{overflow:hidden;transition:max-height .3s ease,opacity .3s ease}
+    .mob-collapsible.collapsed{max-height:0!important;opacity:0;pointer-events:none}
+    section .sec-head > div > h3{pointer-events:none}
+  }
+
   /* ---- SIGNAL EXPLAIN POPUP ---- */
   .se-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
   .se-overlay.open{opacity:1;pointer-events:auto}
@@ -528,7 +562,7 @@
 
 <header>
   <div class="head-inner">
-    <div class="brand"><span class="mark">ROT/04</span><h1>ETF Rotation <span class="em">Desk</span> + Themes</h1></div>
+    <div class="brand"><span class="mark">ROT/04</span></div>
     <div class="head-right">
       <div class="ticker-clock">INTERMARKET + THEMATIC INTELLIGENCE · SESSION <b id="clk">--:--:--</b> · <span id="dte"></span></div>
       <div class="live-badge"><span class="live-dot" id="liveDot"></span><span id="liveStatusTxt">connecting…</span></div>
@@ -804,8 +838,14 @@
 
 <!-- Video Modal -->
 <div class="vm-overlay" id="videoModal">
-  <div class="vm-box" id="videoBox"></div>
-  <button class="vm-close" onclick="closeVideoModal()" aria-label="Close video">✕</button>
+  <div class="vm-box" id="videoBox">
+    <div class="vm-controls">
+      <button class="vm-ctrl-btn" id="vmFullscreenBtn" onclick="toggleVmFullscreen()" title="Fullscreen">
+        <svg id="vmFsIcon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="vm-ctrl-btn" onclick="closeVideoModal()" title="Close">✕</button>
+    </div>
+  </div>
 </div>
 
 <!-- Holdings Popup -->
@@ -925,11 +965,62 @@ const sectors=[
 ];
 const sb=document.getElementById('sectorBody');
 function tkC(c){return c==='global'?'glob':c==='macro'?'asset':c==='theme'?'theme':''}
-sb.innerHTML=sectors.map(s=>`<tr data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}" data-tk="${s.t}" style="cursor:pointer" title="Click to see top 10 holdings">
-  <td><span class="tk ${tkC(s.c)}">${s.t}</span></td><td><div class="nm">${s.n}</div></td>
-  <td><span class="tag">${s.cat}</span></td><td class="sub">${s.tr}</td>
+
+function buildExpandRow(s){
+  const hData=HOLDINGS_MAP.get(s.t);
+  if(!hData) return `<tr class="etf-expand-row hidden" data-expand="${s.t}"><td colspan="6" style="padding:0"><div class="etf-expand-body"><div style="color:var(--text-faint);font-family:var(--mono);font-size:11px;padding:14px">No holdings data available.</div></div></td></tr>`;
+  const maxW=hData.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
+  const top5=hData.h.slice(0,5);
+  const rest=hData.h.slice(5);
+  const holdRow=(r,i,isTop)=>{
+    const w=parseFloat(r[2]);const wStr=!isNaN(w)?`${w.toFixed(1)}%`:(r[2]||'—');
+    const pct=!isNaN(w)?Math.min(100,(w/maxW)*100).toFixed(1):0;
+    return `<tr class="${isTop?'etf-h-top':'etf-h-rest'}">
+      <td class="h-rank">${i+1}</td>
+      <td class="h-tk">${r[0]}</td>
+      <td class="h-co">${r[1]}</td>
+      <td><div class="h-wt-wrap"><span class="h-wt">${wStr}</span>${!isNaN(w)?`<span class="h-wt-bar"><span class="h-wt-fill" style="width:${pct}%"></span></span>`:''}</div></td>
+    </tr>`;
+  };
+  const top5Html=top5.map((r,i)=>holdRow(r,i,true)).join('');
+  const restHtml=rest.map((r,i)=>holdRow(r,i+5,false)).join('');
+  const noteHtml=hData.note?`<div class="etf-expand-note">${hData.note}</div>`:'';
+  return `<tr class="etf-expand-row hidden" data-expand="${s.t}"><td colspan="6" style="padding:0">
+    <div class="etf-expand-body">
+      <div class="etf-expand-cols">
+        <div class="etf-expand-holdings">
+          <div class="etf-expand-label">🏆 Top 5 Best Performers <span style="color:var(--text-faint);font-weight:400">· largest positions — key P&amp;L drivers</span></div>
+          <table class="holdings-table etf-h-table">
+            <thead><tr><th>#</th><th>Ticker</th><th>Company</th><th style="text-align:right">Weight</th></tr></thead>
+            <tbody>${top5Html}</tbody>
+          </table>
+          ${rest.length?`<details class="etf-more-details"><summary class="etf-more-toggle">Show all 10 holdings ▾</summary><table class="holdings-table etf-h-table"><tbody>${restHtml}</tbody></table></details>`:''}
+          ${noteHtml}
+        </div>
+      </div>
+      <div style="padding:0 16px 12px;font-family:var(--mono);font-size:9px;color:var(--text-faint)">Data approx. mid-2026 · verify on issuer website</div>
+    </div>
+  </td></tr>`;
+}
+
+sb.innerHTML=sectors.map(s=>`<tr class="etf-main-row" data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}" data-tk="${s.t}" onclick="toggleEtfExpand('${s.t}',this)">
+  <td><span class="tk ${tkC(s.c)}">${s.t}</span></td>
+  <td><div class="nm">${s.n}</div></td>
+  <td><span class="tag">${s.cat}</span></td>
+  <td class="sub">${s.tr}</td>
   <td><span class="aum">${s.aum}</span>${s.thin?'<br><span class="thin">THIN</span>':''}</td>
-  <td class="why">${s.why} <span style="font-family:var(--mono);font-size:9px;color:var(--text-faint);white-space:nowrap">↗ holdings</span></td></tr>`).join('');
+  <td class="why">${s.why} <span class="etf-expand-hint">▾ expand</span></td>
+</tr>${buildExpandRow(s)}`).join('');
+
+function toggleEtfExpand(tk, row){
+  const expRow=sb.querySelector(`tr.etf-expand-row[data-expand="${tk}"]`);
+  if(!expRow) return;
+  const isOpen=!expRow.classList.contains('hidden');
+  // Close all others first
+  sb.querySelectorAll('tr.etf-expand-row:not(.hidden)').forEach(r=>{ r.classList.add('hidden'); });
+  sb.querySelectorAll('tr.etf-main-row.expanded').forEach(r=>r.classList.remove('expanded'));
+  if(!isOpen){ expRow.classList.remove('hidden'); row.classList.add('expanded'); }
+}
 let sF='all';
 document.querySelectorAll('#sectorFilters .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{document.querySelectorAll('#sectorFilters .chip').forEach(c=>c.classList.remove('active'));ch.classList.add('active');sF=ch.dataset.f;applyS();});
@@ -1652,20 +1743,54 @@ function openVideoModal(){
     ifr.setAttribute('scrolling','no');
     ifr.setAttribute('allowfullscreen','');
     ifr.style.cssText='width:100%;height:100%;display:block;border:none';
-    box.appendChild(ifr);
+    box.insertBefore(ifr, box.firstChild);
   }
   modal.classList.add('open');
   document.body.style.overflow='hidden';
+  // Auto fullscreen after brief delay so modal is visible first
+  setTimeout(()=>{ enterVmFullscreen(); }, 120);
+}
+function enterVmFullscreen(){
+  const box=document.getElementById('videoBox');
+  const req=box.requestFullscreen||box.webkitRequestFullscreen||box.mozRequestFullScreen||box.msRequestFullscreen;
+  if(req) req.call(box).catch(()=>{});
+  updateFsIcon(true);
+}
+function toggleVmFullscreen(){
+  const box=document.getElementById('videoBox');
+  const fsEl=document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement;
+  if(fsEl){
+    const exit=document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen;
+    if(exit) exit.call(document).catch(()=>{});
+    updateFsIcon(false);
+  } else {
+    enterVmFullscreen();
+  }
+}
+function updateFsIcon(isFs){
+  const icon=document.getElementById('vmFsIcon');
+  if(!icon) return;
+  if(isFs){
+    icon.innerHTML='<path d="M6 1H1v5M15 1h-5v5M6 15H1v-5M15 15h-5v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';
+  } else {
+    icon.innerHTML='<path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
 }
 function closeVideoModal(){
+  const fsEl=document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement;
+  if(fsEl){ const exit=document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen;if(exit)exit.call(document).catch(()=>{}); }
   const modal=document.getElementById('videoModal');
   modal.classList.remove('open');
   document.body.style.overflow='';
-  // Reset iframe so it restarts next open
   const box=document.getElementById('videoBox');
   const ifr=box.querySelector('iframe');
   if(ifr) ifr.remove();
+  updateFsIcon(false);
 }
+document.addEventListener('fullscreenchange',()=>{
+  const fsEl=document.fullscreenElement||document.webkitFullscreenElement;
+  updateFsIcon(!!fsEl);
+});
 document.getElementById('videoModal').addEventListener('click',function(e){
   if(e.target===this) closeVideoModal();
 });
@@ -1757,11 +1882,7 @@ document.addEventListener('click',function(e){
     if(tk) openHoldingsPopup(tk.textContent.trim());
     return;
   }
-  // ETF universe table rows
-  const tr=e.target.closest('#sectorBody tr[data-tk]');
-  if(tr){
-    openHoldingsPopup(tr.dataset.tk);
-  }
+  // ETF universe table rows — handled by inline expand (toggleEtfExpand)
 });
 
 // ---- SIGNAL EXPLAIN POPUP ----
@@ -2059,6 +2180,52 @@ document.addEventListener('click', function(e) {
   const sig = ['strong-bull','bull','bear','strong-bear'].find(s => chipEl.classList.contains(s));
   if (sig) openSignalPopup(pair.textContent.trim(), labelEl ? labelEl.textContent.trim() : '', sig);
 });
+
+// ---- MOBILE COLLAPSIBLE SECTIONS ----
+(function setupMobileCollapse(){
+  if(window.innerWidth > 700) return;
+  const COLLAPSE_SECTIONS = ['sectors','ratios','regime','playbook','caveats','performers'];
+  COLLAPSE_SECTIONS.forEach(id=>{
+    const sec = document.getElementById(id);
+    if(!sec) return;
+    const head = sec.querySelector('.sec-head');
+    if(!head) return;
+    // Wrap everything after sec-head in a collapsible div
+    const children = Array.from(sec.children).filter(c=>c!==head);
+    if(!children.length) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'mob-collapsible';
+    // Start collapsed for non-live sections
+    wrap.classList.add('collapsed');
+    wrap.style.maxHeight = '0px';
+    children.forEach(c => wrap.appendChild(c));
+    sec.appendChild(wrap);
+    // Add toggle button inside sec-head
+    const titleDiv = head.querySelector('div');
+    const h3 = titleDiv ? titleDiv.querySelector('h3') : null;
+    if(!h3) return;
+    const btn = document.createElement('button');
+    btn.className = 'mob-collapse-toggle';
+    btn.innerHTML = `<span></span><span class="mob-arrow">▼</span>`;
+    // Move h3 and siblings inside button's first span
+    const span = btn.querySelector('span');
+    span.appendChild(h3.cloneNode(true));
+    h3.replaceWith(btn);
+    btn.addEventListener('click',()=>{
+      const isCollapsed = wrap.classList.contains('collapsed');
+      if(isCollapsed){
+        wrap.classList.remove('collapsed');
+        wrap.style.maxHeight = wrap.scrollHeight + 'px';
+        btn.classList.add('open');
+      } else {
+        wrap.style.maxHeight = wrap.scrollHeight + 'px';
+        requestAnimationFrame(()=>{ wrap.style.maxHeight = '0px'; });
+        wrap.classList.add('collapsed');
+        btn.classList.remove('open');
+      }
+    });
+  });
+})();
 </script>
 </body>
 </html>
