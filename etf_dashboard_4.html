@@ -210,6 +210,36 @@
   .bd-light.green{background:#3fd17e;box-shadow:0 0 6px rgba(63,209,126,.5)}.bd-light.red{background:#ff5c61;box-shadow:0 0 6px rgba(255,92,97,.5)}.bd-light.gold{background:#e8c14a;box-shadow:0 0 6px rgba(232,193,74,.5)}
   .bd-pair{font-family:var(--mono);font-size:12px;font-weight:700;min-width:82px}.bd-label{font-size:11px;color:var(--text-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bd-pct{font-family:var(--mono);font-size:11px;font-weight:700;min-width:52px;text-align:right}
   .live-note{margin-top:14px;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);line-height:1.7;border-left:2px solid var(--line-bright);padding-left:12px}
+  /* ---- BEST PERFORMERS ---- */
+  .bp-wrap{background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:22px}
+  .bp-header{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .bp-title{font-size:16px;font-weight:800;letter-spacing:-.3px}
+  .bp-subtitle{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase}
+  .bp-loading{display:flex;align-items:center;gap:12px;color:var(--text-faint);font-family:var(--mono);font-size:11px;padding:12px 0}
+  .bp-group{margin-bottom:18px}
+  .bp-group:last-child{margin-bottom:0}
+  .bp-group-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .bp-group-name{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;white-space:nowrap}
+  .bp-group-line{flex:1;height:1px;background:var(--line)}
+  .bp-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .bp-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:7px;padding:12px 13px;position:relative;transition:border-color .18s,transform .16s,box-shadow .18s}
+  .bp-card:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.25)}
+  .bp-card.rank-1{border-color:rgba(232,193,74,.4);background:rgba(232,193,74,.04)}
+  .bp-card.strong-bull{border-top:2px solid #3fd17e}
+  .bp-card.bull{border-top:2px solid rgba(63,209,126,.3)}
+  .bp-card.bear{border-top:2px solid rgba(255,92,97,.3)}
+  .bp-card.strong-bear{border-top:2px solid #ff5c61}
+  .bp-rank{position:absolute;top:9px;right:10px;font-family:var(--mono);font-size:9px;font-weight:700;color:var(--text-faint);letter-spacing:.5px}
+  .bp-rank.r1{color:var(--gold)}
+  .bp-ticker{font-family:var(--mono);font-size:15px;font-weight:800;letter-spacing:.3px;margin-bottom:2px}
+  .bp-name{font-size:10.5px;color:var(--text-faint);line-height:1.3;margin-bottom:9px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .bp-pct{font-family:var(--mono);font-size:13px;font-weight:700;margin-bottom:2px}
+  .bp-meta{font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-bottom:8px;letter-spacing:.3px}
+  .bp-spark{height:22px;opacity:.8}
+  .bp-spark svg{display:block}
+  @media(max-width:980px){.bp-row{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:640px){.bp-row{grid-template-columns:repeat(2,1fr)}.bp-name{display:none}}
+
   /* ---- ratio cards fold toggle ---- */
   #ratioCardsDetails summary::-webkit-details-marker{display:none}
   .ratio-cards-toggle{
@@ -341,6 +371,17 @@
         <p>15 intermarket ratios + 3 theme signal lights vs. SMA20 &amp; SMA50. Masters ×2 in score. Theme row shows which categories have a green light right now.</p>
       </div>
       <button class="refresh-btn" id="refreshBtn" onclick="loadLiveData()"><span class="spinner-sm"></span>↺ Refresh</button>
+    </div>
+
+    <!-- BEST PERFORMERS -->
+    <div id="bestPerformers" class="bp-wrap">
+      <div class="bp-header">
+        <div class="bp-title">🏆 Best Performers</div>
+        <div class="bp-subtitle">Top 5 per group · ranked by % above SMA20 · updated with live data</div>
+      </div>
+      <div id="bpGroups">
+        <div class="bp-loading"><div class="spinner" style="border-top-color:var(--gold)"></div>Ranking ETFs…</div>
+      </div>
     </div>
 
     <div id="staleBanner" style="display:none;align-items:center;gap:12px;padding:10px 16px;margin-bottom:14px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.25);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--amber)">
@@ -844,6 +885,105 @@ function renderSplitGrid(data,id){
   document.getElementById(id).innerHTML=h||'<div class="live-error-msg">No data</div>';
 }
 
+/* ================================================================
+   BEST PERFORMERS ENGINE
+================================================================ */
+const BP_GROUPS={
+  'US Sectors':       ['XLK','XLF','XLE','XLV','XLI','XLC','XLU','XLY','XLP','XLRE','XLB'],
+  'Global Sectors':   ['IXN','IXJ','IXC','IXG','MXI','KXI'],
+  'Macro / Asset':    ['QQQ','IWM','SMH','SOXX','IBIT','GLD','EEM','EFA','RSP','HYG','TLT','MAGS','SKYY','FINX','INDA'],
+  'Trending Themes':  ['ITA','XAR','SHLD','NASA','UFO','QTUM','AIQ','CHAT','BOTZ','CIBR','URA','ARKK','ARKG','XBI','COPX','PAVE','BLOK','ICLN','TAN','LIT','REMX'],
+};
+const BP_COLORS={
+  'US Sectors':'var(--amber)',
+  'Global Sectors':'var(--cyan)',
+  'Macro / Asset':'var(--violet)',
+  'Trending Themes':'var(--gold)',
+};
+// Short names for display
+const BP_NAMES={
+  XLK:'Tech',XLF:'Financials',XLE:'Energy',XLV:'Health Care',XLI:'Industrials',
+  XLC:'Comm Svcs',XLU:'Utilities',XLY:'Discretionary',XLP:'Staples',XLRE:'Real Estate',XLB:'Materials',
+  IXN:'Global Tech',IXJ:'Global Health',IXC:'Global Energy',IXG:'Global Financials',MXI:'Global Materials',KXI:'Global Staples',
+  QQQ:'Nasdaq-100',IWM:'Small Caps',SMH:'Semis (SMH)',SOXX:'Semis (SOXX)',IBIT:'Bitcoin',GLD:'Gold',
+  EEM:'Emerg. Mkts',EFA:'Developed Intl',RSP:'Equal Weight',HYG:'High Yield',TLT:'Long Bonds',
+  MAGS:'Magnificent 7',SKYY:'Cloud/SaaS',FINX:'Fintech',INDA:'India',
+  ITA:'Defense (ITA)',XAR:'Defense (XAR)',SHLD:'Defense Tech',NASA:'Space (NASA)',UFO:'Space (UFO)',
+  QTUM:'Quantum',AIQ:'AI (AIQ)',CHAT:'GenAI',BOTZ:'Robotics',CIBR:'Cybersecurity',
+  URA:'Uranium',ARKK:'Innovation',ARKG:'Genomics',XBI:'Biotech',COPX:'Copper Miners',
+  PAVE:'Infrastructure',BLOK:'Blockchain',ICLN:'Clean Energy',TAN:'Solar',LIT:'Lithium',REMX:'Rare Earth',
+};
+
+function bpSpark(closes,bullish){
+  const v=closes.slice(-15);if(v.length<3)return '';
+  const W=70,H=20;const mn=Math.min(...v),mx=Math.max(...v),rng=mx-mn||1e-9;
+  const pts=v.map((val,i)=>`${((i/(v.length-1))*W).toFixed(1)},${(H-((val-mn)/rng)*H*.85-H*.05).toFixed(1)}`).join(' ');
+  const col=bullish?'#3fd17e':'#ff5c61';
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <polygon points="0,${H} ${pts} ${W},${H}" fill="${col}" opacity="0.1"/>
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function buildBPCard(e,rank){
+  const isTop=rank===1;
+  const col=e.sig==='strong-bull'?'#3fd17e':e.sig==='strong-bear'?'#ff5c61':e.bullish?'#7aaa90':'#9e7070';
+  const pctStr=(e.pct>=0?'+':'')+e.pct.toFixed(2)+'%';
+  const chg5Str=(e.chg5>=0?'+':'')+e.chg5.toFixed(1)+'%';
+  return `<div class="bp-card ${e.sig}${isTop?' rank-1':''}">
+    <div class="bp-rank ${isTop?'r1':''}${rank<=3?' '+(rank===1?'🥇':rank===2?'🥈':'🥉'):''}">#${rank}</div>
+    <div class="bp-ticker" style="color:${col}">${e.ticker}</div>
+    <div class="bp-name">${BP_NAMES[e.ticker]||''}</div>
+    <div class="bp-pct" style="color:${col}">${pctStr} <span style="font-size:10px;opacity:.7">vs SMA20</span></div>
+    <div class="bp-meta">${chg5Str} (5d) &nbsp;·&nbsp; SMA20 ${e.bullish?'▲':'▼'} SMA50</div>
+    <div class="bp-spark">${bpSpark(e.closes,e.bullish)}</div>
+  </div>`;
+}
+
+function scoreBP(ticker,pm){
+  const data=pm[ticker];
+  if(!data||data.length<25)return null;
+  const closes=data.map(d=>d.c);
+  const curr=closes[closes.length-1];
+  const s20=sma(closes,20),s50=sma(closes,50);
+  const pct=(curr-s20)/s20*100;
+  const prev5=closes[Math.max(0,closes.length-6)];
+  const chg5=(curr-prev5)/prev5*100;
+  const bullish=curr>s20;
+  const sig=curr>s20&&s20>s50?'strong-bull':curr>s20?'bull':curr<s20&&s20<s50?'strong-bear':'bear';
+  return{ticker,curr,s20,s50,pct,chg5,bullish,sig,closes:closes.slice(-20)};
+}
+
+async function loadBestPerformers(){
+  const allTickers=[...new Set(Object.values(BP_GROUPS).flat())];
+  const results=await Promise.allSettled(allTickers.map(t=>yfetch(t)));
+  const pm={};allTickers.forEach((t,i)=>{if(results[i].status==='fulfilled'&&results[i].value)pm[t]=results[i].value;});
+
+  let html='';
+  for(const[grp,tickers]of Object.entries(BP_GROUPS)){
+    const scored=tickers.map(t=>scoreBP(t,pm)).filter(Boolean);
+    if(!scored.length)continue;
+    // Rank by: strong-bull first, then by % above SMA20 descending
+    scored.sort((a,b)=>{
+      const wA=(a.sig==='strong-bull'?2:a.sig==='bull'?1:a.sig==='bear'?-1:-2);
+      const wB=(b.sig==='strong-bull'?2:b.sig==='bull'?1:b.sig==='bear'?-1:-2);
+      if(wA!==wB)return wB-wA;
+      return b.pct-a.pct;
+    });
+    const top5=scored.slice(0,5);
+    const col=BP_COLORS[grp]||'var(--text-faint)';
+    html+=`<div class="bp-group">
+      <div class="bp-group-hdr">
+        <div class="bp-group-name" style="color:${col}">${grp}</div>
+        <div class="bp-group-line"></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);white-space:nowrap">${scored.filter(e=>e.bullish).length}/${scored.length} bullish</div>
+      </div>
+      <div class="bp-row">${top5.map((e,i)=>buildBPCard(e,i+1)).join('')}</div>
+    </div>`;
+  }
+  document.getElementById('bpGroups').innerHTML=html||'<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:10px 0">Could not load performer data — will retry.</div>';
+}
+
 function renderBanner(data){
   const valid=data.filter(r=>!r.error);
   if(!valid.length){document.getElementById('liveRegimeBanner').innerHTML='<div class="live-error-msg">Could not load live data.</div>';return;}
@@ -952,7 +1092,8 @@ async function loadLiveData(){
   loading=false;if(btn){btn.disabled=false;btn.classList.remove('loading');}
 }
 loadLiveData();
-setInterval(loadLiveData,5*60*1000);
+loadBestPerformers(); // runs independently, doesn't block live signal
+setInterval(()=>{loadLiveData();loadBestPerformers();},5*60*1000);
 
 /* ================================================================
    HOLDINGS DATA & ACCORDION
