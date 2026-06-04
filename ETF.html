@@ -529,8 +529,10 @@
   .sec-collapsible{overflow:hidden;transition:max-height .35s ease,opacity .3s ease}
   .sec-collapsible.collapsed{max-height:0!important;opacity:0;pointer-events:none}
   /* Section 01 header toggle */
-  .sec-head.collapsible{cursor:pointer}
-  .sec-head.collapsible:hover h3{color:var(--gold)}
+  .sec-head.sec-collapse-hdr{flex-wrap:nowrap;align-items:flex-start;cursor:pointer}
+  .sec-head.sec-collapse-hdr > div{flex:1;min-width:0}
+  .sec-head.sec-collapse-hdr:hover h3{color:var(--gold)}
+  .sec-head.sec-collapse-hdr .sec-arrow{margin-top:6px;font-size:14px}
   /* Theme signal toggle header */
   .theme-toggle-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:8px 0;margin-bottom:4px}
   .theme-toggle-hdr .row-label{margin-bottom:0;flex:1;pointer-events:none}
