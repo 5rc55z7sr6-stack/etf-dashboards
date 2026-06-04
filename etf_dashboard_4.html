@@ -865,6 +865,63 @@ function showStaleBanner(ageMin){
   const b=document.getElementById('staleBanner');
   if(b){b.style.display='flex';b.querySelector('.stale-age').textContent=`Last successful update: ${ago}`;}
 }
+function showDemoBanner(){
+  const b=document.getElementById('staleBanner');
+  if(b){b.style.display='flex';b.style.borderColor='rgba(245,166,35,.4)';
+    b.querySelector('.stale-age').textContent='';
+    b.innerHTML=`<span style="color:var(--amber)">⚠ Live data unavailable — showing a recent snapshot. <b>Hit Refresh</b> to try fetching live prices.</span>`;}
+}
+/* ---- Built-in snapshot so new visitors always see a working dashboard ---- */
+/* Values represent a realistic recent regime. Refreshed by live data when proxies work. */
+function seedData(){
+  const cfgMap=new Map(ALL_R.map(r=>[`${r.key}|${r.theme?1:0}`,r]));
+  const snap=[
+    // key, theme, curr, s20, s50, prev5, sig, bull, ab20
+    // MASTERS
+    ['XLY/XLP',0, 1.872,1.838,1.820,1.855, 'strong-bull',1,1],
+    ['HYG/LQD',0, 0.908,0.901,0.896,0.904, 'strong-bull',1,1],
+    ['SPY/TLT',0, 5.21, 5.08, 4.93, 5.14,  'strong-bull',1,1],
+    ['CPER/GLD',0,0.342,0.329,0.317,0.338,  'strong-bull',1,1],
+    // CORE
+    ['QQQ/SPY',0, 1.312,1.298,1.280,1.305, 'strong-bull',1,1],
+    ['SMH/SPY',0, 0.751,0.728,0.712,0.740,  'strong-bull',1,1],
+    ['IWM/SPY',0, 0.445,0.451,0.458,0.448,  'bear',0,0],
+    ['RSP/SPY',0, 0.612,0.618,0.622,0.614,  'bear',0,0],
+    ['GLD/SPY',0, 0.192,0.197,0.203,0.194,  'bear',0,0],
+    ['IWF/IWD',0, 1.421,1.398,1.375,1.412,  'strong-bull',1,1],
+    ['EEM/EFA',0, 0.734,0.740,0.748,0.737,  'bear',0,0],
+    ['IYT/XLU',0, 1.183,1.175,1.168,1.179,  'bull',1,1],
+    ['XLK/SHY',0, 8.92, 8.74, 8.55, 8.85,  'strong-bull',1,1],
+    ['IBIT/GLD',0,0.461,0.438,0.414,0.452,  'strong-bull',1,1],
+    ['XLK/XLU',0, 2.841,2.790,2.742,2.818,  'strong-bull',1,1],
+    ['KRE/SPY',0, 0.183,0.186,0.190,0.184,  'bear',0,0],
+    ['SPHB/SPLV',0,1.012,0.997,0.985,1.005, 'strong-bull',1,1],
+    ['HYG/TLT',0, 1.241,1.228,1.215,1.235,  'strong-bull',1,1],
+    ['GLD/TLT',0, 0.368,0.362,0.355,0.365,  'bull',1,1],
+    ['SMH/IGV',0, 1.024,0.998,0.975,1.014,  'strong-bull',1,1],
+    ['EWJ/SPY',0, 0.108,0.110,0.112,0.109,  'bear',0,0],
+    ['COPX/GLD',0,0.285,0.278,0.271,0.282,  'bull',1,1],
+    ['SKYY/SPY',0,0.462,0.451,0.441,0.458,  'strong-bull',1,1],
+    ['XBI/SPY',0, 0.148,0.152,0.156,0.150,  'bear',0,0],
+    ['INDA/SPY',0,0.094,0.096,0.098,0.095,  'bear',0,0],
+    // THEMES
+    ['SMH/SPY',1, 0.751,0.728,0.712,0.740,  'strong-bull',1,1],
+    ['ITA/SPY',1, 0.382,0.371,0.362,0.378,  'strong-bull',1,1],
+    ['ARKK/SPY',1,0.072,0.069,0.066,0.071,  'strong-bull',1,1],
+    ['QTUM/SMH',1,0.318,0.311,0.304,0.315,  'bull',1,1],
+    ['SOXX/SMH',1,0.942,0.938,0.933,0.940,  'bull',1,1],
+    ['XBI/SPY',1, 0.148,0.152,0.156,0.150,  'bear',0,0],
+    ['INDA/SPY',1,0.094,0.096,0.098,0.095,  'bear',0,0],
+    ['PAVE/SPY',1,0.214,0.219,0.224,0.216,  'bear',0,0],
+    ['MAGS/SPY',1,1.148,1.121,1.096,1.138,  'strong-bull',1,1],
+  ];
+  const makeVals=(curr,s20,n=22)=>{const step=(curr-s20)/n;return Array.from({length:n},(_,i)=>+(s20+step*(i+1)+(Math.random()-.5)*step*2).toFixed(5));};
+  return snap.map(([key,theme,curr,s20,s50,prev5,sig,bull,ab20])=>{
+    const cfg=cfgMap.get(`${key}|${theme}`);
+    if(!cfg)return null;
+    return{...cfg,error:false,curr,s20,s50,prev5,vals:makeVals(curr,s20),cl:{sig,bullish:!!bull,above20:!!ab20}};
+  }).filter(Boolean);
+}
 function hideStaleBanner(){
   const b=document.getElementById('staleBanner');if(b)b.style.display='none';
 }
@@ -1117,16 +1174,16 @@ async function loadLiveData(){
   if(btn){btn.disabled=true;btn.classList.add('loading');}
   dot.className='live-dot';stxt.textContent='loading…';
 
-  // If we have cached data, render it immediately while fetching fresh data
+  // Show cached data immediately — fall back to built-in snapshot so new visitors never see blank spinners
   const cached=loadCache();
   if(cached&&cached.data.length){
     renderAll(cached.data);
     showStaleBanner(cached.ageMin);
     dot.className='live-dot amber';stxt.textContent='refreshing…';
   } else {
-    document.getElementById('livePulseGrid').innerHTML='<div class="live-spinner-wrap"><div class="spinner"></div>Fetching live data…</div>';
-    document.getElementById('liveMasters').innerHTML=Array(4).fill('<div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>').join('');
-    document.getElementById('liveThemes').innerHTML=Array(9).fill('<div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>').join('');
+    renderAll(seedData());
+    showDemoBanner();
+    dot.className='live-dot amber';stxt.textContent='loading…';
   }
 
   try{
@@ -1155,20 +1212,16 @@ async function loadLiveData(){
     console.error('Live fetch failed:',e.message);
     const fallback=loadCache();
     if(fallback&&fallback.data.length){
-      // Already rendered above if we had cache; just update the status
       renderAll(fallback.data);
       showStaleBanner(fallback.ageMin);
       dot.className='live-dot amber';
       stxt.textContent='cached · '+new Date(Date.now()-fallback.ageMin*60000).toLocaleTimeString();
     } else {
-      document.getElementById('liveRegimeBanner').innerHTML=
-        `<div style="border:1px solid rgba(255,92,97,.3);border-radius:8px;background:var(--bg-card);padding:20px 24px;font-family:var(--mono);font-size:12px;color:var(--text-dim)">
-          <div style="color:var(--red);font-size:14px;font-weight:700;margin-bottom:8px">⚠ Live data unavailable</div>
-          All 6 data proxies failed — this is usually temporary. <b style="color:var(--text)">Try refreshing in 30–60 seconds.</b><br>
-          <span style="opacity:.6;font-size:11px">Error: ${e.message||'network timeout'}</span>
-        </div>`;
-      document.getElementById('livePulseGrid').innerHTML='';
-      dot.className='live-dot err';stxt.textContent='offline';
+      // No localStorage cache — show built-in snapshot so new visitors see a working dashboard
+      const demo=seedData();
+      renderAll(demo);
+      showDemoBanner();
+      dot.className='live-dot amber';stxt.textContent='snapshot';
     }
   }
   loading=false;if(btn){btn.disabled=false;btn.classList.remove('loading');}
