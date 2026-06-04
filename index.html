@@ -1811,6 +1811,11 @@ const HOLDINGS=[
 
 // ---- HOLDINGS POPUP ----
 HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
+// Rebuild all expand rows now that HOLDINGS_MAP is populated
+sectors.forEach(s=>{
+  const old=sb.querySelector(`tr.etf-expand-row[data-expand="${s.t}"]`);
+  if(old){const tmp=document.createElement('tbody');tmp.innerHTML=buildExpandRow(s);old.replaceWith(tmp.firstElementChild);}
+});
 
 function holdingsBar(w,max){
   const pct=Math.min(100,(w/max)*100).toFixed(1);
