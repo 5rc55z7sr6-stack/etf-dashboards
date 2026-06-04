@@ -10,13 +10,22 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repo
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: '3.11'
-      - run: pip install yfinance pandas --quiet
-      - run: python scripts/refresh_data.py
+
+      - name: Install dependencies
+        run: pip install yfinance pandas --quiet
+
+      - name: Fetch & compute signal data
+        run: python scripts/refresh_data.py
+
       - name: Commit data.json
         run: |
           git config user.name "github-actions[bot]"
