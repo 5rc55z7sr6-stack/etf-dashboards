@@ -184,17 +184,7 @@
     max-width: 800px;
   }
   .voiceover {
-    position: absolute;
-    bottom: 50px;
-    left: 60px;
-    right: 60px;
-    font-size: 15px;
-    color: rgba(255,255,255,0.55);
-    line-height: 1.7;
-    font-style: italic;
-    border-left: 2px solid rgba(0,200,150,0.4);
-    padding-left: 16px;
-    text-align: left;
+    display: none;
   }
 
   /* ─── ANIMATED CHART ─── */
@@ -543,6 +533,31 @@
     pointer-events: none;
     z-index: 90;
     transition: opacity 0.15s;
+  }
+
+  /* ─── MOBILE PORTRAIT ─── */
+  @media (max-width: 600px) and (orientation: portrait) {
+    .slide { padding: 20px 16px 60px; justify-content: flex-start; padding-top: 40px; }
+    .headline { font-size: 26px; margin-bottom: 12px; }
+    .subhead { font-size: 13px; }
+    .phase-badge { font-size: 9px; top: 12px; padding: 4px 12px; }
+    .chart-container { height: 140px; margin: 10px 0; }
+    .dual-chart { flex-direction: column; gap: 10px; }
+    .sector-pct { font-size: 26px; }
+    .leaderboard { max-width: 100%; }
+    .lb-row { padding: 8px 10px; gap: 6px; }
+    .lb-label { font-size: 12px; }
+    .lb-pct { font-size: 14px; }
+    .ratio-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+    .ratio-card { padding: 12px 10px !important; }
+    .ratio-val { font-size: 22px !important; }
+    .ratio-label { font-size: 10px !important; }
+  }
+  @media (max-width: 900px) and (orientation: landscape) {
+    .slide { padding: 10px 20px 50px; }
+    .headline { font-size: 32px; }
+    .subhead { font-size: 14px; }
+    .chart-container { height: 150px; }
   }
 </style>
 </head>
@@ -1110,7 +1125,7 @@
   `;
   document.getElementById('presentation').appendChild(overlay);
 
-  // Auto-start if inside iframe or ?autostart param
+  // Auto-start only when explicitly requested via ?autostart=1
   function doStart() {
     overlay.remove();
     showSlide(0, true);
@@ -1118,10 +1133,9 @@
   }
 
   const params = new URLSearchParams(window.location.search);
-  if (params.get('autostart') === '1' || window.self !== window.top) {
-    // Inside iframe → auto-dismiss overlay immediately (click needed for audio)
+  if (params.get('autostart') === '1') {
+    // Explicit auto-start requested (e.g. from modal)
     overlay.addEventListener('click', doStart, {once:true});
-    // Try auto-start anyway (will be silently blocked if no user gesture)
     setTimeout(doStart, 100);
   } else {
     overlay.addEventListener('click', doStart, {once:true});
