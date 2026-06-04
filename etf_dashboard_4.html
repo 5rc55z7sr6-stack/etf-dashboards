@@ -670,11 +670,11 @@ const sectors=[
 ];
 const sb=document.getElementById('sectorBody');
 function tkC(c){return c==='global'?'glob':c==='macro'?'asset':c==='theme'?'theme':''}
-sb.innerHTML=sectors.map(s=>`<tr data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}">
+sb.innerHTML=sectors.map(s=>`<tr data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}" data-tk="${s.t}" style="cursor:pointer" title="Click to see top 10 holdings">
   <td><span class="tk ${tkC(s.c)}">${s.t}</span></td><td><div class="nm">${s.n}</div></td>
   <td><span class="tag">${s.cat}</span></td><td class="sub">${s.tr}</td>
   <td><span class="aum">${s.aum}</span>${s.thin?'<br><span class="thin">THIN</span>':''}</td>
-  <td class="why">${s.why}</td></tr>`).join('');
+  <td class="why">${s.why} <span style="font-family:var(--mono);font-size:9px;color:var(--text-faint);white-space:nowrap">↗ holdings</span></td></tr>`).join('');
 let sF='all';
 document.querySelectorAll('#sectorFilters .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{document.querySelectorAll('#sectorFilters .chip').forEach(c=>c.classList.remove('active'));ch.classList.add('active');sF=ch.dataset.f;applyS();});
@@ -1444,10 +1444,10 @@ document.addEventListener('click',function(e){
     if(tk)openHoldingsPopup(tk.textContent.trim());
     return;
   }
-  // ETF universe table rows (ticker cell)
-  const tkCell=e.target.closest('td.tk');
-  if(tkCell){
-    openHoldingsPopup(tkCell.textContent.trim());
+  // ETF universe table rows
+  const tr=e.target.closest('#sectorBody tr[data-tk]');
+  if(tr){
+    openHoldingsPopup(tr.dataset.tk);
   }
 });
 
