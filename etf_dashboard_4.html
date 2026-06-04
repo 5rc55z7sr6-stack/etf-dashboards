@@ -313,9 +313,10 @@
   .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);min-width:22px}
   .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;min-width:62px}
   .h-co{color:var(--text)}
-  .h-wt{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);text-align:right;white-space:nowrap}
-  .h-wt-bar{display:inline-block;width:48px;height:4px;background:var(--line);border-radius:2px;vertical-align:middle;margin-left:8px;position:relative;overflow:hidden}
-  .h-wt-fill{position:absolute;left:0;top:0;height:100%;background:var(--gold);border-radius:2px}
+  .h-wt{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--gold);text-align:right;white-space:nowrap;min-width:54px}
+  .h-wt-wrap{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+  .h-wt-bar{display:inline-block;width:80px;height:7px;background:var(--line);border-radius:4px;position:relative;overflow:hidden;flex-shrink:0}
+  .h-wt-fill{position:absolute;left:0;top:0;height:100%;background:var(--gold);border-radius:4px;opacity:.85}
   .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
   .holdings-search-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
   .h-search{font-family:var(--mono);font-size:12px;background:var(--bg-card);border:1px solid var(--line-bright);color:var(--text);padding:7px 12px;border-radius:3px;width:220px;outline:none}
@@ -1438,6 +1439,11 @@ function holdingsBar(w,max){
   const pct=Math.min(100,(w/max)*100).toFixed(1);
   return `<span class="h-wt-bar"><span class="h-wt-fill" style="width:${pct}%"></span></span>`;
 }
+function holdingsWt(w,max){
+  const wStr=!isNaN(w)?`${w.toFixed(1)}%`:'—';
+  const bar=!isNaN(w)?holdingsBar(w,max):'';
+  return `<div class="h-wt-wrap">${bar}<span class="h-wt">${wStr}</span></div>`;
+}
 
 function openHoldingsPopup(ticker){
   const e=HOLDINGS_MAP.get(ticker);
@@ -1456,9 +1462,7 @@ function openHoldingsPopup(ticker){
   const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
   const rows=e.h.map((r,i)=>{
     const w=parseFloat(r[2]);
-    const wStr=!isNaN(w)?`${w.toFixed(1)}%`:(r[2]||'—');
-    const bar=!isNaN(w)?holdingsBar(w,maxW):'';
-    return `<tr><td class="h-rank">${i+1}</td><td class="h-tk">${r[0]}</td><td class="h-co">${r[1]}</td><td class="h-wt">${wStr}${bar}</td></tr>`;
+    return `<tr><td class="h-rank">${i+1}</td><td class="h-tk">${r[0]}</td><td class="h-co">${r[1]}</td><td>${holdingsWt(w,maxW)}</td></tr>`;
   }).join('');
   overlay.querySelector('.ho-ticker').textContent=e.t;
   overlay.querySelector('.ho-name').textContent=e.n;
