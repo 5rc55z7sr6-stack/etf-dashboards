@@ -560,6 +560,18 @@
   .se-footer{padding:0 24px 20px;display:flex;justify-content:flex-end}
   .se-dismiss{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:8px 18px;border:1px solid var(--line-bright);background:transparent;color:var(--text-dim);cursor:pointer;border-radius:5px;transition:all .15s;text-transform:uppercase}
   .se-dismiss:hover{border-color:var(--gold);color:var(--gold)}
+  /* Holdings popup — fast movers section */
+  .ho-movers{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+  .ho-movers-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#4ec994;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .ho-movers-loading{font-family:var(--mono);font-size:11px;color:var(--text-faint);display:flex;align-items:center;gap:8px;padding:4px 0}
+  .ho-mover-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .ho-mover-row:last-child{border-bottom:none}
+  .ho-mover-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:14px;flex-shrink:0;text-align:center}
+  .ho-mover-tk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);min-width:52px;flex-shrink:0}
+  .ho-mover-co{font-size:11px;color:var(--text-dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ho-mover-chg{font-family:var(--mono);font-size:13px;font-weight:700;min-width:58px;text-align:right;flex-shrink:0}
+  .ho-mover-chg.up{color:#4ec994}.ho-mover-chg.dn{color:#e06b6b}
+  .ho-scroll-body{max-height:72vh;overflow-y:auto;padding-right:2px}
   .pulse-card{cursor:pointer}
 </style>
 </head>
@@ -842,12 +854,16 @@
       <div class="ho-cat" style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:4px;margin-bottom:16px"></div>
     </div>
     <div class="se-divider"></div>
-    <div class="se-body" style="padding:16px 24px">
+    <div class="se-body ho-scroll-body" style="padding:16px 24px">
       <div class="ho-table-wrap" style="overflow-x:auto"></div>
       <div class="ho-note hac-note" style="margin-top:12px;display:none"></div>
+      <div class="ho-movers" id="hoMovers" style="display:none">
+        <div class="ho-movers-label">⚡ Top 5 Fast Movers <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· live % change today</span></div>
+        <div id="hoMoversBody"><div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div></div>
+      </div>
     </div>
-    <div class="se-footer">
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-faint);flex:1">Data approximate · mid-2026 · verify on issuer website</span>
+    <div class="se-footer" style="justify-content:space-between">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--text-faint)">Holdings ≈ mid-2026 · movers: live Yahoo Finance · not investment advice</span>
       <button class="se-dismiss" onclick="closeHoldingsPopup()">Close</button>
     </div>
   </div>
@@ -987,24 +1003,16 @@ function buildExpandRow(s){
   </td></tr>`;
 }
 
-sb.innerHTML=sectors.map(s=>`<tr class="etf-main-row" data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}" data-tk="${s.t}" onclick="toggleEtfExpand('${s.t}',this)">
+sb.innerHTML=sectors.map(s=>`<tr class="etf-main-row" data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}" data-tk="${s.t}" onclick="openHoldingsPopup('${s.t}')">
   <td><span class="tk ${tkC(s.c)}">${s.t}</span></td>
   <td><div class="nm">${s.n}</div></td>
   <td><span class="tag">${s.cat}</span></td>
   <td class="sub">${s.tr}</td>
   <td><span class="aum">${s.aum}</span>${s.thin?'<br><span class="thin">THIN</span>':''}</td>
-  <td class="why">${s.why} <span class="etf-expand-hint">▾ expand</span></td>
-</tr>${buildExpandRow(s)}`).join('');
+  <td class="why">${s.why} <span class="etf-expand-hint">↗ details</span></td>
+</tr>`).join('');
 
-function toggleEtfExpand(tk, row){
-  const expRow=sb.querySelector(`tr.etf-expand-row[data-expand="${tk}"]`);
-  if(!expRow) return;
-  const isOpen=!expRow.classList.contains('hidden');
-  // Close all others first
-  sb.querySelectorAll('tr.etf-expand-row:not(.hidden)').forEach(r=>{ r.classList.add('hidden'); });
-  sb.querySelectorAll('tr.etf-main-row.expanded').forEach(r=>r.classList.remove('expanded'));
-  if(!isOpen){ expRow.classList.remove('hidden'); row.classList.add('expanded'); }
-}
+// Inline expand rows removed — ETF clicks now open the holdings popup.
 let sF='all';
 document.querySelectorAll('#sectorFilters .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{document.querySelectorAll('#sectorFilters .chip').forEach(c=>c.classList.remove('active'));ch.classList.add('active');sF=ch.dataset.f;applyS();});
@@ -1811,11 +1819,6 @@ const HOLDINGS=[
 
 // ---- HOLDINGS POPUP ----
 HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
-// Rebuild all expand rows now that HOLDINGS_MAP is populated
-sectors.forEach(s=>{
-  const old=sb.querySelector(`tr.etf-expand-row[data-expand="${s.t}"]`);
-  if(old){const tmp=document.createElement('tbody');tmp.innerHTML=buildExpandRow(s);old.replaceWith(tmp.firstElementChild);}
-});
 
 function holdingsBar(w,max){
   const pct=Math.min(100,(w/max)*100).toFixed(1);
@@ -1830,20 +1833,55 @@ function holdingsWt(w,max){
   </div>`;
 }
 
+// Fetch live % change for a list of tickers via Yahoo Finance
+async function fetchFastMovers(tickers){
+  // Only attempt real equity tickers (skip bond/long names)
+  const stockRe=/^[A-Z]{1,5}(\.[A-Z])?$/;
+  const valid=tickers.filter(t=>stockRe.test(t)).slice(0,10);
+  if(!valid.length) return [];
+  const syms=valid.join(',');
+  const q=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=regularMarketChangePercent,regularMarketChange,shortName`;
+  const proxies=[
+    {u:`https://corsproxy.io/?url=${encodeURIComponent(q)}`,          p:r=>r},
+    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q)}`, p:r=>JSON.parse(r.contents)},
+  ];
+  for(const px of proxies){
+    try{
+      const res=await fetch(px.u,{signal:AbortSignal.timeout(5000)});
+      if(!res.ok) continue;
+      const raw=await res.json();
+      const json=px.p(raw);
+      const quotes=(json?.quoteResponse?.result)||[];
+      if(!quotes.length) continue;
+      return quotes
+        .filter(q=>q.regularMarketChangePercent!=null)
+        .sort((a,b)=>b.regularMarketChangePercent-a.regularMarketChangePercent)
+        .slice(0,5)
+        .map(q=>({t:q.symbol,n:q.shortName||q.symbol,chg:q.regularMarketChangePercent}));
+    }catch(e){/* try next */}
+  }
+  return [];
+}
+
 function openHoldingsPopup(ticker){
   const e=HOLDINGS_MAP.get(ticker);
   const overlay=document.getElementById('holdingsOverlay');
+  const moversWrap=document.getElementById('hoMovers');
+  const moversBody=document.getElementById('hoMoversBody');
+
   if(!e){
-    // No holdings data — show a minimal popup
     overlay.querySelector('.ho-ticker').textContent=ticker;
     overlay.querySelector('.ho-name').textContent='';
     overlay.querySelector('.ho-cat').textContent='';
     overlay.querySelector('.ho-table-wrap').innerHTML=`<div style="color:var(--text-faint);font-family:var(--mono);font-size:12px;padding:20px 0;text-align:center">No holdings data available for ${ticker}.</div>`;
     overlay.querySelector('.ho-note').textContent='';
+    moversWrap.style.display='none';
     overlay.classList.add('open');
     document.body.style.overflow='hidden';
     return;
   }
+
+  // Build top 10 holdings table
   const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
   const rows=e.h.map((r,i)=>{
     const w=parseFloat(r[2]);
@@ -1856,8 +1894,35 @@ function openHoldingsPopup(ticker){
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
   noteEl.style.display=e.note?'block':'none';
+
+  // Show fast movers section with loading spinner
+  moversWrap.style.display='block';
+  moversBody.innerHTML=`<div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div>`;
+
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
+
+  // Fetch fast movers async (don't block popup open)
+  const holdingTickers=e.h.map(r=>r[0]);
+  fetchFastMovers(holdingTickers).then(movers=>{
+    if(!overlay.classList.contains('open')) return; // popup was closed already
+    if(!movers.length){
+      moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable (market closed or proxy down)</div>`;
+      return;
+    }
+    moversBody.innerHTML=movers.map((m,i)=>{
+      const sign=m.chg>=0?'+':'';
+      const cls=m.chg>=0?'up':'dn';
+      return `<div class="ho-mover-row">
+        <span class="ho-mover-rank">${i+1}</span>
+        <span class="ho-mover-tk">${m.t}</span>
+        <span class="ho-mover-co">${m.n}</span>
+        <span class="ho-mover-chg ${cls}">${sign}${m.chg.toFixed(2)}%</span>
+      </div>`;
+    }).join('');
+  }).catch(()=>{
+    moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable</div>`;
+  });
 }
 
 function closeHoldingsPopup(){
@@ -2274,4 +2339,3 @@ function toggleRatiosSection(){ toggleCollapse('ratiosToggleHdr','ratiosWrap'); 
 </script>
 </body>
 </html>
-<!-- Fri Jun  5 00:12:20 +03 2026 -->
