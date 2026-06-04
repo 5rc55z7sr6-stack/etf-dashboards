@@ -215,7 +215,10 @@
   .bp-header{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap}
   .bp-title{font-size:16px;font-weight:800;letter-spacing:-.3px}
   .bp-subtitle{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase}
-  .bp-loading{display:flex;align-items:center;gap:12px;color:var(--text-faint);font-family:var(--mono);font-size:11px;padding:12px 0}
+  .bp-loading{display:flex;align-items:center;gap:12px;color:var(--text-faint);font-family:var(--mono);font-size:11px;padding:24px 0}
+  .bp-methodology{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:22px;font-family:var(--mono);font-size:10px;background:var(--bg-card);border:1px solid var(--line);border-radius:5px;padding:10px 14px}
+  .bp-m-sep{color:var(--line-bright)}
+  .bp-m-item{color:var(--text-dim)}
   .bp-group{margin-bottom:18px}
   .bp-group:last-child{margin-bottom:0}
   .bp-group-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -343,6 +346,7 @@
     <button class="tab" data-go="regime">Regimes</button>
     <button class="tab" data-go="playbook">Playbook</button>
     <button class="tab" data-go="caveats">Caveats</button>
+    <button class="tab" data-go="performers">🏆 Best Performers</button>
     <button class="tab" data-go="holdings">Holdings</button>
   </div>
 </nav>
@@ -371,17 +375,6 @@
         <p>15 intermarket ratios + 3 theme signal lights vs. SMA20 &amp; SMA50. Masters ×2 in score. Theme row shows which categories have a green light right now.</p>
       </div>
       <button class="refresh-btn" id="refreshBtn" onclick="loadLiveData()"><span class="spinner-sm"></span>↺ Refresh</button>
-    </div>
-
-    <!-- BEST PERFORMERS -->
-    <div id="bestPerformers" class="bp-wrap">
-      <div class="bp-header">
-        <div class="bp-title">🏆 Best Performers</div>
-        <div class="bp-subtitle">Top 5 per group · ranked by % above SMA20 · updated with live data</div>
-      </div>
-      <div id="bpGroups">
-        <div class="bp-loading"><div class="spinner" style="border-top-color:var(--gold)"></div>Ranking ETFs…</div>
-      </div>
     </div>
 
     <div id="staleBanner" style="display:none;align-items:center;gap:12px;padding:10px 16px;margin-bottom:14px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.25);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--amber)">
@@ -558,6 +551,30 @@
     </div>
   </section>
 
+  <!-- BEST PERFORMERS -->
+  <section id="performers">
+    <div class="sec-head">
+      <div>
+        <div class="num">BEST PERFORMERS / RELATIVE STRENGTH RANKING</div>
+        <h3>Who is beating the market?</h3>
+        <p>Each ETF is measured as <b>ETF / SPY ratio</b> — then ranked by how far that ratio sits <b>above its own 20-day SMA</b>. This removes the market tide and shows which ETF is genuinely outperforming. Strong Bull = ratio above both SMA20 and SMA50.</p>
+      </div>
+      <button class="refresh-btn" id="bpRefreshBtn" onclick="loadBestPerformers()"><span class="spinner-sm"></span>↺ Refresh</button>
+    </div>
+    <div class="bp-methodology">
+      <span class="bp-m-item"><span style="color:var(--green)">▲▲ STRONG BULL</span> — ETF/SPY ratio above SMA20 AND SMA20 above SMA50</span>
+      <span class="bp-m-sep">·</span>
+      <span class="bp-m-item"><span style="color:#7aaa90">▲ BULL</span> — ratio above SMA20 only</span>
+      <span class="bp-m-sep">·</span>
+      <span class="bp-m-item"><span style="color:#9e7070">▼ BEAR</span> — ratio below SMA20</span>
+      <span class="bp-m-sep">·</span>
+      <span class="bp-m-item"><span style="color:var(--red)">▼▼ STRONG BEAR</span> — ratio below both SMAs</span>
+    </div>
+    <div id="bpGroups">
+      <div class="bp-loading"><div class="spinner" style="border-top-color:var(--gold)"></div><span>Fetching relative strength data…</span></div>
+    </div>
+  </section>
+
   <!-- HOLDINGS -->
   <section id="holdings" style="border-bottom:none">
     <div class="sec-head">
@@ -713,7 +730,7 @@ document.querySelectorAll('#ratioFilters .chip').forEach(ch=>{
 const tabs=document.querySelectorAll('.tab');
 tabs.forEach(t=>t.addEventListener('click',()=>document.getElementById(t.dataset.go).scrollIntoView({behavior:'smooth',block:'start'})));
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)tabs.forEach(t=>t.classList.toggle('active',t.dataset.go===e.target.id));});},{rootMargin:'-45% 0px -50% 0px'});
-['hero','live','sectors','ratios','regime','playbook','caveats','holdings'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
+['hero','live','sectors','ratios','regime','playbook','caveats','performers','holdings'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
 const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target);}});},{threshold:0.07});
 document.querySelectorAll('section,.master,.rcard,.reg,.step').forEach(el=>{el.classList.add('reveal');ro.observe(el);});
 
@@ -934,54 +951,96 @@ function buildBPCard(e,rank){
     <div class="bp-rank ${isTop?'r1':''}${rank<=3?' '+(rank===1?'🥇':rank===2?'🥈':'🥉'):''}">#${rank}</div>
     <div class="bp-ticker" style="color:${col}">${e.ticker}</div>
     <div class="bp-name">${BP_NAMES[e.ticker]||''}</div>
-    <div class="bp-pct" style="color:${col}">${pctStr} <span style="font-size:10px;opacity:.7">vs SMA20</span></div>
-    <div class="bp-meta">${chg5Str} (5d) &nbsp;·&nbsp; SMA20 ${e.bullish?'▲':'▼'} SMA50</div>
+    <div class="bp-pct" style="color:${col}">${pctStr} <span style="font-size:9px;opacity:.6">vs SPY SMA20</span></div>
+    <div class="bp-meta">ratio momentum ${chg5Str} (5d) &nbsp;·&nbsp; ${e.bullish?'SMA20▲SMA50':'SMA20▼SMA50'}</div>
     <div class="bp-spark">${bpSpark(e.closes,e.bullish)}</div>
   </div>`;
 }
 
-function scoreBP(ticker,pm){
-  const data=pm[ticker];
-  if(!data||data.length<25)return null;
-  const closes=data.map(d=>d.c);
-  const curr=closes[closes.length-1];
-  const s20=sma(closes,20),s50=sma(closes,50);
-  const pct=(curr-s20)/s20*100;
-  const prev5=closes[Math.max(0,closes.length-6)];
-  const chg5=(curr-prev5)/prev5*100;
-  const bullish=curr>s20;
-  const sig=curr>s20&&s20>s50?'strong-bull':curr>s20?'bull':curr<s20&&s20<s50?'strong-bear':'bear';
-  return{ticker,curr,s20,s50,pct,chg5,bullish,sig,closes:closes.slice(-20)};
+// Score ETF using ETF/SPY ratio — the correct relative-strength approach
+function scoreBP(ticker, pm){
+  const etfData = pm[ticker];
+  const spyData = pm['SPY'];
+  if(!etfData || !spyData || etfData.length < 25) return null;
+
+  // Align ETF to SPY by date → ratio series
+  const ratioSeries = align(etfData, spyData); // [{d, r: ETF_close/SPY_close}]
+  if(ratioSeries.length < 25) return null;
+
+  const vals = ratioSeries.map(x => x.r);
+  const curr = vals[vals.length - 1];
+  const s20  = sma(vals, 20);
+  const s50  = sma(vals, 50);
+
+  // % above/below SMA20 of the ratio = how much ETF is outperforming/underperforming SPY on trend
+  const pct  = (curr - s20) / s20 * 100;
+  const prev5 = vals[Math.max(0, vals.length - 6)];
+  const chg5  = (curr - prev5) / prev5 * 100; // 5-day momentum of the ratio
+
+  const bullish = curr > s20;
+  const sig = curr > s20 && s20 > s50 ? 'strong-bull'
+            : curr > s20              ? 'bull'
+            : s20 < s50               ? 'strong-bear'
+            :                           'bear';
+
+  // Raw ETF price for reference
+  const etfCloses = etfData.map(d => d.c);
+  const etfPrice  = etfCloses[etfCloses.length - 1];
+
+  return { ticker, curr, s20, s50, pct, chg5, bullish, sig, closes: vals.slice(-20), etfPrice };
 }
 
 async function loadBestPerformers(){
-  const allTickers=[...new Set(Object.values(BP_GROUPS).flat())];
-  const results=await Promise.allSettled(allTickers.map(t=>yfetch(t)));
-  const pm={};allTickers.forEach((t,i)=>{if(results[i].status==='fulfilled'&&results[i].value)pm[t]=results[i].value;});
+  const btn = document.getElementById('bpRefreshBtn');
+  if(btn){ btn.disabled=true; btn.classList.add('loading'); }
+  document.getElementById('bpGroups').innerHTML = '<div class="bp-loading"><div class="spinner" style="border-top-color:var(--gold)"></div><span>Computing ETF / SPY relative strength…</span></div>';
 
-  let html='';
-  for(const[grp,tickers]of Object.entries(BP_GROUPS)){
-    const scored=tickers.map(t=>scoreBP(t,pm)).filter(Boolean);
-    if(!scored.length)continue;
-    // Rank by: strong-bull first, then by % above SMA20 descending
-    scored.sort((a,b)=>{
-      const wA=(a.sig==='strong-bull'?2:a.sig==='bull'?1:a.sig==='bear'?-1:-2);
-      const wB=(b.sig==='strong-bull'?2:b.sig==='bull'?1:b.sig==='bear'?-1:-2);
-      if(wA!==wB)return wB-wA;
-      return b.pct-a.pct;
+  // Need SPY + all group ETFs
+  const allTickers = [...new Set(['SPY', ...Object.values(BP_GROUPS).flat()])];
+  const results = await Promise.allSettled(allTickers.map(t => yfetch(t)));
+  const pm = {};
+  allTickers.forEach((t, i) => {
+    if(results[i].status === 'fulfilled' && results[i].value) pm[t] = results[i].value;
+  });
+
+  if(!pm['SPY']){
+    document.getElementById('bpGroups').innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--red);padding:16px">Could not load SPY data — relative strength analysis requires it. Retry in 30s.</div>';
+    if(btn){ btn.disabled=false; btn.classList.remove('loading'); }
+    return;
+  }
+
+  let html = '';
+  for(const [grp, tickers] of Object.entries(BP_GROUPS)){
+    const scored = tickers.map(t => scoreBP(t, pm)).filter(Boolean);
+    if(!scored.length) continue;
+
+    // Primary sort: strong-bull → bull → bear → strong-bear
+    // Secondary: % above SMA20 of ratio (outperformance margin)
+    const sigRank = {'strong-bull':4,'bull':3,'bear':2,'strong-bear':1};
+    scored.sort((a, b) => {
+      const d = sigRank[b.sig] - sigRank[a.sig];
+      return d !== 0 ? d : b.pct - a.pct;
     });
-    const top5=scored.slice(0,5);
-    const col=BP_COLORS[grp]||'var(--text-faint)';
-    html+=`<div class="bp-group">
+
+    const top5    = scored.slice(0, 5);
+    const bullN   = scored.filter(e => e.bullish).length;
+    const col     = BP_COLORS[grp] || 'var(--text-faint)';
+
+    html += `<div class="bp-group">
       <div class="bp-group-hdr">
         <div class="bp-group-name" style="color:${col}">${grp}</div>
         <div class="bp-group-line"></div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);white-space:nowrap">${scored.filter(e=>e.bullish).length}/${scored.length} bullish</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);white-space:nowrap">
+          ${bullN}/${scored.length} beating SPY &nbsp;·&nbsp; ${scored.length} ETFs ranked
+        </div>
       </div>
-      <div class="bp-row">${top5.map((e,i)=>buildBPCard(e,i+1)).join('')}</div>
+      <div class="bp-row">${top5.map((e, i) => buildBPCard(e, i+1)).join('')}</div>
     </div>`;
   }
-  document.getElementById('bpGroups').innerHTML=html||'<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:10px 0">Could not load performer data — will retry.</div>';
+
+  document.getElementById('bpGroups').innerHTML = html ||
+    '<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:16px">No data available.</div>';
+  if(btn){ btn.disabled=false; btn.classList.remove('loading'); }
 }
 
 function renderBanner(data){
