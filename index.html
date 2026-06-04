@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz@0,6..72;1,6..72&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#1e2d31;--bg-elev:#253840;--bg-card:#263540;
-    --line:#344d56;--line-bright:#456472;
-    --text:#e8f0ef;--text-dim:#a8bcba;--text-faint:#7a9390;
+    --bg:#22292c;--bg-elev:#2a3235;--bg-card:#2e3538;
+    --line:#3d474b;--line-bright:#546268;
+    --text:#e6edec;--text-dim:#a5b4b2;--text-faint:#758280;
     --amber:#f5a623;--green:#3fd17e;--red:#ff5c61;
     --cyan:#46d6d2;--violet:#9d8cff;--gold:#e8c14a;
     --mono:'JetBrains Mono',monospace;--sans:'Archivo',sans-serif;--serif:'Newsreader',serif;
@@ -1775,6 +1775,37 @@ const HOLDINGS=[
   {t:'REMX',n:'VanEck Rare Earth/Strategic Metals ETF',cat:'Critical Minerals',group:'Trending Themes',
    h:[['MP','MP Materials',9.8],['LYC','Lynas Rare Earths',8.4],['PLS','Pilbara Minerals',7.2],['ALB','Albemarle',6.8],['1772.HK','Ganfeng Lithium',5.9],['LTHM','Livent Corp',5.3],['NMG','Nouveau Monde',4.2],['NEO','neo Performance Materials',3.8],['UUUU','Energy Fuels',3.6],['CC','Chemours',3.2]],
    note:'Rare earths + lithium for AI chips, EVs, defense. China controls ~85% of processing — geopolitical choke point. Defense demand + EV demand = structural tailwind.'},
+  // ---- Previously missing ETFs ----
+  {t:'IWF',n:'iShares Russell 1000 Growth ETF',cat:'Style — Growth',group:'Macro / Asset Class',
+   h:[['AAPL','Apple',11.8],['MSFT','Microsoft',11.2],['NVDA','Nvidia',9.4],['AMZN','Amazon',5.8],['META','Meta Platforms',4.9],['GOOGL','Alphabet A',3.8],['TSLA','Tesla',3.2],['AVGO','Broadcom',2.6],['LLY','Eli Lilly',2.4],['GOOG','Alphabet C',2.1]],
+   note:'Mega-cap growth concentrated in tech and AI. Top 10 holdings ≈ 57% of fund. Apple + Microsoft alone = ~23%. Pure bet on US innovation leadership.'},
+  {t:'IWD',n:'iShares Russell 1000 Value ETF',cat:'Style — Value',group:'Macro / Asset Class',
+   h:[['BRK.B','Berkshire Hathaway',3.8],['JPM','JPMorgan Chase',3.2],['XOM','Exxon Mobil',2.9],['UNH','UnitedHealth Group',2.5],['JNJ','Johnson & Johnson',2.3],['WMT','Walmart',2.1],['CVX','Chevron',1.9],['BAC','Bank of America',1.7],['HD','Home Depot',1.6],['ABBV','AbbVie',1.5]],
+   note:'Diversified across financials (~23%), healthcare (~14%), energy (~9%). Less concentrated than growth — top 10 ≈ 23%. Outperforms growth when rates rise or tech sells off.'},
+  {t:'RSP',n:'Invesco S&P 500 Equal Weight ETF',cat:'US Breadth',group:'Macro / Asset Class',
+   h:[['DECK','Deckers Outdoor',0.25],['PKG','Packaging Corp',0.24],['AXON','Axon Enterprise',0.24],['HWM','Howmet Aerospace',0.23],['NRG','NRG Energy',0.23],['TRGP','Targa Resources',0.22],['VST','Vistra Corp',0.22],['GE','GE Aerospace',0.22],['CEG','Constellation Energy',0.21],['ETN','Eaton Corp',0.21]],
+   note:'Equal-weight: each of ~500 S&P 500 stocks gets ≈0.2%. Top 10 shown are recent outperformers (weights shuffle at quarterly rebalance). RSP/SPY rising = market breadth expanding — not just mega-caps leading.'},
+  {t:'LQD',n:'iShares iBoxx $ Inv Grade Corp Bond ETF',cat:'IG Credit',group:'Macro / Asset Class',
+   h:[['AAPL','Apple Inc bonds',1.9],['MSFT','Microsoft bonds',1.7],['JPM','JPMorgan bonds',1.5],['T','AT&T bonds',1.3],['BAC','Bank of America bonds',1.2],['VZ','Verizon bonds',1.1],['CVS','CVS Health bonds',0.9],['GS','Goldman Sachs bonds',0.8],['C','Citigroup bonds',0.8],['WFC','Wells Fargo bonds',0.7]],
+   note:'~2,500 investment-grade USD corporate bonds. Duration ~8–9 years — rate sensitive. LQD falling = credit spreads widening or rates rising. Core proxy for institutional credit appetite.'},
+  {t:'HYG',n:'iShares iBoxx $ High Yield Corp Bond ETF',cat:'HY Credit',group:'Macro / Asset Class',
+   h:[['T-Mobile','T-Mobile bonds',1.8],['CCO','Clear Channel bonds',1.2],['Sprint','Sprint/T-Mobile bonds',1.1],['Bausch','Bausch Health bonds',1.0],['Tenet','Tenet Healthcare bonds',0.9],['Wynn','Wynn Resorts bonds',0.8],['SBA','SBA Communications',0.8],['AMC','AMC Networks bonds',0.7],['Freeport','Freeport-McMoRan bonds',0.7],['Rite Aid','Rite Aid bonds',0.6]],
+   note:'~1,200 high-yield ("junk") USD bonds. Duration ~4 years — less rate risk than LQD. HYG vs LQD spread = credit risk appetite. HYG falling first = credit stress, equity weakness likely to follow.'},
+  {t:'SHY',n:'iShares 1-3 Year Treasury Bond ETF',cat:'Short Treasuries',group:'Macro / Asset Class',
+   h:[['UST','US Treasury 2.750% 2026',8.2],['UST','US Treasury 3.125% 2026',7.9],['UST','US Treasury 2.500% 2025',7.4],['UST','US Treasury 1.500% 2026',6.8],['UST','US Treasury 2.875% 2027',6.5],['UST','US Treasury 3.500% 2027',5.9],['UST','US Treasury 0.250% 2025',5.4],['UST','US Treasury 1.875% 2027',4.8],['UST','US Treasury 4.625% 2026',4.3],['UST','US Treasury 2.250% 2025',3.9]],
+   note:'100% US Treasury bonds, maturity 1–3 years. Minimal credit risk, low duration (~1.9 yrs). Used as the "cash proxy" in XLK/SHY ratio — when ratio falls, money is moving out of risk assets into near-cash.'},
+  {t:'IYT',n:'iShares Transportation Average ETF',cat:'Transports',group:'Macro / Asset Class',
+   h:[['UNP','Union Pacific',12.4],['UBER','Uber Technologies',10.8],['UPS','United Parcel Service',9.6],['CSX','CSX Corp',7.3],['NSC','Norfolk Southern',6.8],['FDX','FedEx',6.2],['JBHT','J.B. Hunt Transport',5.1],['DAL','Delta Air Lines',4.9],['ODFL','Old Dominion Freight',4.7],['LUV','Southwest Airlines',3.8]],
+   note:'Dow Theory indicator — transports confirm or diverge from industrials. IYT/XLU rising = economic expansion signaled. Mix of rails, trucking, airlines and logistics reflects real-economy activity.'},
+  {t:'IXG',n:'iShares Global Financials ETF',cat:'Financials · Global',group:'Global Sectors',
+   h:[['JPM','JPMorgan Chase',8.4],['BRK.B','Berkshire Hathaway',7.1],['V','Visa',5.3],['MA','Mastercard',4.8],['BAC','Bank of America',3.6],['HSBC','HSBC Holdings',3.1],['MS','Morgan Stanley',2.8],['GS','Goldman Sachs',2.6],['BNP','BNP Paribas',2.1],['RY','Royal Bank of Canada',2.0]],
+   note:'Global financials: US banks dominate (~55%) but adds European and Canadian banks. Rate-sensitive. Use for global credit-cycle positioning alongside HYG/LQD credit signals.'},
+  {t:'MXI',n:'iShares Global Materials ETF',cat:'Materials · Global',group:'Global Sectors',
+   h:[['LIN','Linde',9.8],['BHP','BHP Group',7.6],['RIO','Rio Tinto',5.4],['APD','Air Products',4.2],['FCX','Freeport-McMoRan',3.8],['NEM','Newmont',3.5],['SHW','Sherwin-Williams',3.1],['DOW','Dow Inc',2.9],['VALE','Vale SA',2.7],['SCCO','Southern Copper',2.4]],
+   note:'Global materials including mining, chemicals, construction. BHP + Rio Tinto = iron ore/copper exposure. Context ETF — thin volume, use COPX/GLD ratio for cleaner copper signal.'},
+  {t:'KXI',n:'iShares Global Consumer Staples ETF',cat:'Staples · Global',group:'Global Sectors',
+   h:[['NESN','Nestlé',9.2],['PG','Procter & Gamble',8.4],['KO','Coca-Cola',6.1],['PEP','PepsiCo',5.8],['UL','Unilever',4.6],['COST','Costco',4.1],['WMT','Walmart',3.8],['PM','Philip Morris',3.5],['MDLZ','Mondelez',2.4],['DGE','Diageo',2.2]],
+   note:'Global consumer staples — defensive, non-cyclical. Nestlé + P&G = ~18%. Adds European staples giants (Nestlé, Unilever, Diageo) not in XLP. Use vs XLY for global risk-off signal.'},
 ];
 
 
