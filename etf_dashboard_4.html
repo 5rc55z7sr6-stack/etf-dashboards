@@ -348,13 +348,6 @@
   .se-dismiss{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:8px 18px;border:1px solid var(--line-bright);background:transparent;color:var(--text-dim);cursor:pointer;border-radius:5px;transition:all .15s;text-transform:uppercase}
   .se-dismiss:hover{border-color:var(--gold);color:var(--gold)}
   .pulse-card{cursor:pointer}
-
-  /* ---- LANGUAGE SWITCHER ---- */
-  .lang-switcher{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--line-bright);border-radius:20px;padding:2px 4px}
-  .lang-btn{background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--text-faint);padding:3px 8px;border-radius:14px;transition:all .18s;display:flex;align-items:center;gap:4px;white-space:nowrap}
-  .lang-btn span{font-size:10px}
-  .lang-btn:hover{color:var(--text)}
-  .lang-btn.active{background:var(--gold);color:var(--bg);font-weight:700}
 </style>
 </head>
 <body>
@@ -364,36 +357,30 @@
     <div class="brand"><span class="mark">ROT/04</span><h1>ETF Rotation <span class="em">Desk</span> + Themes</h1></div>
     <div class="head-right">
       <div class="ticker-clock">INTERMARKET + THEMATIC INTELLIGENCE · SESSION <b id="clk">--:--:--</b> · <span id="dte"></span></div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-        <div class="live-badge"><span class="live-dot" id="liveDot"></span><span id="liveStatusTxt">connecting…</span></div>
-        <div class="lang-switcher" id="langSwitcher">
-          <button class="lang-btn active" data-lang="en" onclick="setLang('en')" title="English">🇬🇧 <span>EN</span></button>
-          <button class="lang-btn" data-lang="tr" onclick="setLang('tr')" title="Türkçe">🇹🇷 <span>TR</span></button>
-        </div>
-      </div>
+      <div class="live-badge"><span class="live-dot" id="liveDot"></span><span id="liveStatusTxt">connecting…</span></div>
     </div>
   </div>
 </header>
 
 <nav class="tabs">
   <div class="wrap">
-    <button class="tab active" data-go="hero" data-i18n="tab_overview">Overview</button>
-    <button class="tab live-tab" data-go="live" data-i18n="tab_live">⬤ Live Signal</button>
-    <button class="tab" data-go="sectors" data-i18n="tab_etfs">ETFs + Themes</button>
-    <button class="tab" data-go="ratios" data-i18n="tab_ratios">Ratios</button>
-    <button class="tab" data-go="regime" data-i18n="tab_regimes">Regimes</button>
-    <button class="tab" data-go="playbook" data-i18n="tab_playbook">Playbook</button>
-    <button class="tab" data-go="caveats" data-i18n="tab_caveats">Caveats</button>
-    <button class="tab" data-go="performers" data-i18n="tab_performers">🏆 Best Performers</button>
+    <button class="tab active" data-go="hero">Overview</button>
+    <button class="tab live-tab" data-go="live">⬤ Live Signal</button>
+    <button class="tab" data-go="sectors">ETFs + Themes</button>
+    <button class="tab" data-go="ratios">Ratios</button>
+    <button class="tab" data-go="regime">Regimes</button>
+    <button class="tab" data-go="playbook">Playbook</button>
+    <button class="tab" data-go="caveats">Caveats</button>
+    <button class="tab" data-go="performers">🏆 Best Performers</button>
   </div>
 </nav>
 
 <div class="wrap">
 
   <div class="hero" id="hero">
-    <div class="kicker" data-i18n="hero_kicker">// Where the money is going — and how to be early</div>
-    <h2 data-i18n="hero_h2">Stop watching prices. Watch the <span class="serif">ratios.</span></h2>
-    <p data-i18n="hero_p">The absolute price of any ETF tells you little. The <em>relationship</em> between two ETFs tells you the regime: risk-on or risk-off, growth or defense, reflation or fear. This desk maps the most liquid fund per sector — US and worldwide — against 15 intermarket ratios that professional traders use to spot rotation before it completes.</p>
+    <div class="kicker">// Where the money is going — and how to be early</div>
+    <h2>Stop watching prices. Watch the <span class="serif">ratios.</span></h2>
+    <p>The absolute price of any ETF tells you little. The <em>relationship</em> between two ETFs tells you the regime: risk-on or risk-off, growth or defense, reflation or fear. This desk maps the most liquid fund per sector — US and worldwide — against 15 intermarket ratios that professional traders use to spot rotation before it completes.</p>
     <div class="masters">
       <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 01</div><div class="ratio">XLY / XLP</div><div class="desc">Consumer risk appetite. Discretionary over staples = the economy is wanted.</div></div>
       <div class="master"><div class="bar"></div><div class="lab">MASTER GAUGE 02</div><div class="ratio">HYG / LQD</div><div class="desc">Credit appetite. The most reliable risk gauge under stress — credit leads.</div></div>
@@ -407,11 +394,11 @@
   <section id="live">
     <div class="sec-head">
       <div>
-        <div class="num" data-i18n="s00_num">SECTION 00 / LIVE SIGNAL ENGINE</div>
-        <h3 data-i18n="s00_h3">Green light / Red light — now</h3>
-        <p data-i18n="s00_p">15 intermarket ratios + 3 theme signal lights vs. SMA20 &amp; SMA50. Masters ×2 in score. Theme row shows which categories have a green light right now.</p>
+        <div class="num">SECTION 00 / LIVE SIGNAL ENGINE</div>
+        <h3>Green light / Red light — now</h3>
+        <p>15 intermarket ratios + 3 theme signal lights vs. SMA20 &amp; SMA50. Masters ×2 in score. Theme row shows which categories have a green light right now.</p>
       </div>
-      <button class="refresh-btn" id="refreshBtn" onclick="loadLiveData()"><span class="spinner-sm"></span><span data-i18n="btn_refresh">↺ Refresh</span></button>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadLiveData()"><span class="spinner-sm"></span>↺ Refresh</button>
     </div>
 
     <div id="staleBanner" style="display:none;align-items:center;gap:12px;padding:10px 16px;margin-bottom:14px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.25);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--amber)">
@@ -447,7 +434,7 @@
       </div>
     </div>
 
-    <div class="row-label" data-i18n="row_masters">Core Master Gauges</div>
+    <div class="row-label">Core Master Gauges</div>
     <div class="master-live-row" id="liveMasters">
       <div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
       <div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
@@ -455,7 +442,7 @@
       <div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
     </div>
 
-    <div class="row-label" style="color:var(--gold)" data-i18n="row_themes">⬤ Theme Signal Lights — Green = add exposure · Red = cut first</div>
+    <div class="row-label" style="color:var(--gold)">⬤ Theme Signal Lights — Green = add exposure · Red = cut first</div>
     <div class="theme-live-row" id="liveThemes">
       <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
       <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
@@ -463,7 +450,7 @@
     </div>
 
     <div class="breakdown" id="liveBreakdown" style="display:none">
-      <div class="breakdown-title" data-i18n="breakdown_title">All Signals at a Glance</div>
+      <div class="breakdown-title">All Signals at a Glance</div>
       <div class="bd-grid" id="bdGrid"></div>
     </div>
 
@@ -474,11 +461,11 @@
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div>
-            <div class="rct-title"><span data-i18n="rct_title">All Ratio Cards</span> <span id="ratioCardsCount" class="rct-count"></span></div>
-            <div class="rct-hint" data-i18n="rct_hint">Sorted by signal strength — strong bull first, strong bear last</div>
+            <div class="rct-title">All Ratio Cards <span id="ratioCardsCount" class="rct-count"></span></div>
+            <div class="rct-hint">Sorted by signal strength — strong bull first, strong bear last</div>
           </div>
         </div>
-        <div class="rct-cta" data-i18n="rct_cta">Click to expand</div>
+        <div class="rct-cta">Click to expand</div>
       </summary>
       <div style="margin-top:0" id="livePulseGrid"><div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data…</div></div>
     </details>
@@ -490,9 +477,9 @@
   <section id="sectors">
     <div class="sec-head">
       <div>
-        <div class="num" data-i18n="s01_num">SECTION 01 / SECTOR · ASSET-CLASS · THEME ETFs</div>
-        <h3 data-i18n="s01_h3">The most liquid fund per industry &amp; theme</h3>
-        <p data-i18n="s01_p">US sectors, global ETFs, macro asset classes — plus trending thematic industries (defense, space, quantum, AI, nuclear and more) that cut across GICS sectors.</p>
+        <div class="num">SECTION 01 / SECTOR · ASSET-CLASS · THEME ETFs</div>
+        <h3>The most liquid fund per industry &amp; theme</h3>
+        <p>US sectors, global ETFs, macro asset classes — plus trending thematic industries (defense, space, quantum, AI, nuclear and more) that cut across GICS sectors.</p>
       </div>
     </div>
     <div class="legend">
@@ -510,7 +497,7 @@
       <input class="search" id="sectorSearch" placeholder="search ticker / name…">
     </div>
     <div class="table-scroll">
-      <table><thead><tr><th data-i18n="th_ticker">Ticker</th><th data-i18n="th_fund">Fund</th><th data-i18n="th_category">Category</th><th data-i18n="th_tracks">Tracks</th><th data-i18n="th_aum">Approx AUM</th><th data-i18n="th_why">Why it's the one</th></tr></thead>
+      <table><thead><tr><th>Ticker</th><th>Fund</th><th>Category</th><th>Tracks</th><th>Approx AUM</th><th>Why it's the one</th></tr></thead>
       <tbody id="sectorBody"></tbody></table>
     </div>
     <p style="margin-top:11px;font-size:11px;color:var(--text-faint);font-family:var(--mono)">AUM approximate (early–mid 2026). Trending themes are <b style="color:var(--text-dim)">not GICS sectors</b> — higher-beta, rotate faster. Verify before sizing.</p>
@@ -520,9 +507,9 @@
   <section id="ratios">
     <div class="sec-head">
       <div>
-        <div class="num" data-i18n="s02_num">SECTION 02 / INTERMARKET RATIOS + THEME RATIOS</div>
-        <h3 data-i18n="s02_h3">What each ratio means &amp; how to position</h3>
-        <p data-i18n="s02_p">The last three ratios map themes onto the same framework: SMH/SPY (tech-AI), ITA/SPY (defense), ARKK/SPY (speculative).</p>
+        <div class="num">SECTION 02 / INTERMARKET RATIOS + THEME RATIOS</div>
+        <h3>What each ratio means &amp; how to position</h3>
+        <p>The last three ratios map themes onto the same framework: SMH/SPY (tech-AI), ITA/SPY (defense), ARKK/SPY (speculative).</p>
       </div>
     </div>
     <div class="filters" id="ratioFilters">
@@ -537,7 +524,7 @@
 
   <!-- REGIME -->
   <section id="regime">
-    <div class="sec-head"><div><div class="num" data-i18n="s03_num">SECTION 03 / REGIME ARCHETYPES</div><h3 data-i18n="s03_h3">Read them together</h3><p data-i18n="s03_p">Score each lens +1/−1 by its 50-day MA slope. Net the score across lenses.</p></div></div>
+    <div class="sec-head"><div><div class="num">SECTION 03 / REGIME ARCHETYPES</div><h3>Read them together</h3><p>Score each lens +1/−1 by its 50-day MA slope. Net the score across lenses.</p></div></div>
     <div class="regimes">
       <div class="reg on"><div class="glow"></div>
         <div class="rlab">REGIME A · NET POSITIVE</div><h4>Risk-On / Reflation</h4>
@@ -560,7 +547,7 @@
 
   <!-- PLAYBOOK -->
   <section id="playbook">
-    <div class="sec-head"><div><div class="num" data-i18n="s04_num">SECTION 04 / EXECUTION</div><h3 data-i18n="s04_h3">The rotation + theme playbook</h3></div></div>
+    <div class="sec-head"><div><div class="num">SECTION 04 / EXECUTION</div><h3>The rotation + theme playbook</h3></div></div>
     <div class="play">
       <div class="step"><div class="sn">1</div><h4>Confirm regime first</h4><p>Get ≥2 of 4 master gauges bullish. That's the green light for ANY risk. Without it — no theme ETFs, no small caps, no high-beta. The live signal engine scores this for you automatically.</p></div>
       <div class="step"><div class="sn">2</div><h4>Check theme switches</h4><p><b style="color:var(--text)">SMH/SPY green</b> → add AIQ, QTUM, BOTZ, CHAT. <b style="color:var(--text)">ITA/SPY green</b> → add ITA, XAR, SHLD. <b style="color:var(--text)">ARKK/SPY green</b> → add speculative sleeve (NASA, ARKG). Each flipping red = cut that category first.</p></div>
@@ -577,7 +564,7 @@
 
   <!-- CAVEATS -->
   <section id="caveats" style="border-bottom:none">
-    <div class="sec-head"><div><div class="num" data-i18n="s05_num">SECTION 05 / RISK NOTES</div><h3 data-i18n="s05_h3">Where this breaks</h3></div></div>
+    <div class="sec-head"><div><div class="num">SECTION 05 / RISK NOTES</div><h3>Where this breaks</h3></div></div>
     <div class="caveats">
       <div class="cav"><h5>Theme ETFs are high-beta</h5><p>ARKK, NASA, UFO, QTUM, ARKG can fall 50–80% in a bear market. They amplify the regime — never hold through a red-light signal.</p></div>
       <div class="cav"><h5>AUM & liquidity vary widely</h5><p>GLD ~$155.1B vs. UFO ~$1.2B. Thin theme funds can gap on news. Use limit orders; verify spreads before sizing.</p></div>
@@ -592,9 +579,9 @@
   <section id="performers">
     <div class="sec-head">
       <div>
-        <div class="num" data-i18n="bp_num">BEST PERFORMERS / RELATIVE STRENGTH RANKING</div>
-        <h3 data-i18n="bp_h3">Who is beating the market?</h3>
-        <p data-i18n="bp_p">Each ETF is measured as <b>ETF / SPY ratio</b> — then ranked by how far that ratio sits <b>above its own 20-day SMA</b>. This removes the market tide and shows which ETF is genuinely outperforming. Strong Bull = ratio above both SMA20 and SMA50.</p>
+        <div class="num">BEST PERFORMERS / RELATIVE STRENGTH RANKING</div>
+        <h3>Who is beating the market?</h3>
+        <p>Each ETF is measured as <b>ETF / SPY ratio</b> — then ranked by how far that ratio sits <b>above its own 20-day SMA</b>. This removes the market tide and shows which ETF is genuinely outperforming. Strong Bull = ratio above both SMA20 and SMA50.</p>
       </div>
       <button class="refresh-btn" id="bpRefreshBtn" onclick="loadBestPerformers()"><span class="spinner-sm"></span>↺ Refresh</button>
     </div>
@@ -612,7 +599,7 @@
     </div>
   </section>
 
-    <footer><span data-i18n="footer_text">ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</span></footer>
+    <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
 </div>
 
 <!-- Holdings Popup -->
@@ -620,7 +607,7 @@
   <div class="se-box" style="max-width:640px;width:100%">
     <button class="se-close" onclick="closeHoldingsPopup()" aria-label="Close">✕</button>
     <div class="se-top">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px" data-i18n="popup_holdings_title">Top 10 Holdings</div>
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px">Top 10 Holdings</div>
       <div class="ho-ticker" style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--gold)"></div>
       <div class="ho-name" style="font-size:13px;color:var(--text);font-weight:600;margin-top:2px"></div>
       <div class="ho-cat" style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:4px;margin-bottom:16px"></div>
@@ -631,8 +618,8 @@
       <div class="ho-note hac-note" style="margin-top:12px;display:none"></div>
     </div>
     <div class="se-footer">
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-faint);flex:1" data-i18n="popup_holdings_note">Data approximate · mid-2026 · verify on issuer website</span>
-      <button class="se-dismiss" onclick="closeHoldingsPopup()" data-i18n="btn_close">Close</button>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-faint);flex:1">Data approximate · mid-2026 · verify on issuer website</span>
+      <button class="se-dismiss" onclick="closeHoldingsPopup()">Close</button>
     </div>
   </div>
 </div>
@@ -654,7 +641,7 @@
       <div class="se-what"></div>
     </div>
     <div class="se-footer">
-      <button class="se-dismiss" onclick="closeSignalPopup()" data-i18n="btn_gotit">Got it</button>
+      <button class="se-dismiss" onclick="closeSignalPopup()">Got it</button>
     </div>
   </div>
 </div>
@@ -1642,95 +1629,6 @@ document.addEventListener('click', function(e) {
   const sig = ['strong-bull','bull','bear','strong-bear'].find(s => chipEl.classList.contains(s));
   if (sig) openSignalPopup(pair.textContent.trim(), labelEl ? labelEl.textContent.trim() : '', sig);
 });
-
-// ===================== i18n TRANSLATION SYSTEM =====================
-const TRANSLATIONS = {
-  en: {
-    tab_overview:'Overview', tab_live:'⬤ Live Signal', tab_etfs:'ETFs + Themes',
-    tab_ratios:'Ratios', tab_regimes:'Regimes', tab_playbook:'Playbook',
-    tab_caveats:'Caveats', tab_performers:'🏆 Best Performers',
-    hero_kicker:'// Where the money is going — and how to be early',
-    hero_h2:'Stop watching prices. Watch the <span class="serif">ratios.</span>',
-    hero_p:'The absolute price of any ETF tells you little. The <em>relationship</em> between two ETFs tells you the regime: risk-on or risk-off, growth or defense, reflation or fear. This desk maps the most liquid fund per sector — US and worldwide — against 15 intermarket ratios that professional traders use to spot rotation before it completes.',
-    s00_num:'SECTION 00 / LIVE SIGNAL ENGINE', s00_h3:'Green light / Red light — now',
-    s00_p:'15 intermarket ratios + 3 theme signal lights vs. SMA20 &amp; SMA50. Masters ×2 in score. Theme row shows which categories have a green light right now.',
-    s01_num:'SECTION 01 / SECTOR · ASSET-CLASS · THEME ETFs',
-    s01_h3:'The most liquid fund per industry &amp; theme',
-    s01_p:'US sectors, global ETFs, macro asset classes — plus trending thematic industries (defense, space, quantum, AI, nuclear and more) that cut across GICS sectors.',
-    s02_num:'SECTION 02 / INTERMARKET RATIOS + THEME RATIOS',
-    s02_h3:'What each ratio means &amp; how to position',
-    s02_p:'The last three ratios map themes onto the same framework: SMH/SPY (tech-AI), ITA/SPY (defense), ARKK/SPY (speculative).',
-    s03_num:'SECTION 03 / REGIME ARCHETYPES', s03_h3:'Read them together',
-    s03_p:'Score each lens +1/−1 by its 50-day MA slope. Net the score across lenses.',
-    s04_num:'SECTION 04 / EXECUTION', s04_h3:'The rotation + theme playbook',
-    s05_num:'SECTION 05 / RISK NOTES', s05_h3:'Where this breaks',
-    bp_num:'BEST PERFORMERS / RELATIVE STRENGTH RANKING',
-    bp_h3:'Who is beating the market?',
-    bp_p:'Each ETF is measured as <b>ETF / SPY ratio</b> — then ranked by how far that ratio sits <b>above its own 20-day SMA</b>. This removes the market tide and shows which ETF is genuinely outperforming. Strong Bull = ratio above both SMA20 and SMA50.',
-    btn_refresh:'↺ Refresh', btn_close:'Close', btn_gotit:'Got it',
-    row_masters:'Core Master Gauges',
-    row_themes:'⬤ Theme Signal Lights — Green = add exposure · Red = cut first',
-    breakdown_title:'All Signals at a Glance',
-    rct_title:'All Ratio Cards', rct_hint:'Sorted by signal strength — strong bull first, strong bear last',
-    rct_cta:'Click to expand',
-    th_ticker:'Ticker', th_fund:'Fund', th_category:'Category',
-    th_tracks:'Tracks', th_aum:'Approx AUM', th_why:"Why it's the one",
-    popup_holdings_title:'Top 10 Holdings',
-    popup_holdings_note:'Data approximate · mid-2026 · verify on issuer website',
-    footer_text:'ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.',
-  },
-  tr: {
-    tab_overview:'Genel Bakış', tab_live:'⬤ Canlı Sinyal', tab_etfs:"ETF'ler + Temalar",
-    tab_ratios:'Oranlar', tab_regimes:'Rejimler', tab_playbook:'Strateji',
-    tab_caveats:'Uyarılar', tab_performers:'🏆 En İyi Performanslar',
-    hero_kicker:'// Paranın nereye gittiği — ve erken nasıl fark edilir',
-    hero_h2:'Fiyatlara bakmayı bırakın. <span class="serif">Oranlara</span> bakın.',
-    hero_p:"Herhangi bir ETF'nin mutlak fiyatı size çok az şey söyler. İki ETF arasındaki <em>ilişki</em> size rejimi söyler: riskli mi yoksa savunmacı mı, büyüme mi yoksa koruma mu, enflasyon mu yoksa korku mu. Bu masa, ABD ve dünya genelindeki her sektörden en likit fonu — profesyonel yatırımcıların rotasyonu tamamlanmadan önce tespit etmek için kullandığı 15 piyasalar arası oranla karşılaştırır.",
-    s00_num:'BÖLÜM 00 / CANLI SİNYAL MOTORU', s00_h3:'Yeşil ışık / Kırmızı ışık — şimdi',
-    s00_p:"SMA20 ve SMA50'ye karşı 15 piyasalar arası oran + 3 tema sinyal ışığı. Ana göstergeler puanda ×2 ağırlıklı. Tema satırı hangi kategorilerin şu anda yeşil ışığa sahip olduğunu gösterir.",
-    s01_num:"BÖLÜM 01 / SEKTÖR · VARLIK SINIFI · TEMA ETF'LERİ",
-    s01_h3:'Her sektörden en likit fon',
-    s01_p:'ABD sektörleri, küresel ETF\'ler, makro varlık sınıfları — artı savunma, uzay, kuantum, yapay zeka, nükleer ve daha fazlası gibi GICS sektörlerini aşan tematik endüstriler.',
-    s02_num:'BÖLÜM 02 / PİYASALARARASI ORANLAR + TEMA ORANLARI',
-    s02_h3:'Her oranın anlamı ve nasıl pozisyon alınır',
-    s02_p:"Son üç oran temaları aynı çerçeveye eşler: SMH/SPY (teknoloji-YZ), ITA/SPY (savunma), ARKK/SPY (spekülatif).",
-    s03_num:'BÖLÜM 03 / REJİM ARKETİPLERİ', s03_h3:'Birlikte okuyun',
-    s03_p:"Her lensi 50 günlük MA eğimine göre +1/−1 olarak puanlayın. Puanları lenslere göre netleştirin.",
-    s04_num:'BÖLÜM 04 / UYGULAMA', s04_h3:'Rotasyon + tema stratejisi',
-    s05_num:'BÖLÜM 05 / RİSK NOTLARI', s05_h3:'Bu nerede işe yaramaz',
-    bp_num:'EN İYİ PERFORMANSLAR / GÖRELİ GÜÇ SIRALAMASI',
-    bp_h3:'Piyasayı kim geçiyor?',
-    bp_p:"Her ETF <b>ETF / SPY oranı</b> olarak ölçülür — ardından bu oranın <b>kendi 20 günlük SMA'sının ne kadar üzerinde</b> durduğuna göre sıralanır. Bu, piyasa dalgasını kaldırır ve hangi ETF'nin gerçekten üstün performans gösterdiğini ortaya koyar. Güçlü Boğa = oran hem SMA20 hem de SMA50'nin üzerinde.",
-    btn_refresh:'↺ Yenile', btn_close:'Kapat', btn_gotit:'Anladım',
-    row_masters:'Ana Göstergeler',
-    row_themes:'⬤ Tema Sinyal Işıkları — Yeşil = pozisyon ekle · Kırmızı = önce kes',
-    breakdown_title:'Tüm Sinyaller Bir Bakışta',
-    rct_title:'Tüm Oran Kartları', rct_hint:"Sinyal gücüne göre sıralandı — güçlü boğa önce, güçlü ayı son",
-    rct_cta:'Genişletmek için tıklayın',
-    th_ticker:'Sembol', th_fund:'Fon', th_category:'Kategori',
-    th_tracks:'Takip Eder', th_aum:'Tahmini AUM', th_why:'Neden bu fon',
-    popup_holdings_title:'İlk 10 Hisse',
-    popup_holdings_note:"Veriler tahminidir · 2026 ortası · İşlem yapmadan önce ihraççı web sitesinden doğrulayın",
-    footer_text:"ETF ROTASYON MASASI + TEMALAR · Araştırma: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC dosyaları.<br>Yalnızca eğitim amaçlıdır — yatırım tavsiyesi değildir. AUM ve korelasyonlar yaklaşıktır ve zamana duyarlıdır.",
-  }
-};
-
-let currentLang = localStorage.getItem('etf_lang') || 'en';
-
-function setLang(lang) {
-  currentLang = lang;
-  localStorage.setItem('etf_lang', lang);
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    const val = TRANSLATIONS[lang][key];
-    if (val !== undefined) el.innerHTML = val;
-  });
-  document.documentElement.lang = lang === 'tr' ? 'tr' : 'en';
-}
-
-// Apply saved or default language on load
-setLang(currentLang);
 </script>
 </body>
 </html>
