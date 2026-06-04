@@ -778,7 +778,10 @@
   <div class="se-box">
     <button class="se-close" onclick="closeSignalPopup()" aria-label="Close">✕</button>
     <div class="se-top">
-      <div class="se-verdict"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <div class="se-verdict"></div>
+        <span class="se-tier" style="display:none;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:10px;background:rgba(232,193,74,.12);color:var(--gold);border:1px solid rgba(232,193,74,.25)"></span>
+      </div>
       <div class="se-pair"></div>
       <div class="se-label"></div>
       <div class="se-verdict-summary" style="font-size:13px;color:var(--text-dim);margin-bottom:16px;font-style:italic"></div>
@@ -1332,7 +1335,7 @@ function renderBanner(data){
   document.getElementById('rbTime').textContent='Updated '+new Date().toLocaleTimeString();
   const b=document.querySelector('.regime-banner');if(b){b.className=`regime-banner ${cls}`;b.style.setProperty('--rb-col',rbCol);}
   document.getElementById('liveBreakdown').style.display='block';
-  document.getElementById('bdGrid').innerHTML=valid.map(r=>{const c=r.cl.bullish?'green':'red';const col=r.cl.bullish?'#3fd17e':'#ff5c61';const pct=((r.curr-r.s20)/r.s20*100);return `<div class="bd-row"><div class="bd-light ${r.theme?'gold':c}"></div><div class="bd-pair" style="color:${col}">${r.key}</div><div class="bd-label">${r.label}</div><div class="bd-pct" style="color:${col}">${(pct>=0?'+':'')+pct.toFixed(2)}%</div></div>`;}).join('');
+  document.getElementById('bdGrid').innerHTML=valid.map(r=>{const c=r.cl.bullish?'green':'red';const col=r.cl.bullish?'#3fd17e':'#ff5c61';const pct=((r.curr-r.s20)/r.s20*100);return `<div class="bd-row" data-ratio="${r.key}" data-sig="${r.cl.sig}" style="cursor:pointer" title="Click to understand this signal"><div class="bd-light ${r.theme?'gold':c}"></div><div class="bd-pair" style="color:${col}">${r.key}</div><div class="bd-label">${r.label}</div><div class="bd-pct" style="color:${col}">${(pct>=0?'+':'')+pct.toFixed(2)}%</div></div>`;}).join('');
 }
 
 let loading=false;
@@ -1642,6 +1645,13 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeHolding
 
 // Click delegation for Best Performers cards and ETF universe table rows
 document.addEventListener('click',function(e){
+  // All Signals at a Glance — breakdown rows
+  const bdRow=e.target.closest('.bd-row[data-ratio]');
+  if(bdRow){
+    const labelEl=bdRow.querySelector('.bd-label');
+    openSignalPopup(bdRow.dataset.ratio, labelEl?labelEl.textContent.trim():'', bdRow.dataset.sig||'bull');
+    return;
+  }
   // Section 02 ratio cards
   const rcard=e.target.closest('.rcard[data-ratio]');
   if(rcard){
@@ -1667,66 +1677,244 @@ document.addEventListener('click',function(e){
 
 // ---- SIGNAL EXPLAIN POPUP ----
 const SIGNAL_EXPLAINS = {
+
+  // ── TIER 1 — THE REGIME DEFINERS ──────────────────────────────────────────
+
   'XLY/XLP': {
-    headline: '🛒 Are people spending freely or playing it safe?',
-    explain: 'This compares two types of everyday companies. <strong>XLY</strong> holds brands like Amazon, Tesla, and Nike — things people buy when they feel good about money. <strong>XLP</strong> holds companies like Procter & Gamble, Coca-Cola, and Walmart — things people buy no matter what.\n\nWhen this signal is <em>bullish</em>, more money is flowing into the "feel good" spending stocks. When it\'s <em>bearish</em>, investors are quietly shifting money into the boring-but-safe stocks — a sign they\'re getting nervous.',
-    what: '<strong>In plain English:</strong> Think of it like this — when people feel rich, they eat at restaurants (XLY). When they feel worried, they stock up on toilet paper (XLP). This signal tells you which mood is winning right now.'
+    tier: '⭐ TIER 1 — REGIME',
+    headline: '🛒 Restaurants vs. toilet paper: the economy\'s mood test',
+    explain: '<strong>XLY</strong> holds companies people spend on when they feel good — Amazon, Tesla, Nike, McDonald\'s. <strong>XLP</strong> holds what people buy regardless — Procter & Gamble, Coca-Cola, Walmart.<br><br>This is called the <em>"offensive vs. defensive"</em> ratio by institutional traders. John Murphy at StockCharts popularised it as the purest measure of whether real money is moving into cyclicals or retreating into defensives — regardless of where the S&P 500 is printing.<br><br>Consumer spending is ~68% of US GDP. When this ratio falls while the market is still rising, that\'s a <strong>divergence</strong> — historically one of the most reliable early warnings of a market top.',
+    what: '<strong>The institutional rule:</strong> Divergences with SPX are the most powerful signal. If stocks are making new highs but XLY/XLP is rolling over, reduce risk. When it\'s rising, the consumer is healthy and cyclicals deserve overweight. <em>Source: John Murphy (StockCharts), JC Parets (All Star Charts)</em>'
   },
-  'QQQ/SPY': {
-    headline: '💻 Is Big Tech leading the market, or falling behind?',
-    explain: '<strong>QQQ</strong> is basically the top 100 tech and growth companies — Apple, Microsoft, Nvidia, Meta, Google. <strong>SPY</strong> is the whole US stock market.\n\nWhen this is <em>bullish</em>, tech is outrunning everything else — investors are feeling optimistic and betting on growth. When it\'s <em>bearish</em>, money is rotating out of tech and into other parts of the market.',
-    what: '<strong>In plain English:</strong> Tech stocks go up fast but also fall fast. When this signal turns red, it means investors are saying "we\'ve had enough tech for now" and moving money elsewhere — like banks, healthcare, or energy.'
-  },
-  'SMH/SPY': {
-    headline: '🔬 Are chip stocks (the engine of AI) in demand?',
-    explain: '<strong>SMH</strong> holds the companies that make semiconductors — the tiny chips inside every smartphone, AI server, and electric car. Think Nvidia, TSMC, AMD.\n\nWhen this is <em>bullish</em>, demand for AI and technology is strong. When it\'s <em>bearish</em>, it\'s an early warning that the whole tech sector could slow down — chips are usually the first to feel it.',
-    what: '<strong>In plain English:</strong> Chip companies are like the factories that build everything digital. If their stocks are falling relative to the market, it\'s like seeing fewer orders at a factory — a warning sign for the whole tech economy.'
-  },
-  'IWM/SPY': {
-    headline: '🏘️ Are small American companies keeping up with the big ones?',
-    explain: '<strong>IWM</strong> holds about 2,000 small US companies — local businesses, regional banks, smaller manufacturers. <strong>SPY</strong> is the big names everyone knows.\n\nWhen this is <em>bullish</em>, even the little guys are doing well — that\'s a healthy, broad market. When it\'s <em>bearish</em>, only the big companies are holding up, which usually means investors are getting cautious.',
-    what: '<strong>In plain English:</strong> Small companies are more sensitive to the economy — they borrow more, have less cushion. If they\'re underperforming, it\'s a sign investors are worried about the real economy, not just the big tech names.'
-  },
+
   'HYG/LQD': {
-    headline: '⚠️ Are investors willing to lend money to risky companies?',
-    explain: '<strong>HYG</strong> holds "junk bonds" — loans to companies with shaky finances that pay higher interest. <strong>LQD</strong> holds bonds from rock-solid companies.\n\nWhen this is <em>bullish</em>, investors are comfortable taking risk — they\'re chasing the higher interest from riskier loans. When it\'s <em>bearish</em>, they\'re pulling money out of risky debt and hiding in safe bonds. This is one of the earliest warning signals before stock markets drop.',
-    what: '<strong>In plain English:</strong> Imagine two borrowers — one is a stable bank (LQD), the other is a startup with debt (HYG). When people stop lending to the startup, it means they\'re getting scared. This often happens before the stock market notices trouble.'
+    tier: '⭐ TIER 1 — REGIME',
+    headline: '⚠️ The credit market\'s verdict — and it always speaks first',
+    explain: '<strong>HYG</strong> holds "junk bonds" — loans to financially weaker companies that pay higher interest to attract buyers. <strong>LQD</strong> holds investment-grade bonds from stable corporations.<br><br>This strips out duration entirely — it\'s a pure <em>quality preference</em> signal. JC Parets of All Star Charts calls the credit risk ratio <em>"the most important ratio chart in markets"</em> because <strong>credit leads equities</strong>. HYG/LQD peaks typically precede S&P 500 peaks by weeks, not days.<br><br>When junk bonds roll over while stocks are still rallying, institutional bond desks are quietly de-risking before equity traders notice.',
+    what: '<strong>The institutional rule:</strong> Break of the 40-week moving average in this ratio = textbook risk-off signal. Don\'t wait for stocks to confirm — they\'re always late. If HYG/LQD breaks down, cut equity beta immediately. <em>Source: JC Parets (All Star Charts), Andrew Thrasher</em>'
   },
-  'Copper/Gold': {
-    headline: '🏗️ Is the global economy growing, or are people scared?',
-    explain: '<strong>Copper</strong> is used in everything — buildings, cars, electronics, power lines. When copper prices rise, it means factories and construction are busy. <strong>Gold</strong> is the classic safe haven — people buy it when they\'re frightened.\n\nWhen this ratio is <em>bullish</em>, copper is winning — the world economy is humming. When it\'s <em>bearish</em>, gold is winning — fear is taking over.',
-    what: '<strong>In plain English:</strong> Copper = optimism about building things. Gold = fear and hiding. This ratio is like a global mood ring — rising copper/gold means "let\'s grow," falling means "protect yourself."'
+
+  'CPER/GLD': {
+    tier: '⭐ TIER 1 — REGIME',
+    headline: '🏗️ The Gundlach ratio — predicts the 10-year yield better than most economists',
+    explain: '<strong>Copper</strong> is the metal of growth — used in every building, car, data centre, and power grid. <strong>Gold</strong> is the metal of fear — bought when people don\'t trust paper money or the economy.<br><br>Jeff Gundlach (DoubleLine, one of the world\'s largest bond managers) calls this the indicator he\'d use <em>"rather than overthink things."</em> The historical correlation with the US 10-year Treasury yield is <strong>0.85–0.97</strong> — extraordinarily high. When copper beats gold, yields tend to rise (growth); when gold beats copper, yields fall (fear/deflation).<br><br><em>Important caveat since 2022:</em> Central bank gold buying (China, Russia, emerging markets) has artificially suppressed the ratio. It still works directionally — just don\'t trust the magnitude.',
+    what: '<strong>The institutional rule:</strong> Copper/Gold making a 6-month high → bias long cyclicals (industrials, materials, emerging markets); 10-year yield likely heading higher. Collapsing → prepare for Treasury rally and equity drawdown. <em>Source: Jeff Gundlach (DoubleLine), CFA Institute 2023</em>'
   },
+
   'SPY/TLT': {
-    headline: '📈 Are stocks winning over safe government bonds?',
-    explain: '<strong>SPY</strong> is the US stock market. <strong>TLT</strong> holds long-term US government bonds — the ultimate "safe" investment.\n\nWhen this is <em>bullish</em>, stocks are outperforming bonds — investors are risk-on and chasing growth. When it\'s <em>bearish</em>, money is flooding into government bonds — classic "flight to safety," the kind of move you see when people get really worried.',
-    what: '<strong>In plain English:</strong> Stocks vs. government IOUs. When people trust the economy, they own stocks. When they get scared, they lend money to the government instead. This signal shows which way that tide is flowing.'
+    tier: '⭐ TIER 1 — REGIME',
+    headline: '📈 Stocks vs. bonds — the classic risk-on/risk-off switch',
+    explain: '<strong>SPY</strong> is the entire US stock market. <strong>TLT</strong> holds long-term US government bonds — 20+ year Treasuries, the ultimate safe haven for institutional capital.<br><br>This is the most direct measure of whether capital is <em>seeking return</em> (equities) or <em>seeking safety</em> (duration). When it falls sharply, money is flooding into government bonds — the institutional equivalent of sprinting for the exit. The speed of the move matters: a slow decline is rotation; a fast decline is panic.',
+    what: '<strong>The institutional rule:</strong> Rising = overweight equities, underweight bonds. Falling = rotate to Treasuries and defensives. A sharp, fast breakdown often precedes equity volatility by 1–5 days. <em>Source: Standard intermarket analysis, Tier 1 regime signal</em>'
   },
+
+  // ── TIER 2 — ROTATION SIGNALS ─────────────────────────────────────────────
+
+  'QQQ/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '💻 Is Big Tech leading, or is the rally broadening?',
+    explain: '<strong>QQQ</strong> is the Nasdaq-100 — Apple, Microsoft, Nvidia, Meta, Google, no financials. <strong>SPY</strong> is the full S&P 500.<br><br>The Magnificent Seven represented <strong>34.3% of the S&P 500</strong> as of December 2025 (up from 12.3% in 2015). When QQQ/SPY rises, mega-cap tech is driving the entire market — a sign of <em>concentration risk</em>. Savita Subramanian at BofA has called this the reason equal-weight (RSP) will outperform cap-weight in 2025.<br><br>When this ratio rolls over, it doesn\'t necessarily mean stocks fall — it means the rally is broadening into banks, industrials, energy. That\'s often healthier.',
+    what: '<strong>The institutional rule:</strong> Rising sharply = tech leadership intact, stay in QQQ/XLK. Rolling over = rotate into equal-weight (RSP), value, international. A falling QQQ/SPY alongside rising RSP/SPY is the ideal rotation signal. <em>Source: Savita Subramanian (BofA), standard concentration analysis</em>'
+  },
+
+  'SMH/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🔬 Semiconductors: the canary for AI demand and the tech theme master switch',
+    explain: '<strong>SMH</strong> holds chip makers — Nvidia (~21%), TSMC, AMD, Broadcom, ASML. Semiconductors are the most cyclically sensitive part of tech because they\'re ordered months in advance. When demand softens, chip stocks feel it first.<br><br>This ratio serves two purposes: (1) <em>macro canary</em> — semis lead the broader tech cycle by 2–3 months, and (2) <em>theme switch</em> — if SMH/SPY is red, all AI/quantum/robotics theme ETFs should be cut first, because they have no justification without semiconductor demand.<br><br>The SMH/IGV sub-ratio (semis vs. software) tells you <em>which phase</em> of AI you\'re in: hardware buildout (semis win) or monetisation (software wins).',
+    what: '<strong>The institutional rule:</strong> SMH/SPY green = green light for AIQ, QTUM, BOTZ, CHAT. Below SMA50 = cut all tech themes immediately — semis lead tech, not the other way around. <em>Source: Frank Cappelleri (Cappnotes, ex-Instinet)</em>'
+  },
+
+  'RSP/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '⚖️ "A few generals, no troops" — is the rally real or just mega-caps?',
+    explain: '<strong>RSP</strong> is the equal-weight S&P 500 — every stock gets the same 0.2% weight. <strong>SPY</strong> is cap-weighted — Apple and Nvidia each get 7%.<br><br>When RSP/SPY falls, it means the S&P 500 is rising but only because a handful of mega-caps are carrying it. The average stock is actually flat or down — institutional traders call this <em>"a few generals, no troops."</em> This was the dominant story of 2023–2025: the Magnificent Seven doing all the work while 490 other stocks struggled.<br><br>Savita Subramanian at BofA has explicitly called for equal-weight to outperform cap-weight, citing extreme Mag-7 valuations (38x earnings vs. 23x for the broader S&P).',
+    what: '<strong>The institutional rule:</strong> Rising RSP/SPY = healthy, broad rally — trust it. Falling RSP/SPY = fragile, narrow rally — reduce size, expect volatility. <em>Source: Savita Subramanian (BofA Head of US Equity Strategy)</em>'
+  },
+
+  'SPHB/SPLV': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🎲 High risk vs. low risk stocks — the cleanest equity fear gauge',
+    explain: '<strong>SPHB</strong> holds the 100 highest-beta S&P 500 stocks — companies whose prices swing wildly. <strong>SPLV</strong> holds the 100 lowest-volatility stocks — the boring, steady ones.<br><br>The PDF describes this as <em>"the single cleanest equity-internal risk-on/off ratio"</em> — no cross-asset noise, no duration effects, just pure investor appetite for risk within equities. StockCharts uses it as the primary confirmation tool for sector rotation.<br><br>When SPHB/SPLV fails to confirm a new S&P 500 high, the rally is being driven by defensive positioning, not genuine risk appetite — a powerful warning.',
+    what: '<strong>The institutional rule:</strong> Rising = increase beta across all sectors. Falling while SPX is still rising = divergence warning, reduce size. This divergence preceded several corrections including 2018 and 2022. <em>Source: Aptus Capital, StockCharts RRG analysis</em>'
+  },
+
+  'IWM/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🏘️ Small caps vs. large caps — is the economy\'s engine running?',
+    explain: '<strong>IWM</strong> holds ~2,000 small US companies — regional businesses, local banks, smaller manufacturers. They are highly sensitive to US domestic growth, borrowing costs, and consumer confidence. <strong>SPY</strong> is the large caps that can weather global headwinds.<br><br>Small caps borrow more at floating rates, have thinner margins, and can\'t hedge currency risk. When IWM underperforms, it\'s often because the bond market is pricing in slower growth or tighter credit — well before it shows up in headline data.',
+    what: '<strong>The institutional rule:</strong> Rising = genuine economic expansion, broaden exposure. Falling = up-in-quality, move to large-cap defensives. IWM is a leading indicator for credit conditions — if it breaks SMA50, watch KRE and HYG/LQD next.'
+  },
+
+  'IWF/IWD': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '📐 Growth vs. Value — which style is the market rewarding?',
+    explain: '<strong>IWF</strong> holds growth stocks — companies priced for future earnings, heavily weighted in tech. <strong>IWD</strong> holds value stocks — cheap relative to earnings, heavily weighted in financials, energy, industrials.<br><br>Growth outperforms when real interest rates are low or falling (future earnings are worth more when discounted at a lower rate). Value outperforms when rates are rising (reflation) or when growth stocks are priced to perfection.<br><br>This ratio flipped dramatically in 2022 when the Fed hiked rates — growth collapsed 30%+ while value held flat. Watching this ratio tells you what the bond market is implying about the rate cycle.',
+    what: '<strong>The institutional rule:</strong> Rising = growth/tech/duration regime — lower real rates expected. Falling = value/cyclical/financial regime — higher rates or reflation. Always check SPY/TLT alongside this to confirm the rate direction.'
+  },
+
+  'HYG/TLT': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🔥 Credit vs. duration — both legs of the risk-off trade in one ratio',
+    explain: '<strong>HYG</strong> rises when credit risk is being rewarded. <strong>TLT</strong> rises when people flee to long-duration safety. This ratio captures both simultaneously — when it falls, <em>both</em> credit stress and duration demand are active at the same time.<br><br>This is a more extreme risk-off signal than HYG/LQD alone. When both junk bonds sell off AND Treasuries rally together, it typically means institutional desks are in full de-risking mode, not just rotating. This double-leg move often leads equity weakness by 3–10 days.',
+    what: '<strong>The institutional rule:</strong> Rising strongly = double risk-on confirmation. Falling sharply = maximum risk-off warning. The speed of the decline matters more than the level — a 2% drop in a week is a serious signal. <em>Source: Standard institutional cross-asset analysis</em>'
+  },
+
+  'GLD/TLT': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '💰 Inflation fear vs. deflation fear — which type of crisis is this?',
+    explain: '<strong>GLD</strong> rises when people fear inflation or currency debasement. <strong>TLT</strong> rises when people fear deflation, recession, and falling rates.<br><br>This ratio separates two very different types of fear: <em>inflationary fear</em> (gold wins — think 2022 commodity shock) vs. <em>deflationary fear</em> (bonds win — think 2020 COVID crash, 2008).<br><br>This distinction matters enormously for positioning. In an inflationary regime, equities with pricing power (energy, commodities, value) do well even as rates rise. In a deflationary regime, long duration (TLT, growth stocks, TIPS) is the protection.',
+    what: '<strong>The institutional rule:</strong> Rising GLD/TLT = inflationary regime — tilt to commodities, TIPS, energy, materials. Falling = deflationary/risk-off — favour TLT, investment-grade bonds, quality growth. This is the first check before any macro positioning.'
+  },
+
+  'KRE/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🏦 Regional banks: the earliest credit stress indicator in the system',
+    explain: '<strong>KRE</strong> holds regional US banks — the lenders to small businesses, local real estate, and consumers. They have less access to capital markets than the big four and show funding stress earlier.<br><br>The 2023 SVB crisis proved this signal leads HYG/LQD by days to weeks — KRE dropped sharply before junk bonds reflected the credit stress. When KRE underperforms the broad market, it means deposit flight, tightening lending standards, or rate-squeeze fears are building below the surface.<br><br>KRE reappeared as a key indicator in October 2025 when Zions and Western Alliance disclosures triggered a 6.2% single-day drop (ETF.com data).',
+    what: '<strong>The institutional rule:</strong> KRE breaking SMA50 = early warning. Immediately check HYG/LQD and XLF. If all three are falling together, de-risk credit-sensitive positions (small caps, leveraged names, XLF). <em>Source: ETF.com, post-SVB institutional analysis</em>'
+  },
+
+  'SMH/IGV': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🤖 Semis vs. software — which phase of the AI trade are we in?',
+    explain: 'The AI investment cycle has two distinct phases: <em>hardware buildout</em> and <em>monetisation</em>. <strong>SMH</strong> (semiconductors: Nvidia, TSMC, AMAT) wins in the hardware phase — data centres being built, chips being ordered. <strong>IGV</strong> (software: Salesforce, ServiceNow, Snowflake) wins in the monetisation phase — companies actually profiting from AI.<br><br>Frank Cappelleri (Cappnotes, ex-Instinet) flagged extreme SMH/IGV readings in 2024 — semis at all-time highs while software hit 6-month lows — as the most oversold software signal on record. That set up a major software mean-reversion rally.<br><br>Watching this ratio tells you where to rotate <em>within</em> tech, not just whether tech is on.',
+    what: '<strong>The institutional rule:</strong> SMH/IGV rising = stay in semis (NVDA, SOXX, SMH). Falling from extreme = rotate from semis into software (IGV, SKYY, CRM, NOW). When flat = hold broad XLK. <em>Source: Frank Cappelleri (Cappnotes)</em>'
+  },
+
+  'IBIT/GLD': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '₿ Bitcoin vs. gold — digital speculation vs. ancient safe haven',
+    explain: '<strong>IBIT</strong> tracks spot Bitcoin — the ultimate speculative, high-beta asset. <strong>GLD</strong> tracks physical gold — the 5,000-year-old store of value.<br><br>Mike McGlone at Bloomberg Intelligence treats BTC/Gold as a leading indicator for speculative risk appetite. The ratio peaked at ~33x in May 2025 and fell to ~20x by December 2025. McGlone has explicitly warned it "may face greater risk of dropping toward 10x than staying above 30x in 2026, with recessionary implications."<br><br>When Bitcoin is winning, institutional risk tolerance is at maximum — crypto correlates with Nasdaq in risk-off events, and Bitcoin positions are usually the first to get liquidated when funds need cash.',
+    what: '<strong>The institutional rule:</strong> BTC/Gold dropping below 15x (McGlone framework) = confirms risk-off in digital assets, typically spills into high-beta equities. Rising = maximum speculative risk-on. <em>Source: Mike McGlone (Bloomberg Intelligence)</em>'
+  },
+
+  'EEM/EFA': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🌍 Emerging vs. developed markets — the weak-dollar trade',
+    explain: '<strong>EEM</strong> holds emerging market stocks — China (~25%), India (~20%), Taiwan (~17%), Korea (~12%). <strong>EFA</strong> holds developed markets outside the US — Japan, UK, Europe, Switzerland.<br><br>This ratio is primarily a <em>US dollar proxy</em>. A weaker dollar makes dollar-denominated EM assets worth more in local currency and makes their commodity exports more competitive. LPL Research flagged five structural reasons EM could outperform into 2026 when the EM/SPX ratio broke a multi-year downtrend in late 2025.<br><br>EM also requires global growth optimism — it won\'t outperform if Copper/Gold is falling.',
+    what: '<strong>The institutional rule:</strong> Rising EEM/EFA = weak dollar, global risk-on, add EM and cyclicals. Falling = strong dollar, capital returning to US safety. Always confirm with Copper/Gold — they should agree. <em>Source: LPL Research 2025</em>'
+  },
+
+  'QQQ/RSP': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🔭 Mega-cap concentration — is the whole market really just 7 stocks?',
+    explain: '<strong>QQQ</strong> is the tech-heavy Nasdaq-100. <strong>RSP</strong> is the equal-weight S&P 500 — every company equally sized.<br><br>This is the cleanest concentration measure available. The Magnificent Seven (Apple, Microsoft, Nvidia, Amazon, Google, Meta, Tesla) represented <strong>34.3% of the S&P 500</strong> in December 2025 — up from 12.3% in 2015. They traded at 38x earnings vs. 23x for the rest of the index (Fortune/BofA data).<br><br>When this ratio rolls over, broad rotation is starting. It doesn\'t mean stocks fall — it means capital is flowing from mega-caps into smaller, cheaper names. Historically this is how bull markets mature.',
+    what: '<strong>The institutional rule:</strong> QQQ/RSP at extreme highs = concentration risk, reduce mega-cap overweight. Rolling over = rotate into equal-weight RSP, value, international. <em>Source: Savita Subramanian (BofA), BofA Research 2024</em>'
+  },
+
+  'IYT/XLU': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🚚 Transport vs. utilities — Dow Theory in modern form',
+    explain: '<strong>IYT</strong> holds transport companies — FedEx, UPS, railroads, airlines. They move physical goods and are exquisitely sensitive to economic activity. <strong>XLU</strong> holds utilities — NextEra, Duke Energy. Utilities are bond proxies: they rise when rates fall and investors want yield over growth.<br><br>Charles Dow observed in the early 1900s that when both industrials and transports make new highs together, the economy is genuinely expanding. Modern version: when IYT outperforms XLU, goods are moving and the economy is healthy. Divergences here flagged both the 2007 and 2019 market turns.',
+    what: '<strong>The institutional rule:</strong> IYT/XLU rising = cyclical strength, buy industrials and materials. Falling = defensive regime, utilities outperforming as bond proxy. Divergence with SPX = classic Dow Theory warning. <em>Source: Dow Theory (Charles Dow, modernised)</em>'
+  },
+
+  'XLK/XLU': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '⚡ Tech vs. utilities — the high-beta offensive/defensive switch',
+    explain: '<strong>XLK</strong> holds pure technology — Apple, Nvidia, Microsoft. <strong>XLU</strong> holds utilities — NextEra, Duke, Dominion.<br><br><em>Important 2024–2026 context:</em> Utilities surged on AI data-centre power demand, which distorted this ratio\'s historical cleanliness. The ratio now partially reflects AI infrastructure spending, not just risk appetite. For a cleaner read, use SMH/XLU (AI hardware vs. AI power) or SMH/IGV (hardware vs. software).<br><br>Still a useful directional indicator — just interpret any XLU strength carefully: is it defensive buying, or AI power demand?',
+    what: '<strong>The institutional rule:</strong> Rising = tech leading, risk-on. Falling = check whether it\'s genuine defensiveness or utilities being bid for AI power reasons. In 2024–2025, XLU outperformance was NOT necessarily a risk-off signal. <em>Source: StockAnalysis, institutional note 2025</em>'
+  },
+
   'GLD/SPY': {
-    headline: '🥇 Is gold outrunning stocks? (Fear gauge)',
-    explain: '<strong>GLD</strong> tracks the gold price. When gold beats the stock market, it means investors are prioritising safety over growth.\n\nWhen this is <em>bearish</em> (gold underperforming), it\'s actually good news — people prefer stocks. When it\'s <em>bullish</em> here, it means gold is surging relative to stocks — a sign of rising fear or inflation worries.',
-    what: '<strong>In plain English:</strong> Gold goes up when people are scared or don\'t trust paper money. If this signal is flashing, money is moving from growth stocks into the oldest safe haven in history.'
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🥇 Gold vs. stocks — is fear premium rising?',
+    explain: '<strong>GLD</strong> tracks spot gold. When gold outperforms the stock market, institutions are paying a <em>fear premium</em> — they\'re willing to accept zero yield to own the oldest safe haven.<br><br>The 30-day rolling correlation between gold and the US Dollar Index hit -96% in mid-2025 (E*TRADE data). Dollar direction is essentially gold direction right now — any sustained dollar weakness is a gold tailwind. Central banks globally (China, India, Russia, emerging markets) have been aggressively buying gold since 2022, which has permanently raised the floor.',
+    what: '<strong>The institutional rule:</strong> Rising GLD/SPY = fear or inflation premium building — check GLD/TLT to distinguish which type. Falling = equities preferred, risk appetite healthy. <em>Note: rising gold can now coexist with rising equities — watch the rate of change, not the level.</em>'
   },
+
   'ITA/SPY': {
-    headline: '🛡️ Are defence stocks outperforming? (Geopolitical tension)',
-    explain: '<strong>ITA</strong> holds defence companies — Lockheed Martin, Raytheon, Northrop Grumman. These stocks do well when governments increase military spending, often due to geopolitical tensions.\n\nThis signal can be <em>bullish</em> even when the rest of the market is weak, because defence spending doesn\'t depend on the economy.',
-    what: '<strong>In plain English:</strong> When the world gets tense — wars, conflicts, military buildups — defence company profits go up. This signal tells you if that money flow is happening right now.'
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🛡️ Defence stocks — the one sector that can diverge from the risk cycle',
+    explain: '<strong>ITA</strong> holds US aerospace & defence — Lockheed Martin, RTX, Northrop Grumman, L3Harris. Defence budgets are set by governments, not the economy, so this sector can outperform even in full risk-off regimes.<br><br>ITA/SPY is the only theme switch on this dashboard that is <em>independent of the master gauges</em>. It tracks geopolitical tension, NATO spending targets, and global arms demand — not consumer confidence or credit spreads. Europe\'s rearmament programme, the Ukraine conflict, and the Indo-Pacific buildup are structural multi-year tailwinds.',
+    what: '<strong>The institutional rule:</strong> Hold ITA/XAR/SHLD as a separate "geopolitical sleeve" — it doesn\'t need a risk-on macro environment to work. The only exit trigger is a genuine global de-escalation, not a recession. <em>Source: Institutional theme analysis 2024–2026</em>'
   },
+
   'ARKK/SPY': {
-    headline: '🚀 Are speculative "moonshot" stocks back in favour?',
-    explain: '<strong>ARKK</strong> holds highly speculative innovation stocks — companies that might change the world but aren\'t profitable yet. Think early-stage biotech, space companies, disruptive tech.\n\nWhen this is <em>bullish</em>, investors are in full risk-on mode, chasing big potential gains. When it\'s <em>bearish</em>, these are the first stocks people sell when they get nervous — they\'re considered last-in, first-out.',
-    what: '<strong>In plain English:</strong> ARKK stocks are the "lottery tickets" of the market. People only buy them when they feel great about the future. When this turns red, it means confidence is fading and people are selling the riskiest bets first.'
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🚀 Speculative pulse — the first to get cut, the last to recover',
+    explain: '<strong>ARKK</strong> holds Cathie Wood\'s most speculative innovation bets — Tesla, Coinbase, Roku, Block, Palantir. These are companies with massive potential but often no current profits.<br><br>ARKK/SPY is the cleanest read on <em>frontier risk appetite</em>. When it\'s rising, institutions are willing to pay for optionality and the promise of future profits. When it rolls over, it almost always leads the broader speculative complex — space ETFs, genomics, crypto equities, and early-stage AI.<br><br>The rule is brutal: ARKK is last to add (only when ≥2 master gauges are bullish AND SMH/SPY is green) and first to cut (as soon as any master gauge turns red).',
+    what: '<strong>The institutional rule:</strong> ARKK/SPY rolling over SMA20 = exit all speculative themes immediately. Rising confidently = green light for NASA, ARKG, BLOK, space/genomics. Never hold ARKK names through a risk-off signal. <em>Source: Standard hedge fund theme management</em>'
   },
-  'XLF/SPY': {
-    headline: '🏦 Are banks and financial stocks leading?',
-    explain: '<strong>XLF</strong> holds big banks, insurance companies, and financial firms — JPMorgan, Goldman Sachs, Berkshire Hathaway.\n\nWhen banks outperform, it often signals rising interest rates and a healthy lending environment. When they underperform, it can mean the economy is slowing or credit is tightening.',
-    what: '<strong>In plain English:</strong> Banks make money when the economy is active — people borrow to buy homes and businesses take loans to grow. Strong banks = healthy economy. Weak banks = people are borrowing less and being cautious.'
+
+  // ── ADDITIONAL SIGNALS ────────────────────────────────────────────────────
+
+  'XLK/SHY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '💵 Risk assets vs. cash — are stocks worth owning over doing nothing?',
+    explain: '<strong>XLK</strong> is technology stocks — the highest-beta sector. <strong>SHY</strong> holds 1–3 year Treasuries — essentially cash with a tiny yield.<br><br>This is the most basic risk/no-risk comparison. When XLK/SHY is falling, cash (or short-term Treasuries) is beating the most aggressive equity sector — a powerful signal that the risk-reward for equities has collapsed.',
+    what: '<strong>The institutional rule:</strong> Rising = stay long risk, equities have positive carry over cash. Falling = cash is winning — reduce equity beta, rotate to SHY/BIL or money market. Simple but effective.'
   },
-  'XLE/SPY': {
-    headline: '⛽ Are energy stocks (oil & gas) outperforming?',
-    explain: '<strong>XLE</strong> holds energy companies — ExxonMobil, Chevron, ConocoPhillips. Energy stocks tend to rise when oil prices climb, often linked to geopolitical events or growing global demand.\n\nEnergy is a classic "defensive" sector during inflation — companies pass rising costs onto consumers.',
-    what: '<strong>In plain English:</strong> When you see petrol prices rising at the pump, energy company profits usually go up too. This signal tells you if the market is betting on higher energy prices ahead.'
+
+  'SPHB/SPLV': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🎲 High-beta vs. low-vol — the cleanest equity risk barometer',
+    explain: '<strong>SPHB</strong> holds the 100 most volatile S&P 500 stocks. <strong>SPLV</strong> holds the 100 least volatile. No cross-asset noise, no duration effects — just pure equity risk appetite within the same index.<br><br>Per the Macro Trader\'s Playbook: <em>"The single cleanest equity-internal risk-on/off ratio."</em> StockCharts uses SPHB/SPLV as the primary confirmation tool for sector rotation theses. When it fails to confirm a new SPX high, the rally is narrow and vulnerable.',
+    what: '<strong>The institutional rule:</strong> Rising = increase portfolio beta, all sectors. SPHB/SPLV diverging from SPX (one makes new high, other doesn\'t) = reduce size. Works on all timeframes. <em>Source: Aptus Capital, Seeking Alpha institutional analysis</em>'
+  },
+
+  'MAGS/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🏆 The Magnificent Seven vs. everyone else',
+    explain: '<strong>MAGS</strong> holds only the seven largest AI-exposed mega-caps equally weighted: Apple, Microsoft, Nvidia, Amazon, Alphabet, Meta, Tesla. <strong>SPY</strong> holds all 500.<br><br>The Mag-7 represented 34.3% of the S&P 500 by December 2025 and traded at ~38x earnings vs. 23x for the rest. This extreme concentration means MAGS/SPY is essentially measuring whether the AI premium is expanding or contracting.<br><br>When MAGS/SPY falls while RSP/SPY rises simultaneously — that\'s the ideal rotation: broad market strengthening, not concentrated leadership. Historically the healthiest sign a bull market is maturing.',
+    what: '<strong>The institutional rule:</strong> MAGS/SPY at extreme highs = reduce mega-cap overweight. Falling alongside rising RSP/SPY = rotate into equal-weight, value, international — bullish rotation. Falling alongside falling RSP/SPY = broad de-risking. <em>Source: BofA Research, Savita Subramanian 2025</em>'
+  },
+
+  'COPX/GLD': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '⛏️ Copper miners vs. gold — industrial cycle intensity',
+    explain: '<strong>COPX</strong> holds copper mining stocks — Freeport-McMoRan, Southern Copper, Ivanhoe. Miners carry equity risk premium on top of spot copper: they are more volatile and more leveraged to the copper price.<br><br>The structural case is powerful: AI data centres, electric vehicles, and grid modernisation require massive copper volumes. Goldman Sachs forecasts data-centre power demand growing 175% by 2030 vs. 2023 levels. Every megawatt needs kilometres of copper wiring.<br><br>When COPX beats GLD, markets are pricing accelerating industrial demand — a more aggressive version of the Copper/Gold signal.',
+    what: '<strong>The institutional rule:</strong> Rising = overweight industrials, materials, energy, EM. Falling = cut industrial cyclicals, add gold/defensive. Compare to CPER/GLD: if both falling together, the industrial thesis is breaking down. <em>Source: Goldman Sachs "Generational Growth" 2024</em>'
+  },
+
+  'SKYY/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '☁️ Cloud/SaaS vs. market — is AI moving from hardware to monetisation?',
+    explain: '<strong>SKYY</strong> holds cloud computing companies — AWS (Amazon), Azure (Microsoft), GCP (Google), Salesforce, Snowflake, Cloudflare. These are the companies that will actually bill customers for AI usage.<br><br>The AI trade has two phases: (1) <em>hardware capex</em> — buy Nvidia, TSMC, AMAT; and (2) <em>software monetisation</em> — buy SKYY, IGV, CRM, NOW. This ratio tells you when the market is transitioning from phase 1 to phase 2. When SKYY/SPY starts leading SMH/SPY, the AI trade is maturing into a revenue story.',
+    what: '<strong>The institutional rule:</strong> Rising SKYY while SMH is flat/falling = AI monetisation phase, rotate from semis into cloud. Watch SKYY vs. SMH directly as the phase-change indicator. <em>Source: Standard AI capex cycle analysis 2024–2026</em>'
+  },
+
+  'XBI/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🧬 Biotech risk appetite — GLP-1 and gene therapy on/off switch',
+    explain: '<strong>XBI</strong> is equal-weight across ~180 biotech companies — it captures small-cap FDA approval surprises that market-cap weighted IBB would miss. The equal weighting makes it the most sensitive gauge for broad biotech risk appetite.<br><br>Two mega-themes are running simultaneously: <em>GLP-1 obesity drugs</em> (Eli Lilly, Novo Nordisk pipeline) and <em>gene editing</em> (CRISPR, mRNA). When XBI/SPY rises, either M&A activity, positive trial data, or policy tailwinds are bringing money back into the sector.',
+    what: '<strong>The institutional rule:</strong> Rising = add XBI, IBB, ARKG. If XBI rising while SMH falling = genuine sector rotation into healthcare, not just broad risk-on. Falling = cut speculative biotech, hold only large-cap pharma. <em>Source: Standard biotech cycle analysis</em>'
+  },
+
+  'INDA/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🇮🇳 India vs. US — the decade-long structural rotation',
+    explain: '<strong>INDA</strong> holds the top Indian stocks — Reliance, HDFC Bank, Infosys, TCS, Bharti Airtel. India is the fastest-growing major economy: GDP growth >6%, manufacturing shift from China, young demographics (average age 28 vs. 38 in the US), and Modi\'s infrastructure buildout.<br><br>This is a structural multi-year story, not a tactical trade. Weak dollar amplifies returns for US investors. LPL Research flagged five structural reasons EM (led by India) could outperform into 2026 when the INDA/SPY ratio broke a multi-year downtrend.',
+    what: '<strong>The institutional rule:</strong> Rising = add INDA, consider small-cap India (SMIN). Hold through short-term volatility — this is structural. Sharp falls during dollar strength = opportunity to add. Falling in a strong-dollar, US-exceptionalism regime = wait for dollar to weaken. <em>Source: LPL Research 2025</em>'
+  },
+
+  'EWJ/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🗾 Japan vs. US — the yen carry trade indicator',
+    explain: '<strong>EWJ</strong> holds Japanese large-cap stocks — Toyota, Sony, Mitsubishi UFJ, Softbank. Japan ran to multi-decade highs in 2024–2025 on yen weakness and corporate governance reforms (companies forced to return capital to shareholders).<br><br>The <strong>yen carry trade</strong> is the hidden mechanism: investors borrow in yen (near-zero rates) and invest in higher-yielding assets elsewhere. When the yen strengthens, those carry trades unwind violently — every asset class sells off simultaneously. August 2024 is the textbook example: a 3% yen move triggered a global volatility spike.',
+    what: '<strong>The institutional rule:</strong> EWJ/SPY falling sharply = yen carry trade unwinding — reduce ALL risk immediately across every asset class. Rising = Japan momentum intact, yen weak, carry trade healthy. <em>⚠️ Sharp EWJ/SPY declines are a cross-asset vol spike warning — act fast.</em>'
+  },
+
+  'SOXX/SMH': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '📡 Semis breadth — is the AI rally broadening beyond Nvidia?',
+    explain: '<strong>SOXX</strong> is iShares Semiconductor — 30 holdings, Nvidia capped at ~7%. <strong>SMH</strong> is VanEck Semiconductor — 25 holdings, Nvidia at ~21%.<br><br>When SOXX outperforms SMH, the semiconductor rally is broadening beyond Nvidia into AMD, Qualcomm, Micron, Texas Instruments, Applied Materials. That\'s a sign of genuine sector health, not just one company\'s AI dominance.<br><br>When SMH outperforms SOXX, the entire semiconductor trade is effectively just an Nvidia trade — concentration risk is high and the rally is fragile.',
+    what: '<strong>The institutional rule:</strong> SOXX beating SMH = semis breadth expanding, healthier rally, prefer SOXX for diversification. SMH beating SOXX = concentration in NVDA/TSM only, higher risk. <em>Source: Standard semiconductor breadth analysis 2025–2026</em>'
+  },
+
+  'KRE/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🏦 Regional banks — the earliest credit stress warning in the system',
+    explain: '<strong>KRE</strong> holds ~140 regional US banks — the lenders to small businesses, local real estate developers, and consumers. These banks have far less capital market access than JPMorgan or Goldman Sachs, making them the first to show funding stress.<br><br>The SVB crisis (2023) proved this signal leads the broader credit market by days to weeks. KRE dropped sharply before HYG/LQD reflected the stress. October 2025 saw another episode when Zions and Western Alliance disclosures triggered a 6.2% single-day KRE drop (ETF.com).',
+    what: '<strong>The institutional rule:</strong> KRE breaking SMA50 = immediately check HYG/LQD and XLF. If all three deteriorating simultaneously, de-risk credit-sensitive positions (leveraged loans, small caps, XLF). This signal led the 2023 regional banking crisis by 2 weeks. <em>Source: ETF.com, post-SVB crisis analysis</em>'
+  },
+
+  'PAVE/SPY': {
+    tier: '📊 TIER 2 — ROTATION',
+    headline: '🔌 AI infrastructure & power grid — the picks-and-shovels AI trade',
+    explain: '<strong>PAVE</strong> holds companies building physical infrastructure — Eaton, Quanta Services, EMCOR, Vulcan Materials, Parker Hannifin. This is the "picks-and-shovels" play on AI: every AI data centre needs transformers, switchgear, power lines, and construction.<br><br>Goldman Sachs\' 2025 GS SUSTAIN report forecasts data-centre power demand growing <strong>175% by 2030</strong> vs. 2023 levels. The US grid is decades behind where it needs to be for this demand. PAVE captures the companies building the physical layer of the AI economy.',
+    what: '<strong>The institutional rule:</strong> Rising PAVE/SPY = AI capex cycle is active, add PAVE and utilities with data-centre exposure. Falling = capex cycle cooling or rates rising making infrastructure projects less attractive. <em>Source: Goldman Sachs "Generational Growth" Nov 2025</em>'
   }
+
 };
 
 const VERDICT_TEXT = {
@@ -1738,18 +1926,22 @@ const VERDICT_TEXT = {
 
 function openSignalPopup(key, label, sig) {
   const info = SIGNAL_EXPLAINS[key] || {
+    tier: null,
     headline: label,
     explain: 'This ratio compares the performance of two market segments to gauge investor sentiment.',
     what: '<strong>Rising:</strong> money flowing into the first asset. <strong>Falling:</strong> money flowing into the second asset.'
   };
   const vt = VERDICT_TEXT[sig] || VERDICT_TEXT['bull'];
   const overlay = document.getElementById('seOverlay');
+  // Tier badge
+  const tierEl = overlay.querySelector('.se-tier');
+  if(tierEl) { tierEl.textContent = info.tier||''; tierEl.style.display = info.tier ? 'inline-block' : 'none'; }
   overlay.querySelector('.se-verdict').innerHTML = `<span class="se-dot" style="background:${vt.color};box-shadow:0 0 8px ${vt.color}66"></span><span style="color:${vt.color}">${vt.label}</span>`;
   overlay.querySelector('.se-pair').textContent = key;
   overlay.querySelector('.se-label').textContent = label;
   overlay.querySelector('.se-verdict-summary').textContent = vt.summary;
   overlay.querySelector('.se-headline').textContent = info.headline;
-  overlay.querySelector('.se-explain').innerHTML = info.explain.replace(/\n/g,'<br>');
+  overlay.querySelector('.se-explain').innerHTML = info.explain;
   overlay.querySelector('.se-what').innerHTML = info.what;
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
