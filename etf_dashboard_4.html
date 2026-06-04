@@ -601,6 +601,50 @@
     <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
 </div>
 
+<!-- Holdings Popup -->
+<div class="se-overlay" id="holdingsOverlay" role="dialog" aria-modal="true">
+  <div class="se-box" style="max-width:560px">
+    <button class="se-close" onclick="closeHoldingsPopup()" aria-label="Close">✕</button>
+    <div class="se-top">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px">Top 10 Holdings</div>
+      <div class="ho-ticker" style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--gold)"></div>
+      <div class="ho-name" style="font-size:13px;color:var(--text);font-weight:600;margin-top:2px"></div>
+      <div class="ho-cat" style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:4px;margin-bottom:16px"></div>
+    </div>
+    <div class="se-divider"></div>
+    <div class="se-body" style="padding:16px 24px">
+      <div class="ho-table-wrap"></div>
+      <div class="ho-note hac-note" style="margin-top:12px;display:none"></div>
+    </div>
+    <div class="se-footer">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-faint);flex:1">Data approximate · mid-2026 · verify on issuer website</span>
+      <button class="se-dismiss" onclick="closeHoldingsPopup()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Signal Explain Popup -->
+<div class="se-overlay" id="seOverlay" role="dialog" aria-modal="true">
+  <div class="se-box">
+    <button class="se-close" onclick="closeSignalPopup()" aria-label="Close">✕</button>
+    <div class="se-top">
+      <div class="se-verdict"></div>
+      <div class="se-pair"></div>
+      <div class="se-label"></div>
+      <div class="se-verdict-summary" style="font-size:13px;color:var(--text-dim);margin-bottom:16px;font-style:italic"></div>
+    </div>
+    <div class="se-divider"></div>
+    <div class="se-body">
+      <div class="se-headline"></div>
+      <div class="se-explain"></div>
+      <div class="se-what"></div>
+    </div>
+    <div class="se-footer">
+      <button class="se-dismiss" onclick="closeSignalPopup()">Got it</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function tick(){const n=new Date();document.getElementById('clk').textContent=n.toLocaleTimeString('en-GB');document.getElementById('dte').textContent=n.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();setTimeout(tick,1000);})();
 
@@ -1565,49 +1609,5 @@ document.addEventListener('click', function(e) {
   if (sig) openSignalPopup(pair.textContent.trim(), labelEl ? labelEl.textContent.trim() : '', sig);
 });
 </script>
-
-<!-- Holdings Popup -->
-<div class="se-overlay" id="holdingsOverlay" role="dialog" aria-modal="true">
-  <div class="se-box" style="max-width:560px">
-    <button class="se-close" onclick="closeHoldingsPopup()" aria-label="Close">✕</button>
-    <div class="se-top">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px">Top 10 Holdings</div>
-      <div class="ho-ticker" style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--gold)"></div>
-      <div class="ho-name" style="font-size:13px;color:var(--text);font-weight:600;margin-top:2px"></div>
-      <div class="ho-cat" style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:4px;margin-bottom:16px"></div>
-    </div>
-    <div class="se-divider"></div>
-    <div class="se-body" style="padding:16px 24px">
-      <div class="ho-table-wrap"></div>
-      <div class="ho-note hac-note" style="margin-top:12px;display:none"></div>
-    </div>
-    <div class="se-footer">
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-faint);flex:1">Data approximate · mid-2026 · verify on issuer website</span>
-      <button class="se-dismiss" onclick="closeHoldingsPopup()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Signal Explain Popup -->
-<div class="se-overlay" id="seOverlay" role="dialog" aria-modal="true">
-  <div class="se-box">
-    <button class="se-close" onclick="closeSignalPopup()" aria-label="Close">✕</button>
-    <div class="se-top">
-      <div class="se-verdict"></div>
-      <div class="se-pair"></div>
-      <div class="se-label"></div>
-      <div class="se-verdict-summary" style="font-size:13px;color:var(--text-dim);margin-bottom:16px;font-style:italic"></div>
-    </div>
-    <div class="se-divider"></div>
-    <div class="se-body">
-      <div class="se-headline"></div>
-      <div class="se-explain"></div>
-      <div class="se-what"></div>
-    </div>
-    <div class="se-footer">
-      <button class="se-dismiss" onclick="closeSignalPopup()">Got it</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
