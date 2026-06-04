@@ -45,9 +45,25 @@
   .hero{padding:42px 0 28px;border-bottom:1px solid var(--line)}
   .hero-inner{display:grid;grid-template-columns:1fr 420px;gap:36px;align-items:start}
   .hero-text{min-width:0}
-  .hero-video{position:relative;flex-shrink:0}
+  .hero-video{position:relative;flex-shrink:0;cursor:pointer}
   .hero-video-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:8px}
-  .hero-video iframe{width:100%;height:236px;border-radius:8px;border:1px solid var(--line);display:block;background:var(--bg-card)}
+  .hv-thumb{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);transition:border-color .2s,box-shadow .2s}
+  .hero-video:hover .hv-thumb{border-color:rgba(63,209,126,.4);box-shadow:0 0 0 1px rgba(63,209,126,.15),0 8px 32px rgba(0,0,0,.4)}
+  .hv-thumb iframe{width:100%;height:236px;display:block;pointer-events:none;background:var(--bg-card)}
+  .hv-overlay{position:absolute;inset:0;background:rgba(5,10,12,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:background .2s}
+  .hero-video:hover .hv-overlay{background:rgba(5,10,12,.35)}
+  .hv-play-btn{width:80px;height:80px;transition:transform .2s,filter .2s;filter:drop-shadow(0 0 18px rgba(63,209,126,.5))}
+  .hero-video:hover .hv-play-btn{transform:scale(1.1);filter:drop-shadow(0 0 28px rgba(63,209,126,.8))}
+  .hv-label{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.7)}
+
+  /* ── VIDEO MODAL ── */
+  .vm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);z-index:950;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s}
+  .vm-overlay.open{opacity:1;pointer-events:auto}
+  .vm-box{position:relative;width:min(1100px,92vw);aspect-ratio:16/9;border-radius:10px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.7);transform:scale(.96);transition:transform .25s cubic-bezier(.4,0,.2,1);border:1px solid rgba(63,209,126,.2)}
+  .vm-overlay.open .vm-box{transform:scale(1)}
+  .vm-box iframe{width:100%;height:100%;display:block;border:none}
+  .vm-close{position:absolute;top:12px;right:14px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:18px;line-height:1;padding:5px 10px;border-radius:6px;cursor:pointer;z-index:10;transition:background .15s}
+  .vm-close:hover{background:rgba(255,92,97,.5)}
   .hero .kicker{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
   .hero h2{font-size:clamp(28px,4.5vw,48px);line-height:1.04;font-weight:800;letter-spacing:-1.5px;max-width:22ch}
   .hero h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--gold)}
@@ -358,7 +374,8 @@
     /* Hero */
     .hero{padding:22px 0 16px}
     .hero-inner{grid-template-columns:1fr;gap:20px}
-    .hero-video iframe{height:200px}
+    .hv-thumb iframe{height:200px}
+    .hv-play-btn{width:60px;height:60px}
     .hero .kicker{font-size:9px;letter-spacing:1.5px;margin-bottom:8px}
     .hero h2{font-size:clamp(21px,6.5vw,30px);letter-spacing:-1px}
     .hero p{font-size:12.5px}
@@ -548,9 +565,27 @@
         </div>
         <p style="margin-top:20px;font-family:var(--mono);font-size:12px;color:var(--text-faint)">Rule: <b style="color:var(--gold)">≥2 of the 4 master gauges must be bullish</b> before adding any thematic exposure. Theme ETFs amplify the regime — last to add, first to cut.</p>
       </div>
-      <div class="hero-video">
-        <div class="hero-video-label">▶ INTRO</div>
-        <iframe src="video.html" scrolling="no" frameborder="0" allowfullscreen title="ETF Ratio Dashboard Introduction"></iframe>
+      <div class="hero-video" onclick="openVideoModal()" title="Watch intro">
+        <div class="hero-video-label">2 MIN INTRO</div>
+        <div class="hv-thumb">
+          <iframe src="video.html" scrolling="no" frameborder="0" tabindex="-1" aria-hidden="true" title="Preview"></iframe>
+          <div class="hv-overlay">
+            <div class="hv-play-btn">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="40" cy="40" r="38" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+                <circle cx="40" cy="40" r="38" stroke="url(#pg)" stroke-width="2"/>
+                <polygon points="32,24 60,40 32,56" fill="white"/>
+                <defs>
+                  <linearGradient id="pg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#3fd17e"/>
+                    <stop offset="100%" stop-color="#46d6d2"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="hv-label">Watch intro</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -765,6 +800,12 @@
   </section>
 
     <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
+</div>
+
+<!-- Video Modal -->
+<div class="vm-overlay" id="videoModal">
+  <div class="vm-box" id="videoBox"></div>
+  <button class="vm-close" onclick="closeVideoModal()" aria-label="Close video">✕</button>
 </div>
 
 <!-- Holdings Popup -->
@@ -1599,6 +1640,38 @@ const HOLDINGS=[
    h:[['MP','MP Materials',9.8],['LYC','Lynas Rare Earths',8.4],['PLS','Pilbara Minerals',7.2],['ALB','Albemarle',6.8],['1772.HK','Ganfeng Lithium',5.9],['LTHM','Livent Corp',5.3],['NMG','Nouveau Monde',4.2],['NEO','neo Performance Materials',3.8],['UUUU','Energy Fuels',3.6],['CC','Chemours',3.2]],
    note:'Rare earths + lithium for AI chips, EVs, defense. China controls ~85% of processing — geopolitical choke point. Defense demand + EV demand = structural tailwind.'},
 ];
+
+// ---- VIDEO MODAL ----
+function openVideoModal(){
+  const modal=document.getElementById('videoModal');
+  const box=document.getElementById('videoBox');
+  if(!box.querySelector('iframe')){
+    const ifr=document.createElement('iframe');
+    ifr.src='video.html';
+    ifr.setAttribute('frameborder','0');
+    ifr.setAttribute('scrolling','no');
+    ifr.setAttribute('allowfullscreen','');
+    ifr.style.cssText='width:100%;height:100%;display:block;border:none';
+    box.appendChild(ifr);
+  }
+  modal.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeVideoModal(){
+  const modal=document.getElementById('videoModal');
+  modal.classList.remove('open');
+  document.body.style.overflow='';
+  // Reset iframe so it restarts next open
+  const box=document.getElementById('videoBox');
+  const ifr=box.querySelector('iframe');
+  if(ifr) ifr.remove();
+}
+document.getElementById('videoModal').addEventListener('click',function(e){
+  if(e.target===this) closeVideoModal();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeVideoModal();
+});
 
 // ---- HOLDINGS POPUP ----
 const HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
