@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz@0,6..72;1,6..72&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0e0f;--bg-elev:#10171a;--bg-card:#0d1316;
-    --line:#1d2b30;--line-bright:#2a3d44;
-    --text:#dfe7e6;--text-dim:#8b9b99;--text-faint:#566663;
+    --bg:#1a2326;--bg-elev:#212e32;--bg-card:#1e292d;
+    --line:#2d3e44;--line-bright:#3d545c;
+    --text:#dfe7e6;--text-dim:#9aabaa;--text-faint:#6a7e7c;
     --amber:#f5a623;--green:#3fd17e;--red:#ff5c61;
     --cyan:#46d6d2;--violet:#9d8cff;--gold:#e8c14a;
     --mono:'JetBrains Mono',monospace;--sans:'Archivo',sans-serif;--serif:'Newsreader',serif;
@@ -730,21 +730,24 @@
 
   <!-- RATIOS -->
   <section id="ratios">
-    <div class="sec-head">
+    <div class="sec-head sec-collapse-hdr" id="ratiosToggleHdr" onclick="toggleRatiosSection()" title="Click to expand / collapse">
       <div>
         <div class="num">SECTION 02 / INTERMARKET RATIOS + THEME RATIOS</div>
         <h3>What each ratio means &amp; how to position</h3>
         <p>The last three ratios map themes onto the same framework: SMH/SPY (tech-AI), ITA/SPY (defense), ARKK/SPY (speculative).</p>
       </div>
+      <span class="sec-arrow">▼</span>
     </div>
-    <div class="filters" id="ratioFilters">
-      <button class="chip active" data-l="all">All Lenses</button>
-      <button class="chip" data-l="equity">Equity-internal</button>
-      <button class="chip" data-l="credit">Credit</button>
-      <button class="chip" data-l="macro">Cross-asset / Macro</button>
-      <button class="chip" data-l="breadth">Breadth &amp; Global</button>
+    <div class="sec-collapsible collapsed" id="ratiosWrap" style="max-height:0">
+      <div class="filters" id="ratioFilters">
+        <button class="chip active" data-l="all">All Lenses</button>
+        <button class="chip" data-l="equity">Equity-internal</button>
+        <button class="chip" data-l="credit">Credit</button>
+        <button class="chip" data-l="macro">Cross-asset / Macro</button>
+        <button class="chip" data-l="breadth">Breadth &amp; Global</button>
+      </div>
+      <div class="ratio-grid" id="ratioGrid"></div>
     </div>
-    <div class="ratio-grid" id="ratioGrid"></div>
   </section>
 
   <!-- REGIME -->
@@ -1062,8 +1065,26 @@ document.querySelectorAll('#ratioFilters .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{document.querySelectorAll('#ratioFilters .chip').forEach(c=>c.classList.remove('active'));ch.classList.add('active');const l=ch.dataset.l;document.querySelectorAll('#ratioGrid .rcard').forEach(c=>c.classList.toggle('hidden',!(l==='all'||c.dataset.l===l)));});
 });
 
+// Map tab id → collapsible wrap id (auto-expand when tab clicked)
+const TAB_EXPAND = {sectors:'sectorsWrap', ratios:'ratiosWrap'};
 const tabs=document.querySelectorAll('.tab');
-tabs.forEach(t=>t.addEventListener('click',()=>document.getElementById(t.dataset.go).scrollIntoView({behavior:'smooth',block:'start'})));
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  const id=t.dataset.go;
+  // Auto-expand if section has a collapsible wrap
+  const wrapId=TAB_EXPAND[id];
+  if(wrapId){
+    const wrap=document.getElementById(wrapId);
+    const hdrId=wrapId.replace('Wrap','ToggleHdr');
+    if(wrap&&wrap.classList.contains('collapsed')){
+      wrap.classList.remove('collapsed');
+      wrap.style.maxHeight='none';
+      const hdr=document.getElementById(hdrId);
+      if(hdr)hdr.classList.add('open');
+    }
+  }
+  // Small delay so expand happens before scroll
+  setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}),50);
+}));
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)tabs.forEach(t=>t.classList.toggle('active',t.dataset.go===e.target.id));});},{rootMargin:'-45% 0px -50% 0px'});
 ['hero','live','sectors','ratios','regime','playbook','caveats','performers','holdings'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
 const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target);}});},{threshold:0.07});
@@ -2162,6 +2183,7 @@ function toggleCollapse(hdrId, wrapId){
 }
 function toggleThemeSection(){ toggleCollapse('themeToggleHdr','themeSignalsWrap'); }
 function toggleSectorsSection(){ toggleCollapse('sectorsToggleHdr','sectorsWrap'); }
+function toggleRatiosSection(){ toggleCollapse('ratiosToggleHdr','ratiosWrap'); }
 
 (function setupMobileCollapse(){
   if(window.innerWidth > 700) return;
