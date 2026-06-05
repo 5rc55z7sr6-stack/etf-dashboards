@@ -1577,37 +1577,37 @@ setInterval(()=>{loadLiveData();loadBestPerformers();},5*60*1000);
 const HOLDINGS=[
   // ---- US SECTORS ----
   {t:'XLK',n:'Technology Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['AAPL','Apple',22.1],['NVDA','NVIDIA',21.4],['MSFT','Microsoft',20.8],['AVGO','Broadcom',4.9],['META','Meta',3.3],['AMD','AMD',2.1],['CRM','Salesforce',1.9],['ADBE','Adobe',1.8],['AMAT','Applied Materials',1.5],['QCOM','Qualcomm',1.4]],
+   h:[['AAPL','Apple',22.1],['NVDA','NVIDIA',21.4],['MSFT','Microsoft',20.8],['AVGO','Broadcom',4.9],['META','Meta',3.3],['AMD','AMD',2.1],['CRM','Salesforce',1.9],['ADBE','Adobe',1.8],['AMAT','Applied Materials',1.5],['QCOM','Qualcomm',1.4],['ORCL','Oracle',1.3],['CSCO','Cisco',1.2],['NOW','ServiceNow',1.1],['INTU','Intuit',1.0],['PANW','Palo Alto Networks',0.9],['KLAC','KLA Corp',0.8],['LRCX','Lam Research',0.8],['MU','Micron Technology',0.7],['MRVL','Marvell Tech',0.7],['SNPS','Synopsys',0.6],['CDNS','Cadence Design',0.6],['FTNT','Fortinet',0.5]],
    note:'Heavily concentrated — top 3 names are ~64% of the fund.'},
   {t:'XLF',n:'Financial Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['BRK.B','Berkshire Hathaway',13.9],['JPM','JPMorgan Chase',11.5],['V','Visa',8.5],['MA','Mastercard',7.2],['BAC','Bank of America',3.9],['WFC','Wells Fargo',3.6],['GS','Goldman Sachs',3.2],['MS','Morgan Stanley',2.9],['BLK','BlackRock',2.5],['SPGI','S&P Global',2.2]],
+   h:[['BRK.B','Berkshire Hathaway',13.9],['JPM','JPMorgan Chase',11.5],['V','Visa',8.5],['MA','Mastercard',7.2],['BAC','Bank of America',3.9],['WFC','Wells Fargo',3.6],['GS','Goldman Sachs',3.2],['MS','Morgan Stanley',2.9],['BLK','BlackRock',2.5],['SPGI','S&P Global',2.2],['CME','CME Group',2.0],['ICE','Intercontinental Exch.',1.9],['AXP','American Express',1.8],['C','Citigroup',1.7],['USB','US Bancorp',1.5],['PNC','PNC Financial',1.4],['TRV','Travelers',1.3],['COF','Capital One',1.2],['MET','MetLife',1.1],['AON','Aon',1.0]],
    note:'Rate-sensitive; JPM + Berkshire dominate. Watch 10Y yield for direction.'},
   {t:'XLE',n:'Energy Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['XOM','Exxon Mobil',22.3],['CVX','Chevron',17.1],['COP','ConocoPhillips',8.2],['EOG','EOG Resources',5.1],['SLB','Schlumberger',5.0],['MPC','Marathon Petroleum',4.2],['VLO','Valero Energy',3.7],['PSX','Phillips 66',3.3],['OXY','Occidental Petroleum',3.1],['PXD','Pioneer Natural Res.',2.9]],
+   h:[['XOM','Exxon Mobil',22.3],['CVX','Chevron',17.1],['COP','ConocoPhillips',8.2],['EOG','EOG Resources',5.1],['SLB','Schlumberger',5.0],['MPC','Marathon Petroleum',4.2],['VLO','Valero Energy',3.7],['PSX','Phillips 66',3.3],['OXY','Occidental Petroleum',3.1],['PXD','Pioneer Natural Res.',2.9],['HAL','Halliburton',2.5],['BKR','Baker Hughes',2.4],['DVN','Devon Energy',2.2],['FANG','Diamondback Energy',2.1],['HES','Hess Corp',1.9],['MRO','Marathon Oil',1.7],['OKE','ONEOK',1.6],['WMB','Williams Companies',1.5],['KMI','Kinder Morgan',1.4],['LNG','Cheniere Energy',1.3]],
    note:'Crude oil price is the primary driver — track WTI/Brent alongside XLE.'},
   {t:'XLV',n:'Health Care Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['UNH','UnitedHealth Group',10.2],['LLY','Eli Lilly',9.5],['JNJ','Johnson & Johnson',7.1],['ABBV','AbbVie',6.3],['MRK','Merck',5.6],['PFE','Pfizer',4.6],['TMO','Thermo Fisher',4.1],['DHR','Danaher',3.6],['ABT','Abbott Labs',3.3],['ISRG','Intuitive Surgical',3.1]],
+   h:[['UNH','UnitedHealth Group',10.2],['LLY','Eli Lilly',9.5],['JNJ','Johnson & Johnson',7.1],['ABBV','AbbVie',6.3],['MRK','Merck',5.6],['PFE','Pfizer',4.6],['TMO','Thermo Fisher',4.1],['DHR','Danaher',3.6],['ABT','Abbott Labs',3.3],['ISRG','Intuitive Surgical',3.1],['ELV','Elevance Health',2.8],['CVS','CVS Health',2.6],['AMGN','Amgen',2.4],['CI','Cigna',2.2],['BMY','Bristol-Myers Squibb',2.0],['MDT','Medtronic',1.8],['BSX','Boston Scientific',1.7],['SYK','Stryker',1.6],['BDX','Becton Dickinson',1.4],['GEHC','GE HealthCare',1.3],['ZTS','Zoetis',1.2],['VRTX','Vertex Pharma',1.1]],
    note:'Defensive-growth mix. LLY weight surged on GLP-1 drug demand.'},
   {t:'XLI',n:'Industrial Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['GEV','GE Aerospace',5.2],['RTX','RTX Corp',4.6],['CAT','Caterpillar',4.5],['HON','Honeywell',4.1],['DE','Deere & Company',3.6],['LMT','Lockheed Martin',3.1],['PH','Parker Hannifin',2.9],['NOC','Northrop Grumman',2.6],['ETN','Eaton',2.6],['UNP','Union Pacific',2.4]],
+   h:[['GEV','GE Aerospace',5.2],['RTX','RTX Corp',4.6],['CAT','Caterpillar',4.5],['HON','Honeywell',4.1],['DE','Deere & Company',3.6],['LMT','Lockheed Martin',3.1],['PH','Parker Hannifin',2.9],['NOC','Northrop Grumman',2.6],['ETN','Eaton',2.6],['UNP','Union Pacific',2.4],['CTAS','Cintas',2.2],['RSG','Republic Services',2.1],['FDX','FedEx',1.9],['NSC','Norfolk Southern',1.8],['CSX','CSX Corp',1.7],['ROK','Rockwell Automation',1.6],['EMR','Emerson Electric',1.5],['JCI','Johnson Controls',1.4],['AME','AMETEK',1.3],['PCAR','PACCAR',1.2],['URI','United Rentals',1.1],['PWR','Quanta Services',1.0]],
    note:'Cyclical sector — sensitive to PMI, capex cycles, and defense budgets.'},
   {t:'XLC',n:'Communication Services Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['META','Meta Platforms',23.1],['GOOGL','Alphabet A',15.4],['GOOG','Alphabet C',13.2],['NFLX','Netflix',5.3],['TMUS','T-Mobile US',4.2],['CMCSA','Comcast',4.0],['DIS','Walt Disney',3.2],['T','AT&T',2.6],['CHTR','Charter Comm.',2.1],['EA','Electronic Arts',1.9]],
+   h:[['META','Meta Platforms',23.1],['GOOGL','Alphabet A',15.4],['GOOG','Alphabet C',13.2],['NFLX','Netflix',5.3],['TMUS','T-Mobile US',4.2],['CMCSA','Comcast',4.0],['DIS','Walt Disney',3.2],['T','AT&T',2.6],['CHTR','Charter Comm.',2.1],['EA','Electronic Arts',1.9],['VZ','Verizon',1.8],['WBD','Warner Bros. Discovery',1.6],['OMC','Omnicom Group',1.4],['TTWO','Take-Two Interactive',1.2],['LYV','Live Nation',1.1],['FOXA','Fox Corp A',1.0],['PARA','Paramount Global',0.9],['NWSA','News Corp A',0.8],['IPG','Interpublic Group',0.7],['MTCH','Match Group',0.6]],
    note:'Meta + Alphabet = ~52%. Effectively a mega-cap tech/social proxy.'},
   {t:'XLU',n:'Utilities Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['NEE','NextEra Energy',14.8],['SO','Southern Company',7.2],['DUK','Duke Energy',6.6],['SRE','Sempra',5.1],['D','Dominion Energy',4.6],['AEP','Am. Electric Power',4.1],['EXC','Exelon',4.0],['ED','Consolidated Edison',3.1],['XEL','Xcel Energy',3.0],['WEC','WEC Energy',2.6]],
+   h:[['NEE','NextEra Energy',14.8],['SO','Southern Company',7.2],['DUK','Duke Energy',6.6],['SRE','Sempra',5.1],['D','Dominion Energy',4.6],['AEP','Am. Electric Power',4.1],['EXC','Exelon',4.0],['ED','Consolidated Edison',3.1],['XEL','Xcel Energy',3.0],['WEC','WEC Energy',2.6],['ES','Eversource Energy',2.4],['ETR','Entergy',2.3],['PPL','PPL Corp',2.1],['FE','FirstEnergy',2.0],['CNP','CenterPoint Energy',1.8],['NI','NiSource',1.6],['AES','AES Corp',1.5],['PNW','Pinnacle West',1.4],['LNT','Alliant Energy',1.3],['EVRG','Evergy',1.2]],
    note:'Bond proxy — rises when rates fall. Watch 10Y Treasury yield inversely.'},
   {t:'XLY',n:'Consumer Discretionary Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['AMZN','Amazon',24.2],['TSLA','Tesla',15.8],['HD','Home Depot',9.1],['MCD',"McDonald's",4.6],['LOW',"Lowe's",4.1],['TJX','TJX Companies',3.6],['BKNG','Booking Holdings',3.1],['NKE','Nike',2.6],['SBUX','Starbucks',2.1],['TGT','Target',1.9]],
+   h:[['AMZN','Amazon',24.2],['TSLA','Tesla',15.8],['HD','Home Depot',9.1],['MCD',"McDonald's",4.6],['LOW',"Lowe's",4.1],['TJX','TJX Companies',3.6],['BKNG','Booking Holdings',3.1],['NKE','Nike',2.6],['SBUX','Starbucks',2.1],['TGT','Target',1.9],['GM','General Motors',1.8],['F','Ford Motor',1.7],['CMG','Chipotle Mexican Grill',1.6],['YUM','Yum! Brands',1.5],['HLT','Hilton Worldwide',1.4],['MAR','Marriott Intl.',1.3],['GRMN','Garmin',1.2],['ORLY',"O'Reilly Auto Parts",1.1],['RH','RH (Restoration Hardware)',1.0],['BBY','Best Buy',0.9]],
    note:'Amazon + Tesla = ~40%. The purest "risk-on consumer" gauge vs. XLP.'},
   {t:'XLP',n:'Consumer Staples Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['PG','Procter & Gamble',14.9],['COST','Costco',12.3],['WMT','Walmart',10.1],['KO','Coca-Cola',9.2],['PEP','PepsiCo',8.1],['PM','Philip Morris',4.2],['MDLZ','Mondelez',3.6],['CL','Colgate-Palmolive',3.1],['EL','Estée Lauder',2.6],['GIS','General Mills',2.1]],
+   h:[['PG','Procter & Gamble',14.9],['COST','Costco',12.3],['WMT','Walmart',10.1],['KO','Coca-Cola',9.2],['PEP','PepsiCo',8.1],['PM','Philip Morris',4.2],['MDLZ','Mondelez',3.6],['CL','Colgate-Palmolive',3.1],['EL','Estée Lauder',2.6],['GIS','General Mills',2.1],['STZ','Constellation Brands',1.9],['HSY','Hershey',1.8],['MKC','McCormick',1.7],['CHD','Church & Dwight',1.6],['KHC','Kraft Heinz',1.5],['SJM','J.M. Smucker',1.4],['HRL','Hormel Foods',1.3],['CAG','Conagra Brands',1.2],['CPB','Campbell Soup',1.1],['TAP','Molson Coors',1.0]],
    note:'Defensive leg of the XLY/XLP ratio. Outperforms in recessions and risk-off.'},
   {t:'XLRE',n:'Real Estate Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['PLD','Prologis',10.3],['AMT','American Tower',8.4],['EQIX','Equinix',8.1],['SPG','Simon Property',5.2],['CCI','Crown Castle',5.0],['SBAC','SBA Comms.',4.3],['DLR','Digital Realty',4.1],['PSA','Public Storage',3.6],['O','Realty Income',3.2],['WELL','Welltower',3.1]],
+   h:[['PLD','Prologis',10.3],['AMT','American Tower',8.4],['EQIX','Equinix',8.1],['SPG','Simon Property',5.2],['CCI','Crown Castle',5.0],['SBAC','SBA Comms.',4.3],['DLR','Digital Realty',4.1],['PSA','Public Storage',3.6],['O','Realty Income',3.2],['WELL','Welltower',3.1],['EXR','Extra Space Storage',2.8],['IRM','Iron Mountain',2.6],['VTR','Ventas',2.4],['ARE','Alexandria Real Estate',2.2],['EQR','Equity Residential',2.0],['AVB','AvalonBay Communities',1.9],['MAA','Mid-America Apartment',1.8],['UDR','UDR Inc.',1.6],['NNN','NNN REIT',1.5],['INVH','Invitation Homes',1.4]],
    note:'Rate-sensitive. Digital infrastructure (towers, data centers) now ~40% of fund.'},
   {t:'XLB',n:'Materials Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['LIN','Linde',18.2],['SHW','Sherwin-Williams',5.4],['APD','Air Products',5.1],['ECL','Ecolab',4.6],['NUE','Nucor',4.1],['FCX','Freeport-McMoRan',4.0],['BALL','Ball Corp',3.6],['LYB','LyondellBasell',3.1],['CF','CF Industries',2.6],['IFF','Intl. Flavors',2.5]],
+   h:[['LIN','Linde',18.2],['SHW','Sherwin-Williams',5.4],['APD','Air Products',5.1],['ECL','Ecolab',4.6],['NUE','Nucor',4.1],['FCX','Freeport-McMoRan',4.0],['BALL','Ball Corp',3.6],['LYB','LyondellBasell',3.1],['CF','CF Industries',2.6],['IFF','Intl. Flavors',2.5],['NEM','Newmont',2.3],['PPG','PPG Industries',2.2],['ALB','Albemarle',2.0],['CE','Celanese',1.9],['DD','DuPont',1.8],['IP','International Paper',1.6],['VMC','Vulcan Materials',1.5],['MLM','Martin Marietta',1.4],['RPM','RPM International',1.3],['WRK','WestRock',1.2]],
    note:'Cyclical. Copper/commodities price is the leading macro driver for XLB.'},
 
   // ---- GLOBAL SECTORS ----
@@ -1626,13 +1626,13 @@ const HOLDINGS=[
    h:[['AAPL','Apple',7.1],['NVDA','NVIDIA',6.9],['MSFT','Microsoft',6.6],['AMZN','Amazon',3.9],['META','Meta Platforms',2.8],['GOOGL','Alphabet A',2.4],['BRK.B','Berkshire Hathaway',1.9],['GOOG','Alphabet C',1.8],['TSLA','Tesla',1.7],['AVGO','Broadcom',1.6]],
    note:'The benchmark. Top 10 = ~37% of the fund. Rest = 490 stocks at tiny weights.'},
   {t:'QQQ',n:'Invesco QQQ Trust (Nasdaq-100)',cat:'Macro',group:'Macro / Asset Class',
-   h:[['AAPL','Apple',10.3],['NVDA','NVIDIA',8.4],['MSFT','Microsoft',8.2],['AMZN','Amazon',5.1],['META','Meta',4.3],['AVGO','Broadcom',3.6],['TSLA','Tesla',2.9],['GOOGL','Alphabet A',2.6],['COST','Costco',2.3],['GOOG','Alphabet C',2.2]],
+   h:[['AAPL','Apple',10.3],['NVDA','NVIDIA',8.4],['MSFT','Microsoft',8.2],['AMZN','Amazon',5.1],['META','Meta',4.3],['AVGO','Broadcom',3.6],['TSLA','Tesla',2.9],['GOOGL','Alphabet A',2.6],['COST','Costco',2.3],['GOOG','Alphabet C',2.2],['ADBE','Adobe',1.6],['AMD','AMD',1.5],['NFLX','Netflix',1.4],['ISRG','Intuitive Surgical',1.3],['TXN','Texas Instruments',1.2],['QCOM','Qualcomm',1.1],['INTU','Intuit',1.0],['CSCO','Cisco',0.9],['REGN','Regeneron',0.9],['HON','Honeywell',0.8],['PANW','Palo Alto Networks',0.7],['MRVL','Marvell Technology',0.6]],
    note:'No financials vs. SPY. Top-heavy tech/growth index — highest beta of the big 3.'},
   {t:'SMH',n:'VanEck Semiconductor ETF',cat:'Macro',group:'Macro / Asset Class',
-   h:[['NVDA','NVIDIA',20.8],['TSM','TSMC',14.1],['AVGO','Broadcom',8.3],['ASML','ASML',5.2],['TXN','Texas Instruments',4.4],['AMAT','Applied Materials',4.2],['LRCX','Lam Research',4.0],['KLAC','KLA Corp',3.2],['MRVL','Marvell Technology',3.1],['QCOM','Qualcomm',2.6]],
+   h:[['NVDA','NVIDIA',20.8],['TSM','TSMC',14.1],['AVGO','Broadcom',8.3],['ASML','ASML',5.2],['TXN','Texas Instruments',4.4],['AMAT','Applied Materials',4.2],['LRCX','Lam Research',4.0],['KLAC','KLA Corp',3.2],['MRVL','Marvell Technology',3.1],['QCOM','Qualcomm',2.6],['AMD','AMD',2.4],['INTC','Intel',2.2],['ON','ON Semiconductor',2.1],['ADI','Analog Devices',1.9],['MPWR','Monolithic Power',1.8],['NXPI','NXP Semiconductors',1.7],['SWKS','Skyworks Solutions',1.5],['ENTG','Entegris',1.4],['WOLF','Wolfspeed',1.2],['TER','Teradyne',1.1]],
    note:'NVDA alone is ~21%. The canary for AI capex demand — moves first.'},
   {t:'IWM',n:'iShares Russell 2000 ETF',cat:'Macro',group:'Macro / Asset Class',
-   h:[['SMCI','Super Micro Computer',0.5],['AXON','Axon Enterprise',0.5],['MSTR','MicroStrategy',0.4],['SAIA','Saia Inc.',0.4],['CELH','Celsius Holdings',0.4],['SPSC','SPS Commerce',0.4],['RMBS','Rambus',0.3],['VRRM','Verra Mobility',0.3],['HWC','Hancock Whitney',0.3],['IDCC','InterDigital',0.3]],
+   h:[['SMCI','Super Micro Computer',0.5],['AXON','Axon Enterprise',0.5],['MSTR','MicroStrategy',0.4],['SAIA','Saia Inc.',0.4],['CELH','Celsius Holdings',0.4],['SPSC','SPS Commerce',0.4],['RMBS','Rambus',0.3],['VRRM','Verra Mobility',0.3],['HWC','Hancock Whitney',0.3],['IDCC','InterDigital',0.3],['TGTX','TG Therapeutics',0.3],['FTLF','FitLife Brands',0.3],['SMPL','Simply Good Foods',0.3],['PLXS','Plexus Corp',0.3],['KFRC','Kforce Inc.',0.2],['CSWI','CSW Industrials',0.2],['UFPI','UFP Industries',0.2],['INVA','Innoviva',0.2],['PRCT','PROCEPT BioRobotics',0.2],['HTLF','Heartland Financial',0.2]],
    note:'~2,000 holdings — no single name >0.5%. Breadth & risk-appetite gauge, not a concentration bet.'},
   {t:'TLT',n:'iShares 20+ Year Treasury Bond ETF',cat:'Macro',group:'Macro / Asset Class',
    h:[['US 30Y','US Treasury 30Y Bond (4.25% 2054)',12.3],['US 30Y','US Treasury 30Y Bond (4.75% 2053)',10.2],['US 30Y','US Treasury 30Y Bond (3.875% 2043)',9.4],['US 30Y','US Treasury 30Y Bond (4.50% 2039)',8.6],['US 20Y','US Treasury 20Y Bond (3.5% 2042)',7.8],['US 30Y','US Treasury 30Y Bond (3.625% 2053)',7.1],['US 30Y','US Treasury 30Y Bond (4.00% 2052)',6.8],['US 20Y','US Treasury 20Y Bond (4.0% 2043)',6.3],['US 30Y','US Treasury 30Y Bond (4.125% 2054)',5.9],['US 30Y','US Treasury 30Y Bond (3.00% 2048)',5.2]],
@@ -1652,7 +1652,7 @@ const HOLDINGS=[
 
   // ---- THEMES ----
   {t:'ITA',n:'iShares U.S. Aerospace & Defense ETF',cat:'Theme — Defense',group:'Trending Themes',
-   h:[['RTX','RTX Corp',17.1],['LHX','L3Harris Technologies',8.3],['NOC','Northrop Grumman',7.4],['LMT','Lockheed Martin',7.2],['GEV','GE Aerospace',6.1],['BA','Boeing',5.3],['TDG','TransDigm Group',5.1],['HWM','Howmet Aerospace',4.2],['HEI','HEICO Corp',4.1],['TXT','Textron',3.6]],
+   h:[['RTX','RTX Corp',17.1],['LHX','L3Harris Technologies',8.3],['NOC','Northrop Grumman',7.4],['LMT','Lockheed Martin',7.2],['GEV','GE Aerospace',6.1],['BA','Boeing',5.3],['TDG','TransDigm Group',5.1],['HWM','Howmet Aerospace',4.2],['HEI','HEICO Corp',4.1],['TXT','Textron',3.6],['LDOS','Leidos Holdings',3.2],['CACI','CACI International',2.8],['BAH','Booz Allen Hamilton',2.6],['SAIC','Science Applications Intl.',2.4],['DRS','Leonardo DRS',2.2],['KTOS','Kratos Defense',2.0],['MOG.A','Moog Inc.',1.8],['SPR','Spirit AeroSystems',1.6],['CW','Curtiss-Wright',1.5],['MRCY','Mercury Systems',1.4]],
    note:'Most liquid defense ETF. Geopolitical premium — can rise even in broad risk-off.'},
   {t:'XAR',n:'SPDR S&P Aerospace & Defense ETF',cat:'Theme — Defense',group:'Trending Themes',
    h:[['RTX','RTX Corp',3.2],['LHX','L3Harris',3.1],['NOC','Northrop Grumman',3.0],['LMT','Lockheed Martin',3.0],['BA','Boeing',3.0],['SPR','Spirit AeroSystems',3.0],['MRCY','Mercury Systems',2.9],['CW','Curtiss-Wright',2.8],['FLIR','Teledyne FLIR',2.8],['DCO','Ducommun',2.7]],
@@ -1670,19 +1670,19 @@ const HOLDINGS=[
    h:[['RKLB','Rocket Lab',10.8],['LHX','L3Harris',8.2],['TRMB','Trimble',7.4],['KTOS','Kratos Defense',6.3],['JOBY','Joby Aviation',5.2],['MKF','Markforged',4.8],['PATH','UiPath',4.2],['PROTO','Proto Labs',4.1],['DE','Deere & Company',3.6],['SPIR','Spire Global',3.2]],
    note:'Active ARK fund — broader tech stack, not pure-play space. Holdings change frequently.'},
   {t:'QTUM',n:'Defiance Quantum ETF',cat:'Theme — Quantum',group:'Trending Themes',
-   h:[['IONQ','IonQ',5.3],['QBTS','D-Wave Quantum',5.1],['RGTI','Rigetti Computing',4.8],['IBM','IBM',4.4],['GOOGL','Alphabet',4.2],['HON','Honeywell',4.0],['MSFT','Microsoft',3.6],['LMT','Lockheed Martin',3.2],['NVDA','NVIDIA',3.1],['ARQQ','Arqit Quantum',2.9]],
+   h:[['IONQ','IonQ',5.3],['QBTS','D-Wave Quantum',5.1],['RGTI','Rigetti Computing',4.8],['IBM','IBM',4.4],['GOOGL','Alphabet',4.2],['HON','Honeywell',4.0],['MSFT','Microsoft',3.6],['LMT','Lockheed Martin',3.2],['NVDA','NVIDIA',3.1],['ARQQ','Arqit Quantum',2.9],['QUBT','Quantum Computing Inc.',2.7],['QBTS','D-Wave Quantum',2.5],['COHU','Cohu Inc.',2.3],['ENTG','Entegris',2.1],['MKSI','MKS Instruments',2.0],['ONTO','Onto Innovation',1.9],['FORM','FormFactor',1.8],['SLAB','Silicon Labs',1.7],['AMBA','Ambarella',1.6],['CEVA','CEVA Inc.',1.5]],
    note:'First and largest quantum ETF. Pure-play quantum names are tiny — IBM/GOOGL provide liquidity.'},
   {t:'AIQ',n:'Global X AI & Technology ETF',cat:'Theme — AI',group:'Trending Themes',
-   h:[['NVDA','NVIDIA',6.4],['GOOGL','Alphabet',5.3],['META','Meta Platforms',5.1],['BIDU','Baidu',4.6],['MSFT','Microsoft',4.2],['005930','Samsung',3.6],['ACN','Accenture',3.2],['0700','Tencent',3.1],['NOW','ServiceNow',2.6],['PLTR','Palantir',2.5]],
+   h:[['NVDA','NVIDIA',6.4],['GOOGL','Alphabet',5.3],['META','Meta Platforms',5.1],['BIDU','Baidu',4.6],['MSFT','Microsoft',4.2],['ACN','Accenture',3.2],['NOW','ServiceNow',2.6],['PLTR','Palantir',2.5],['AMD','AMD',2.3],['AMZN','Amazon',2.1],['AAPL','Apple',2.0],['CRM','Salesforce',1.9],['SNOW','Snowflake',1.8],['DDOG','Datadog',1.7],['AI','C3.ai',1.6],['VRNS','Varonis Systems',1.5],['SNPS','Synopsys',1.4],['KLAC','KLA Corp',1.3],['PATH','UiPath',1.2],['SOUN','SoundHound AI',1.1]],
    note:'Broad AI — includes Chinese AI names (Baidu, Tencent). 84 holdings, well diversified.'},
   {t:'CHAT',n:'Roundhill Generative AI & Technology ETF',cat:'Theme — AI',group:'Trending Themes',
    h:[['NVDA','NVIDIA',8.1],['MSFT','Microsoft',7.4],['GOOGL','Alphabet',6.3],['META','Meta Platforms',6.1],['AMZN','Amazon',5.2],['CRM','Salesforce',3.6],['ORCL','Oracle',3.4],['PLTR','Palantir',3.2],['ADBE','Adobe',3.0],['SNOW','Snowflake',2.8]],
    note:'Active fund. Revenue-purity screen for genAI — holdings subject to manager discretion.'},
   {t:'BOTZ',n:'Global X Robotics & AI ETF',cat:'Theme — Robotics',group:'Trending Themes',
-   h:[['NVDA','NVIDIA',9.3],['ISRG','Intuitive Surgical',8.4],['6861','Keyence (Japan)',7.2],['6954','Fanuc (Japan)',6.1],['ABB','ABB Ltd',6.0],['AVAV','AeroVironment',5.3],['6273','SMC Corp (Japan)',4.2],['IRBT','iRobot',3.8],['ZBRA','Zebra Technologies',3.6],['CGNX','Cognex',3.2]],
+   h:[['NVDA','NVIDIA',9.3],['ISRG','Intuitive Surgical',8.4],['ABB','ABB Ltd',6.0],['AVAV','AeroVironment',5.3],['IRBT','iRobot',3.8],['ZBRA','Zebra Technologies',3.6],['CGNX','Cognex',3.2],['TER','Teradyne',2.9],['ROK','Rockwell Automation',2.7],['PATH','UiPath',2.5],['KTOS','Kratos Defense',2.3],['MKSI','MKS Instruments',2.1],['BRKS','Brooks Automation',1.9],['ESLT','Elbit Systems',1.8],['ONTO','Onto Innovation',1.7],['ROP','Roper Technologies',1.6],['PLTR','Palantir',1.5],['GRMN','Garmin',1.4],['IROQ','iRobot',1.3],['RMBS','Rambus',1.2]],
    note:'~30% Japanese robotics names (Fanuc, Keyence, SMC). Exposed to JPY/USD FX.'},
   {t:'CIBR',n:'First Trust Nasdaq Cybersecurity ETF',cat:'Theme — Cyber',group:'Trending Themes',
-   h:[['CRWD','CrowdStrike',10.2],['CSCO','Cisco Systems',9.4],['AVGO','Broadcom',8.1],['PANW','Palo Alto Networks',7.8],['FTNT','Fortinet',5.4],['ZS','Zscaler',5.1],['OKTA','Okta',4.3],['S','SentinelOne',4.1],['GEN','Gen Digital',3.2],['TENB','Tenable',3.1]],
+   h:[['CRWD','CrowdStrike',10.2],['CSCO','Cisco Systems',9.4],['AVGO','Broadcom',8.1],['PANW','Palo Alto Networks',7.8],['FTNT','Fortinet',5.4],['ZS','Zscaler',5.1],['OKTA','Okta',4.3],['S','SentinelOne',4.1],['GEN','Gen Digital',3.2],['TENB','Tenable',3.1],['CYBR','CyberArk Software',2.8],['QLYS','Qualys',2.6],['VRNS','Varonis Systems',2.4],['CHKP','Check Point Software',2.2],['EPIQ','Epiq Systems',2.0],['NET','Cloudflare',1.9],['RPD','Rapid7',1.8],['SAIL','SailPoint',1.7],['ACSC','Accenture Security',1.6],['ATEN','A10 Networks',1.5]],
    note:'Deepest liquidity of the cyber ETFs. CRWD + CSCO + Broadcom = ~28%.'},
   {t:'URA',n:'Global X Uranium ETF',cat:'Theme — Nuclear',group:'Trending Themes',
    h:[['CCJ','Cameco',23.4],['NXE','NexGen Energy',8.2],['PDN','Paladin Energy',7.4],['KAP','Kazatomprom',7.1],['URC','Uranium Royalty Corp',5.3],['DNN','Denison Mines',5.1],['EFR','Energy Fuels',4.2],['EU','enCore Energy',3.4],['UEC','Uranium Energy',3.2],['YCA','Yellow Cake plc',3.1]],
@@ -1707,13 +1707,13 @@ const HOLDINGS=[
    note:'Active ARK flagship. The purest "speculative risk appetite" barometer — watch ARKK/SPY ratio.'},
   // ---- Hedge fund trending themes ----
   {t:'SOXX',n:'iShares Semiconductor ETF',cat:'Semiconductors (Broad)',group:'Trending Themes',
-   h:[['NVDA','NVIDIA',8.4],['AVGO','Broadcom',7.8],['AMD','AMD',6.1],['TSM','TSMC ADR',5.9],['QCOM','Qualcomm',5.2],['AMAT','Applied Materials',5.1],['LRCX','Lam Research',5.0],['TXN','Texas Instruments',4.9],['KLAC','KLA Corp',4.8],['MU','Micron Technology',4.6]],
+   h:[['NVDA','NVIDIA',8.4],['AVGO','Broadcom',7.8],['AMD','AMD',6.1],['TSM','TSMC ADR',5.9],['QCOM','Qualcomm',5.2],['AMAT','Applied Materials',5.1],['LRCX','Lam Research',5.0],['TXN','Texas Instruments',4.9],['KLAC','KLA Corp',4.8],['MU','Micron Technology',4.6],['INTC','Intel',4.2],['ON','ON Semiconductor',3.8],['ADI','Analog Devices',3.6],['MRVL','Marvell Technology',3.4],['MPWR','Monolithic Power',3.1],['NXPI','NXP Semiconductors',2.9],['SWKS','Skyworks Solutions',2.7],['ENTG','Entegris',2.4],['TER','Teradyne',2.2],['WOLF','Wolfspeed',1.9]],
    note:'More diversified than SMH — NVDA capped at ~8% vs. 21% in SMH. Includes Micron (DRAM/HBM). Rising SOXX/SMH = rally broadening.'},
   {t:'MAGS',n:'Roundhill Magnificent 7 ETF',cat:'Mega-Cap AI',group:'Trending Themes',
    h:[['AAPL','Apple',14.3],['MSFT','Microsoft',14.3],['NVDA','NVIDIA',14.2],['AMZN','Amazon',14.2],['GOOGL','Alphabet',14.2],['META','Meta Platforms',14.1],['TSLA','Tesla',14.0],['—','Equal-weighted quarterly','—'],['—','Rebalances every quarter','—'],['—','No other holdings','—']],
    note:'Pure equal-weight Magnificent 7. MAGS/SPY rising = mega-cap concentration building. Falling = market broadening — historically a healthy sign.'},
   {t:'PAVE',n:'Global X U.S. Infrastructure Development ETF',cat:'Infrastructure / AI Power',group:'Trending Themes',
-   h:[['VMC','Vulcan Materials',5.2],['MLM','Martin Marietta',5.1],['ETN','Eaton Corp',4.8],['PH','Parker Hannifin',4.5],['ACM','AECOM',4.3],['J','Jacobs Engineering',4.1],['PWR','Quanta Services',4.0],['EME','EMCOR Group',3.9],['FIX','Comfort Systems USA',3.8],['ROAD','Construction Partners',3.7]],
+   h:[['VMC','Vulcan Materials',5.2],['MLM','Martin Marietta',5.1],['ETN','Eaton Corp',4.8],['PH','Parker Hannifin',4.5],['ACM','AECOM',4.3],['J','Jacobs Engineering',4.1],['PWR','Quanta Services',4.0],['EME','EMCOR Group',3.9],['FIX','Comfort Systems USA',3.8],['ROAD','Construction Partners',3.7],['NVR','NVR Inc.',3.5],['MDU','MDU Resources',3.3],['TREX','Trex Company',3.1],['AAON','AAON Inc.',2.9],['IESC','IEC Electronics',2.7],['MYRG','MYR Group',2.5],['APOG','Apogee Enterprises',2.3],['AEIS','Advanced Energy',2.1],['STRL','Sterling Infrastructure',2.0],['GVA','Granite Construction',1.9]],
    note:'The "AI power picks-and-shovels" play. AI data centers need massive electrical infrastructure. Rising PAVE/SPY = infrastructure capex cycle active.'},
   {t:'XBI',n:'SPDR S&P Biotech ETF',cat:'Biotech (Equal Weight)',group:'Trending Themes',
    h:[['CRSP','CRISPR Therapeutics',2.1],['RARE','Ultragenyx Pharma',2.0],['BCAB','BioAtla',1.9],['EXAS','Exact Sciences',1.9],['NTRA','Natera',1.8],['VCYT','Veracyte',1.8],['RXRX','Recursion Pharma',1.8],['RCUS','Arcus Biosciences',1.7],['SRRK','Scholar Rock',1.7],['ARQT','Arcutis Biotherapeutics',1.7]],
@@ -1728,7 +1728,7 @@ const HOLDINGS=[
    h:[['FCX','Freeport-McMoRan',12.3],['SCCO','Southern Copper',8.4],['IVN','Ivanhoe Mines',7.2],['FM','First Quantum Minerals',6.8],['ANTO','Antofagasta',6.3],['LUN','Lundin Mining',5.8],['HBM','Hudbay Minerals',4.2],['CS','Capstone Copper',3.9],['TKO','Taseko Mines',3.6],['CPMC','Copper Mountain',3.2]],
    note:'AI + EV structural copper demand. Miners carry equity premium over spot copper (CPER) — more volatile, more leveraged. Watch COPX/GLD vs. CPER/GLD for miner premium.'},
   {t:'SKYY',n:'First Trust Cloud Computing ETF',cat:'Cloud / SaaS',group:'Trending Themes',
-   h:[['AMZN','Amazon (AWS)',6.2],['MSFT','Microsoft (Azure)',6.1],['GOOGL','Alphabet (GCP)',5.8],['CRM','Salesforce',5.2],['ORCL','Oracle',4.9],['SNOW','Snowflake',4.1],['NET','Cloudflare',3.8],['DDOG','Datadog',3.5],['MDB','MongoDB',3.2],['NOW','ServiceNow',3.1]],
+   h:[['AMZN','Amazon (AWS)',6.2],['MSFT','Microsoft (Azure)',6.1],['GOOGL','Alphabet (GCP)',5.8],['CRM','Salesforce',5.2],['ORCL','Oracle',4.9],['SNOW','Snowflake',4.1],['NET','Cloudflare',3.8],['DDOG','Datadog',3.5],['MDB','MongoDB',3.2],['NOW','ServiceNow',3.1],['CFLT','Confluent',2.9],['ZS','Zscaler',2.7],['HUBS','HubSpot',2.5],['TEAM','Atlassian',2.3],['TWLO','Twilio',2.1],['BOX','Box Inc.',2.0],['ESTC','Elastic NV',1.9],['FSLY','Fastly',1.8],['GTLB','GitLab',1.7],['DOCN','DigitalOcean',1.6]],
    note:'AI monetisation play. When SKYY outperforms SMH, the AI trade is shifting from hardware to software revenue. This is the later-cycle, more sustainable phase.'},
   {t:'FINX',n:'Global X FinTech ETF',cat:'Fintech',group:'Trending Themes',
    h:[['V','Visa',9.4],['MA','Mastercard',8.8],['PYPL','PayPal',7.6],['SQ','Block (Square)',6.3],['INTU','Intuit',5.8],['FI','Fiserv',5.4],['ADYEN','Adyen (AMS)',4.3],['AFRM','Affirm',4.1],['COIN','Coinbase',3.8],['SOFI','SoFi Technologies',3.6]],
@@ -1773,6 +1773,11 @@ const HOLDINGS=[
 ];
 
 
+// ---- FMP API KEY (for full ETF holdings scan) ----
+// Get a FREE key at https://financialmodelingprep.com (250 calls/day, no credit card)
+// Paste your key below between the quotes. Leave empty to use stored holdings fallback.
+const FMP_KEY = '';
+
 // ---- HOLDINGS POPUP ----
 HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
 
@@ -1789,35 +1794,36 @@ function holdingsWt(w,max){
   </div>`;
 }
 
-// Fetch fast movers across the ENTIRE ETF (not just top holdings by weight)
-// Step 1: pull live full holdings list from Yahoo Finance quoteSummary
-// Step 2: parallel-fetch % change for ALL of them
-// Step 3: return top 5 by % change — a small cap up +8% beats AAPL at +0.3%
+// Fast movers — scans as many holdings as possible, returns top 5 by % change
+// OPTION A: FMP API (full ETF holdings — set FMP_KEY above)
+// OPTION B: expanded stored holdings (~20 per ETF) — always works as fallback
 async function fetchFastMovers(holdings, etfTicker){
   const stockRe=/^[A-Z]{1,6}(\.[A-Z])?$/;
   const nameMap=new Map(holdings.map(r=>[r[0],r[1]]));
 
-  // Step 1: get live holdings from Yahoo Finance quoteSummary (more tickers than stored top-10)
+  // OPTION A — FMP API: get complete live holdings list (requires FMP_KEY)
   let tickers=[];
-  if(etfTicker){
-    const qs=`https://query1.finance.yahoo.com/v10/finance/quoteSummary/${etfTicker}?modules=topHoldings`;
-    const qsPx=[
-      {u:`https://corsproxy.io/?url=${encodeURIComponent(qs)}`,          p:r=>r},
-      {u:`https://api.allorigins.win/get?url=${encodeURIComponent(qs)}`, p:r=>JSON.parse(r.contents)},
+  if(FMP_KEY && etfTicker){
+    const fmpUrl=`https://financialmodelingprep.com/api/v3/etf-holder/${etfTicker}?apikey=${FMP_KEY}`;
+    const fmpPx=[
+      fmpUrl,                                                           // direct (FMP supports CORS)
+      `https://corsproxy.io/?url=${encodeURIComponent(fmpUrl)}`,       // proxy fallback
     ];
-    for(const px of qsPx){
+    for(const pu of fmpPx){
       try{
-        const resp=await ftch(px.u,8000);if(!resp.ok)continue;
-        const raw=await resp.json();const json=px.p(raw);
-        const h=json?.quoteSummary?.result?.[0]?.topHoldings?.holdings||[];
-        if(h.length){tickers=h.map(x=>x.symbol).filter(t=>t&&stockRe.test(t));break;}
+        const resp=await ftch(pu,9000);if(!resp.ok)continue;
+        const raw=await resp.json();
+        if(!Array.isArray(raw)||!raw.length)continue;
+        tickers=raw.map(h=>h.asset).filter(t=>t&&stockRe.test(t));
+        if(tickers.length)break;
       }catch(e){}
     }
   }
-  // Fallback to stored holdings if quoteSummary fails
+
+  // OPTION B — expanded stored holdings (~20 per ETF, always available)
   if(!tickers.length) tickers=holdings.map(r=>r[0]).filter(t=>stockRe.test(t));
 
-  // Step 2: parallel-fetch % change for ALL tickers in the ETF
+  // Parallel-fetch % change + price for every ticker in the list
   const fetchOne=async tk=>{
     const q1=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
     const q2=`https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
@@ -1842,7 +1848,7 @@ async function fetchFastMovers(holdings, etfTicker){
 
   const results=await Promise.allSettled(tickers.map(tk=>fetchOne(tk)));
   const valid=results.filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
-  window._fmPool=valid.length; // debug hook
+  window._fmPool=valid.length;
   return valid.sort((a,b)=>b.chg-a.chg).slice(0,5);
 }
 
