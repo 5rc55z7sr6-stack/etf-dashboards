@@ -524,7 +524,8 @@
   .ho-mover-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:14px;flex-shrink:0;text-align:center}
   .ho-mover-tk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);min-width:52px;flex-shrink:0}
   .ho-mover-co{font-size:11px;color:var(--text-dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ho-mover-chg{font-family:var(--mono);font-size:13px;font-weight:700;min-width:58px;text-align:right;flex-shrink:0}
+  .ho-mover-price{font-family:var(--mono);font-size:11px;color:var(--text-faint);min-width:52px;text-align:right;flex-shrink:0}
+  .ho-mover-chg{font-family:var(--mono);font-size:13px;font-weight:700;min-width:62px;text-align:right;flex-shrink:0}
   .ho-mover-chg.up{color:#4ec994}.ho-mover-chg.dn{color:#e06b6b}
   .ho-scroll-body{max-height:72vh;overflow-y:auto;padding-right:2px}
   .pulse-card{cursor:pointer}
@@ -1788,12 +1789,43 @@ function holdingsWt(w,max){
   </div>`;
 }
 
-// Fetch live % change for ETF holdings using the proven v8/chart proxy chain
+// Fetch live % change + price for ETF holdings
+// PRIMARY: single batch v7/quote request (all tickers in one call — avoids rate limits)
+// FALLBACK: individual v8/chart requests
 async function fetchFastMovers(holdings){
   const stockRe=/^[A-Z]{1,6}(\.[A-Z])?$/;
   const nameMap=new Map(holdings.map(r=>[r[0],r[1]]));
   const valid=holdings.map(r=>r[0]).filter(t=>stockRe.test(t)).slice(0,10);
   if(!valid.length) return [];
+
+  // --- PRIMARY: batch v7/quote (1 request for all tickers) ---
+  const syms=valid.join(',');
+  const q7a=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}`;
+  const q7b=`https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}`;
+  const batchPx=[
+    {u:`https://corsproxy.io/?url=${encodeURIComponent(q7a)}`,          p:r=>r},
+    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q7a)}`, p:r=>JSON.parse(r.contents)},
+    {u:`https://corsproxy.io/?url=${encodeURIComponent(q7b)}`,          p:r=>r},
+    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q7b)}`, p:r=>JSON.parse(r.contents)},
+  ];
+  for(const px of batchPx){
+    try{
+      const resp=await ftch(px.u,9000);
+      if(!resp.ok) continue;
+      const raw=await resp.json();
+      const json=px.p(raw);
+      const quotes=(json?.quoteResponse?.result)||[];
+      if(!quotes.length) continue;
+      const movers=quotes
+        .filter(q=>q.regularMarketChangePercent!=null)
+        .map(q=>({t:q.symbol, n:nameMap.get(q.symbol)||q.shortName||q.symbol, chg:q.regularMarketChangePercent, price:q.regularMarketPrice}))
+        .sort((a,b)=>b.chg-a.chg)
+        .slice(0,5);
+      if(movers.length) return movers;
+    }catch(e){/* try next */}
+  }
+
+  // --- FALLBACK: individual v8/chart per ticker ---
   const results=await Promise.allSettled(valid.map(async tk=>{
     const q1=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
     const q2=`https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
@@ -1804,7 +1836,7 @@ async function fetchFastMovers(holdings){
     ];
     for(const px of proxies){
       try{
-        const resp=await ftch(px.u,6000);
+        const resp=await ftch(px.u,8000);
         if(!resp.ok) continue;
         const raw=await resp.json();
         const json=px.p(raw);
@@ -1812,9 +1844,10 @@ async function fetchFastMovers(holdings){
         if(!res) continue;
         const closes=res.indicators.quote[0].close.filter(c=>c!=null&&isFinite(c));
         if(closes.length<2) continue;
-        const chg=((closes[closes.length-1]-closes[closes.length-2])/closes[closes.length-2])*100;
-        return {t:tk, n:nameMap.get(tk)||tk, chg};
-      }catch(e){/* try next proxy */}
+        const price=closes[closes.length-1];
+        const chg=((price-closes[closes.length-2])/closes[closes.length-2])*100;
+        return {t:tk, n:nameMap.get(tk)||tk, chg, price};
+      }catch(e){}
     }
     return null;
   }));
@@ -1874,10 +1907,12 @@ function openHoldingsPopup(ticker){
     moversBody.innerHTML=movers.map((m,i)=>{
       const sign=m.chg>=0?'+':'';
       const cls=m.chg>=0?'up':'dn';
+      const priceStr=m.price!=null?`$${m.price<10?m.price.toFixed(3):m.price<100?m.price.toFixed(2):m.price.toFixed(1)}`:'';
       return `<div class="ho-mover-row">
         <span class="ho-mover-rank">${i+1}</span>
         <span class="ho-mover-tk">${m.t}</span>
         <span class="ho-mover-co">${m.n}</span>
+        ${priceStr?`<span class="ho-mover-price">${priceStr}</span>`:''}
         <span class="ho-mover-chg ${cls}">${sign}${m.chg.toFixed(2)}%</span>
       </div>`;
     }).join('');
