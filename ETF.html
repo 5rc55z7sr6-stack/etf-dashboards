@@ -254,6 +254,8 @@
 
   /* ratio cards count inline in .num */
   #ratioCardsCount{font-size:11px;font-weight:400;color:var(--text-faint);letter-spacing:0}
+  .show-all-ratios-btn{display:block;width:100%;margin-top:14px;padding:11px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.5px;background:none;border:1px dashed var(--line-bright);color:var(--text-dim);cursor:pointer;border-radius:6px;transition:all .18s;text-align:center}
+  .show-all-ratios-btn:hover{border-color:var(--gold);color:var(--gold);border-style:solid}
 
   /* ---- HOLDINGS ACCORDION ---- */
   .hgroup{margin-bottom:22px}
@@ -555,12 +557,12 @@
   <div class="wrap">
     <button class="tab active" data-go="hero">Overview</button>
     <button class="tab live-tab" data-go="live">⬤ Live Signal</button>
+    <button class="tab" data-go="performers">🏆 Best Performers</button>
     <button class="tab" data-go="sectors">ETFs + Themes</button>
     <button class="tab" data-go="ratios">Ratios</button>
     <button class="tab" data-go="regime">Regimes</button>
     <button class="tab" data-go="playbook">Playbook</button>
     <button class="tab" data-go="caveats">Caveats</button>
-    <button class="tab" data-go="performers">🏆 Best Performers</button>
   </div>
 </nav>
 
@@ -635,10 +637,15 @@
       <div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
     </div>
 
-    <div class="sec-head sec-collapse-hdr" id="themeToggleHdr" onclick="toggleThemeSection()" title="Click to expand / collapse">
+    <div class="breakdown" id="liveBreakdown" style="display:none">
+      <div class="breakdown-title">All Signals at a Glance</div>
+      <div class="bd-grid" id="bdGrid"></div>
+    </div>
+
+    <div class="sec-head sec-collapse-hdr" id="themeToggleHdr" onclick="toggleThemeSection()" title="Click to expand / collapse" style="margin-top:16px">
       <div>
         <div class="num">SIGNAL ENGINE / THEME INDICATORS</div>
-        <h3 style="margin:4px 0 2px">⬤ Theme Signal Lights</h3>
+        <h3 style="margin:4px 0 2px">Theme Signal Lights</h3>
         <p style="margin:0">Green = add exposure · Red = cut first · Powered by SMH/SPY, ITA/SPY, ARKK/SPY ratios</p>
       </div>
       <span class="sec-arrow">▼</span>
@@ -651,22 +658,14 @@
       </div>
     </div>
 
-    <div class="breakdown" id="liveBreakdown" style="display:none">
-      <div class="breakdown-title">All Signals at a Glance</div>
-      <div class="bd-grid" id="bdGrid"></div>
-    </div>
-
-    <div class="sec-head sec-collapse-hdr" id="allRatioCardsHdr" onclick="toggleCollapse('allRatioCardsHdr','allRatioCardsWrap')" title="Click to expand / collapse" style="margin-top:16px">
+    <div class="sec-head" style="margin-top:16px">
       <div>
         <div class="num">ALL RATIO CARDS · <span id="ratioCardsCount"></span></div>
         <h3 style="margin:4px 0 2px">Live signal cards — all ratios</h3>
-        <p style="margin:0">Sorted by signal strength — strong bull first, strong bear last</p>
+        <p style="margin:0">Top 5 bull + top 5 bear · click "Show all" to expand</p>
       </div>
-      <span class="sec-arrow">▼</span>
     </div>
-    <div class="sec-collapsible collapsed" id="allRatioCardsWrap" style="max-height:0">
-      <div id="livePulseGrid" style="padding-top:12px"><div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data…</div></div>
-    </div>
+    <div id="livePulseGrid" style="padding-top:12px"><div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data…</div></div>
 
     <div class="live-note">Data via Yahoo Finance (~15 min delay) · SMA20 = trend · SMA50 = regime · Copper proxy = CPER · GLD/SPY inverted · Theme signals: SMH/SPY (tech themes), ITA/SPY (defense), ARKK/SPY (speculative) · Theme ETFs are high-beta — last to add, first to cut · Not investment advice.</div>
   </section>
@@ -1280,17 +1279,37 @@ function renderSplitGrid(data,id){
   const bull=data.filter(r=>!r.error&&r.cl.bullish).sort((a,b)=>order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig));
   const bear=data.filter(r=>!r.error&&!r.cl.bullish).sort((a,b)=>order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig));
   const errs=data.filter(r=>r.error);
+  const N=5; // cards shown per group before "Show all"
+  const bull5=bull.slice(0,N), bullRest=bull.slice(N);
+  const bear5=bear.slice(0,N), bearRest=bear.slice(N);
+  const total=bull.length+bear.length;
   let h='';
-  if(bull.length){
+  if(bull5.length){
     h+=`<div class="signal-group-hdr bull-hdr"><span class="sg-label">▲ Bullish</span><span class="sg-count">${bull.length} ratio${bull.length>1?'s':''}</span><div class="sg-line"></div></div>`;
-    h+=`<div class="pulse-grid">${bull.map(r=>buildCard(r,false)).join('')}</div>`;
+    h+=`<div class="pulse-grid">${bull5.map(r=>buildCard(r,false)).join('')}</div>`;
   }
-  if(bear.length){
+  if(bear5.length){
     h+=`<div class="signal-group-hdr bear-hdr"><span class="sg-label">▼ Bearish</span><span class="sg-count">${bear.length} ratio${bear.length>1?'s':''}</span><div class="sg-line"></div></div>`;
-    h+=`<div class="pulse-grid">${bear.map(r=>buildCard(r,false)).join('')}</div>`;
+    h+=`<div class="pulse-grid">${bear5.map(r=>buildCard(r,false)).join('')}</div>`;
+  }
+  const hasRest=bullRest.length||bearRest.length;
+  if(hasRest){
+    h+=`<div id="ratioCardsRest" style="display:none">`;
+    if(bullRest.length) h+=`<div class="pulse-grid">${bullRest.map(r=>buildCard(r,false)).join('')}</div>`;
+    if(bearRest.length) h+=`<div class="pulse-grid">${bearRest.map(r=>buildCard(r,false)).join('')}</div>`;
+    h+=`</div>`;
+    h+=`<button class="show-all-ratios-btn" id="showAllRatiosBtn" onclick="toggleAllRatioCards()">Show all ${total} ratios ▼</button>`;
   }
   if(errs.length) h+=`<div class="pulse-grid" style="margin-top:10px;opacity:.4">${errs.map(r=>buildCard(r,false)).join('')}</div>`;
   document.getElementById(id).innerHTML=h||'<div class="live-error-msg">No data</div>';
+}
+function toggleAllRatioCards(){
+  const rest=document.getElementById('ratioCardsRest');
+  const btn=document.getElementById('showAllRatiosBtn');
+  if(!rest||!btn)return;
+  const open=rest.style.display==='none';
+  rest.style.display=open?'block':'none';
+  btn.textContent=open?'Show less ▲':'Show all ratios ▼';
 }
 
 /* ================================================================
