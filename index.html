@@ -188,12 +188,12 @@
   .sma-pill{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 8px;border-radius:8px;text-transform:uppercase}
   .sma-pill.above{background:rgba(63,209,126,.06);color:#7aaa90;border:1px solid rgba(63,209,126,.14)}
   .sma-pill.below{background:rgba(255,92,97,.06);color:#9e7070;border:1px solid rgba(255,92,97,.14)}
-  .pulse-card.strong-bull .sma-pill.above{background:rgba(63,209,126,.14);color:#3fd17e;border-color:rgba(63,209,126,.28)}
-  .pulse-card.strong-bear .sma-pill.below{background:rgba(255,92,97,.14);color:#ff5c61;border-color:rgba(255,92,97,.28)}
+  .pulse-card.strong-bull .sma-pill.above,.bp-card.strong-bull .sma-pill.above{background:rgba(63,209,126,.14);color:#3fd17e;border-color:rgba(63,209,126,.28)}
+  .pulse-card.strong-bear .sma-pill.below,.bp-card.strong-bear .sma-pill.below{background:rgba(255,92,97,.14);color:#ff5c61;border-color:rgba(255,92,97,.28)}
   .sma50-txt{font-family:var(--mono);font-size:9.5px;color:var(--text-faint)}
   .pc-spark{height:28px;display:flex;align-items:flex-end;opacity:.85}.pc-spark svg{display:block}
-  .pc-master-badge{position:absolute;top:10px;right:12px;font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:2px;background:var(--amber);color:var(--bg);font-weight:700;text-transform:uppercase}
-  .pc-theme-badge{position:absolute;top:10px;right:12px;font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:2px;background:var(--gold);color:var(--bg);font-weight:700;text-transform:uppercase}
+  .pc-master-badge{position:absolute;bottom:10px;left:12px;font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:2px 6px;border-radius:2px;background:rgba(160,175,175,.08);color:rgba(160,175,175,.45);font-weight:600;text-transform:uppercase;border:1px solid rgba(160,175,175,.15)}
+  .pc-theme-badge{position:absolute;bottom:10px;left:12px;font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:2px 6px;border-radius:2px;background:rgba(160,175,175,.08);color:rgba(160,175,175,.45);font-weight:600;text-transform:uppercase;border:1px solid rgba(160,175,175,.15)}
   .pc-lens{position:absolute;bottom:12px;right:12px;font-family:var(--mono);font-size:8.5px;letter-spacing:.5px;padding:2px 6px;border-radius:2px;text-transform:uppercase;border:1px solid var(--line-bright);color:var(--text-faint)}
   .pulse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:11px}
   .signal-group-hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
@@ -252,50 +252,12 @@
   @media(max-width:980px){.bp-row{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:640px){.bp-row{grid-template-columns:repeat(2,1fr)}.bp-name{display:none}}
 
-  /* ---- ratio cards fold toggle ---- */
-  #ratioCardsDetails summary::-webkit-details-marker{display:none}
-  .ratio-cards-toggle{
-    list-style:none;outline:none;cursor:pointer;user-select:none;
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
-    padding:16px 20px;
-    background:var(--bg-elev);
-    border:1px dashed var(--line-bright);
-    border-radius:8px;
-    transition:background .18s,border-color .18s,box-shadow .18s;
-  }
-  .ratio-cards-toggle:hover{
-    background:var(--bg-card);
-    border-color:var(--cyan);
-    box-shadow:0 0 0 1px rgba(70,214,210,.12),0 4px 16px rgba(0,0,0,.25);
-  }
-  .rct-left{display:flex;align-items:center;gap:14px}
-  .rct-icon{
-    display:flex;align-items:center;justify-content:center;
-    width:32px;height:32px;border-radius:6px;
-    background:rgba(70,214,210,.1);border:1px solid rgba(70,214,210,.2);
-    color:var(--cyan);flex-shrink:0;
-    transition:transform .25s cubic-bezier(.4,0,.2,1),background .18s;
-  }
-  #ratioCardsDetails[open] .rct-icon{
-    transform:rotate(90deg);
-    background:rgba(70,214,210,.18);
-  }
-  .rct-title{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--text)}
-  .rct-count{font-size:11px;font-weight:400;color:var(--text-faint);margin-left:6px}
-  .rct-hint{font-size:11.5px;color:var(--text-faint);margin-top:3px;font-family:var(--sans)}
-  .rct-cta{
-    font-family:var(--mono);font-size:11px;letter-spacing:1px;
-    color:var(--cyan);white-space:nowrap;
-    padding:6px 12px;border:1px solid rgba(70,214,210,.25);border-radius:4px;
-    background:rgba(70,214,210,.07);
-    transition:background .15s,border-color .15s;
-    flex-shrink:0;
-  }
-  .ratio-cards-toggle:hover .rct-cta{background:rgba(70,214,210,.14);border-color:rgba(70,214,210,.4)}
-  #ratioCardsDetails[open] .rct-cta::after{content:' ↑'}
-  #ratioCardsDetails:not([open]) .rct-cta::after{content:' ↓'}
-  #ratioCardsDetails[open] .ratio-cards-toggle{border-style:solid;border-color:var(--cyan);border-bottom-left-radius:0;border-bottom-right-radius:0}
-  #ratioCardsDetails[open] #livePulseGrid{border:1px solid var(--cyan);border-top:none;border-radius:0 0 8px 8px;padding:16px}
+  /* ratio cards count inline in .num */
+  #ratioCardsCount{font-size:11px;font-weight:400;color:var(--text-faint);letter-spacing:0}
+  .show-all-ratios-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:18px;padding:14px 20px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:rgba(232,193,74,.07);border:2px solid rgba(232,193,74,.35);color:var(--gold);cursor:pointer;border-radius:8px;transition:all .18s}
+  .show-all-ratios-btn:hover{background:rgba(232,193,74,.14);border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,193,74,.12)}
+  .show-all-ratios-btn .btn-arrow{font-size:16px;transition:transform .2s}
+  .show-all-ratios-btn.open .btn-arrow{transform:rotate(180deg)}
 
   /* ---- HOLDINGS ACCORDION ---- */
   .hgroup{margin-bottom:22px}
@@ -312,19 +274,24 @@
   details[open] .hac-arrow{transform:rotate(90deg)}
   details[open] .haccard{border-color:var(--gold)}
   .hac-body{padding:0 16px 14px}
-  .holdings-table{width:100%;border-collapse:collapse;font-size:12.5px}
-  .holdings-table th{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--bg-elev)}
-  .holdings-table th:last-child{text-align:right}
-  .holdings-table td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--text-dim)}
-  .holdings-table tr:last-child td{border-bottom:none}
-  .holdings-table tr:hover td{background:rgba(232,193,74,.035)}
-  .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);min-width:22px}
-  .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;min-width:62px}
-  .h-co{color:var(--text)}
-  .h-wt{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--gold);white-space:nowrap;min-width:46px;flex-shrink:0}
-  .h-wt-wrap{display:flex;align-items:center;gap:10px}
-  .h-wt-bar{display:inline-block;width:90px;height:7px;background:var(--line);border-radius:4px;position:relative;overflow:hidden;flex-shrink:0}
-  .h-wt-fill{position:absolute;left:0;top:0;height:100%;background:var(--gold);border-radius:4px;opacity:.85}
+  /* ── Holdings flex rows (replaces table — never overflows) ── */
+  .h-list{width:100%;border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--bg-card)}
+  /* grid layout guarantees pixel-perfect column alignment on every row */
+  .h-list-hdr,.h-row{display:grid;grid-template-columns:18px 46px 1fr 120px 90px;align-items:center;width:100%}
+  .h-list-hdr{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);background:var(--bg-elev);border-bottom:1px solid var(--line-bright);padding:6px 10px}
+  .h-row{padding:7px 10px;border-bottom:1px solid var(--line);transition:background .12s}
+  .h-row:last-child{border-bottom:none}
+  .h-row:hover{background:rgba(232,193,74,.035)}
+  .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint)}
+  .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px}
+  .h-co-wrap{min-width:0;padding-right:8px}
+  .h-co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--text);display:block}
+  /* wt-group occupies grid cell 4 (120px); bar+num inside it */
+  .h-wt-group{display:flex;align-items:center;gap:5px}
+  .h-wt-bar-outer{display:block;width:72px;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;flex-shrink:0}
+  .h-wt-bar-fill{display:block;height:100%;background:#e8c14a;border-radius:3px}
+  .h-wt-num{font-family:var(--mono);font-size:10px;color:var(--text-faint);white-space:nowrap}
+  .h-today{text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap}
   .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
   .holdings-search-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
   .h-search{font-family:var(--mono);font-size:12px;background:var(--bg-card);border:1px solid var(--line-bright);color:var(--text);padding:7px 12px;border-radius:3px;width:220px;outline:none}
@@ -339,154 +306,171 @@
      MOBILE — phones up to 480px
   ============================================================ */
   @media(max-width:480px){
-    /* Header — stack brand and info vertically */
-    .head-inner{padding:10px 14px;flex-direction:column;align-items:flex-start;gap:6px}
-    .brand h1{font-size:15px;letter-spacing:-.3px}
+    /* ── Prevent any horizontal overflow ── */
+    body{overflow-x:hidden}
+    .wrap{padding:0 12px;max-width:100vw}
+
+    /* ── Header ── */
+    .head-inner{padding:10px 12px;flex-direction:row;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap}
+    .brand h1{font-size:14px;letter-spacing:-.3px}
     .brand .mark{font-size:9px;padding:3px 6px}
-    .head-right{align-items:flex-start;gap:3px;width:100%}
-    .ticker-clock{font-size:9px;letter-spacing:.3px}
+    /* Hide the long subtitle text on mobile — just show Live dot */
+    .head-right{align-items:flex-end;gap:3px}
+    .ticker-clock{display:none} /* "INTERMARKET + THEMATIC INTELLIGENCE · SESSION…" is too long */
+    .live-badge{font-size:9px;gap:4px}
 
-    /* Tabs — horizontal scroll strip */
-    nav.tabs .wrap{gap:0}
-    .tab{font-size:10px;letter-spacing:.4px;padding:10px 11px;flex-shrink:0}
+    /* ── Tabs — scrollable strip, no wrap ── */
+    nav.tabs .wrap{gap:0;padding:0}
+    .tab{font-size:10px;letter-spacing:.3px;padding:11px 10px;flex-shrink:0}
 
-    /* Global spacing */
-    .wrap{padding:0 12px}
-    section{padding:26px 0}
-    .sec-head{margin-bottom:14px;gap:10px}
-    .sec-head h3{font-size:19px;letter-spacing:-.5px}
-    .sec-head p{font-size:12.5px}
+    /* ── Global spacing ── */
+    section{padding:24px 0}
+    .sec-head{margin-bottom:12px;gap:8px}
+    .sec-head h3{font-size:18px;letter-spacing:-.5px}
+    .sec-head p{font-size:12px}
     .num{font-size:9px;letter-spacing:1px}
 
-    /* Hero */
-    .hero{padding:22px 0 16px}
-    .hero-inner{grid-template-columns:1fr;gap:20px}
-
+    /* ── Hero ── */
+    .hero{padding:20px 0 14px}
+    .hero-inner{grid-template-columns:1fr;gap:16px}
     .hero .kicker{font-size:9px;letter-spacing:1.5px;margin-bottom:8px}
-    .hero h2{font-size:clamp(21px,6.5vw,30px);letter-spacing:-1px}
-    .hero p{font-size:12.5px}
-    .masters{grid-template-columns:1fr 1fr}
-    .master{padding:11px 12px}
+    .hero h2{font-size:clamp(22px,7vw,30px);letter-spacing:-1px;max-width:100%}
+    .hero p{font-size:12px}
+    .masters{grid-template-columns:1fr 1fr;gap:1px}
+    .master{padding:10px 11px}
     .master .ratio{font-size:13px}
-    .master .desc{font-size:10.5px}
+    .master .lab{font-size:9px}
+    .master .desc{font-size:10px}
 
-    /* Filter chips — single scrollable row, no wrapping */
+    /* ── Filter chips — single scrollable row ── */
     .filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
     .filters::-webkit-scrollbar{display:none}
     .chip{flex-shrink:0;font-size:10px;padding:5px 10px}
 
-    /* Regime banner — stack to single column */
-    .regime-banner{grid-template-columns:1fr;gap:12px;padding:14px 16px}
-    .regime-light-wrap{flex-direction:row;padding:10px 14px;gap:12px;min-width:0}
-    .rl-light{width:32px;height:32px;flex-shrink:0}
+    /* ── Regime banner — full-width stacked layout ── */
+    .regime-banner{grid-template-columns:1fr;gap:10px;padding:14px 14px}
+    .regime-light-wrap{flex-direction:row;padding:10px 12px;gap:10px;min-width:0;width:100%}
+    .rl-light{width:30px;height:30px;flex-shrink:0}
     .rl-call{font-size:13px;text-align:left}
     .rl-score{text-align:left}
-    .rb-kicker{font-size:9px;letter-spacing:1px}
-    .rb-call{font-size:20px}
-    .rb-score-big{font-size:26px}
-    .rb-right{align-items:flex-start}
+    .rb-kicker{font-size:8.5px;letter-spacing:.5px;white-space:normal;line-height:1.4} /* allow wrap */
+    .rb-call{font-size:19px;letter-spacing:-.3px}
+    .rb-advice{font-size:12px;max-width:100%;line-height:1.45}
+    .rb-score-big{font-size:24px}
+    .rb-right{align-items:flex-start;width:100%}
     .rb-meter-track{min-width:0;width:100%}
-    .rb-stats{gap:8px}.rb-stat{font-size:10px}
+    .rb-stats{gap:6px;flex-wrap:wrap}.rb-stat{font-size:9.5px}
 
-    /* Live master + theme rows — 2 columns */
+    /* ── Core master + theme rows — 2 cols ── */
     .master-live-row{grid-template-columns:1fr 1fr;gap:7px}
     .theme-live-row{grid-template-columns:1fr 1fr;gap:7px}
     .row-label{font-size:9px;letter-spacing:1px;margin-bottom:6px}
 
-    /* Pulse cards — compact */
-    .pulse-card{padding:10px 11px;gap:7px}
-    .pc-pair{font-size:12px}.master-live-row .pc-pair,.theme-live-row .pc-pair{font-size:13px}
-    .pc-verdict-chip{font-size:8px;padding:2px 6px;letter-spacing:.8px}
-    .pc-label{font-size:10px}
-    .pc-vals{grid-template-columns:repeat(3,1fr)}
-    .pc-val{padding:5px 5px}
-    .pc-val-h{font-size:7.5px}
-    .pc-val-n{font-size:11px}
-    .pc-spark{height:20px}
-    .pc-master-badge,.pc-theme-badge{font-size:7px;padding:1px 5px;top:7px;right:7px}
+    /* ── Pulse cards — compact but readable ── */
+    .pulse-card{padding:10px 10px;gap:6px}
+    .pc-header{gap:5px;flex-wrap:nowrap}
+    .pc-pair{font-size:12px;flex-shrink:0}
+    .master-live-row .pc-pair,.theme-live-row .pc-pair{font-size:12px}
+    .pc-verdict-chip{font-size:7.5px;padding:2px 5px;letter-spacing:.5px;flex-shrink:0}
+    .pc-label{font-size:9.5px;line-height:1.3}
+    .pc-vals{grid-template-columns:repeat(3,1fr);gap:1px}
+    .pc-val{padding:5px 4px}
+    .pc-val-h{font-size:7px;letter-spacing:.3px}
+    .pc-val-n{font-size:10.5px}
+    .pc-spark{height:18px}
     .pc-lens{display:none}
-    .signal-light{width:14px;height:14px}
+    .signal-light{width:12px;height:12px;flex-shrink:0}
     .pulse-grid{grid-template-columns:1fr 1fr;gap:8px}
+    .sma-pill{font-size:8px;padding:2px 6px}
+    .sma50-txt{font-size:8.5px}
 
-    /* Signal group headers */
+    /* ── Signal group headers ── */
+    .signal-group-hdr{padding:8px 10px 5px}
     .sg-label{font-size:9px;letter-spacing:1px}
     .sg-count{font-size:9px}
 
-    /* Ratio cards expand toggle */
-    .ratio-cards-toggle{padding:12px 14px;gap:8px;flex-wrap:wrap}
+    /* ── Ratio cards expand toggle ── */
+    .ratio-cards-toggle{padding:11px 12px;gap:7px;flex-wrap:wrap}
     .rct-title{font-size:11px}.rct-hint{font-size:10px;margin-top:2px}
     .rct-cta{font-size:10px;padding:5px 10px}
-    .rct-icon{width:26px;height:26px}
+    .rct-icon{width:24px;height:24px}
 
-    /* Ratio cards grid */
+    /* ── Ratio cards grid — 1 col ── */
     .ratio-grid{grid-template-columns:1fr;gap:10px}
     .rcard{padding:13px}
     .rcard .formula{font-size:14px}
     .rcard .rtitle{font-size:12px}
     .rcard .measure,.sig .t,.pos{font-size:11.5px}
 
-    /* All signals breakdown */
-    .bd-grid{grid-template-columns:1fr 1fr;gap:5px}
-    .bd-row{padding:6px 8px;gap:6px}
-    .bd-pair{font-size:11px;min-width:64px}
-    .bd-label{font-size:10px}
+    /* ── All Signals at a Glance — 2 cols, tighter ── */
+    .bd-grid{grid-template-columns:1fr 1fr;gap:4px}
+    .bd-row{padding:6px 7px;gap:5px}
+    .bd-pair{font-size:10.5px;min-width:58px}
+    .bd-label{font-size:9.5px}
+    .bd-pct{font-size:10px;min-width:44px}
+    .breakdown-title{font-size:10px;letter-spacing:1.5px;margin-bottom:8px}
 
-    /* Regime archetypes */
-    .reg{padding:14px}
-    .reg h4{font-size:14px}
+    /* ── Regime archetypes ── */
+    .reg{padding:12px 13px}
+    .reg h4{font-size:13px}
     .reg .bt{font-size:11.5px}
 
-    /* Playbook */
-    .step{padding:14px}
-    .step .sn{font-size:28px;top:10px;right:12px}
-    .step h4{font-size:13px}.step p{font-size:12px}
+    /* ── Playbook ── */
+    .step{padding:13px}
+    .step .sn{font-size:26px;top:10px;right:10px}
+    .step h4{font-size:13px}.step p{font-size:11.5px}
     .trig{grid-template-columns:1fr;gap:3px;padding:10px 12px}
     .trig .cond{font-size:11px}.trig .act{font-size:11px}
 
-    /* Caveats */
+    /* ── Caveats ── */
     .cav{padding:12px 13px}
     .cav h5{font-size:12px}.cav p{font-size:11.5px}
 
-    /* Best performers */
-    .bp-wrap{padding:12px 10px}
-    .bp-header{margin-bottom:10px;flex-direction:column;gap:4px}
-    .bp-title{font-size:13px}
+    /* ── Best Performers ── */
     .bp-row{grid-template-columns:1fr 1fr;gap:6px}
     .bp-card{padding:9px 10px}
     .bp-ticker{font-size:12px}
     .bp-pct{font-size:11px}
     .bp-meta{font-size:8px;display:none}
-    .bp-name{font-size:9px;-webkit-line-clamp:1}
+    .bp-name{font-size:9px}
     .bp-spark{height:16px}
-    .bp-methodology{display:none} /* too cluttered on mobile — hidden */
+    .bp-methodology{display:none}
     .bp-group-name{font-size:9px;letter-spacing:1px}
-    #performers .sec-head p{display:none} /* hide long desc on mobile */
+    #performers .sec-head p{display:none}
     #performers .sec-head{flex-direction:column;align-items:flex-start;gap:8px}
 
-    /* Popups — slide up from bottom like native sheet */
+    /* ── Popups — slide up from bottom like native sheet ── */
     .se-overlay{padding:0;align-items:flex-end}
     .se-box{
-      border-radius:18px 18px 0 0;
+      border-radius:18px 18px 0 0 !important;
       max-width:100% !important;
       width:100% !important;
-      max-height:88vh;
+      max-height:90vh;
       overflow-y:auto;
     }
-    .se-top{padding:16px 16px 0}
-    .se-body{padding:12px 16px}
-    .se-footer{padding:0 16px 20px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+    .se-top{padding:14px 14px 0}
+    .se-body,.ho-scroll-body{padding:10px 14px !important}
+    .se-footer{padding:0 14px 16px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
     .se-pair{font-size:18px}
     .se-headline{font-size:14px}
-    .se-explain{font-size:13px}
-    .ho-ticker{font-size:21px !important}
-    .ho-table-wrap{overflow-x:auto}
-    .holdings-table{font-size:11.5px}
-    .holdings-table td,.holdings-table th{padding:6px 7px}
-    .h-wt-bar{width:55px}
-    .h-wt{font-size:12px}
+    .se-explain,.se-what{font-size:12.5px}
+    .ho-ticker{font-size:20px !important}
+    .ho-etf-price{font-size:11px !important}
+    /* Holdings table — tighter grid on mobile */
+    .h-list-hdr,.h-row{grid-template-columns:14px 38px 1fr 90px 70px}
+    .h-wt-bar-outer{width:44px}
+    .h-rank{font-size:9px}
+    .h-tk{font-size:11px}
+    .h-wt-num{font-size:9px}
+    .h-today{font-size:10px}
+    .h-list-hdr{font-size:8px !important;padding:5px 8px !important}
+    .h-row{padding:6px 8px}
+    /* Fast movers + trade idea */
+    .ho-movers-label{font-size:10px}
+    .ho-lev-card{min-width:0;flex:1}
 
-    /* Footer */
-    footer{font-size:9.5px;line-height:1.6;padding:18px 0}
+    /* ── Footer ── */
+    footer{font-size:9px;line-height:1.6;padding:16px 0}
   }
 
   /* ---- ETF INLINE EXPAND ---- */
@@ -534,10 +518,7 @@
   .sec-head.sec-collapse-hdr:hover h3{color:var(--gold)}
   .sec-head.sec-collapse-hdr .sec-arrow{margin-top:6px;font-size:14px}
   /* Theme signal toggle header */
-  .theme-toggle-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:8px 0;margin-bottom:4px}
-  .theme-toggle-hdr .row-label{margin-bottom:0;flex:1;pointer-events:none}
-  .theme-toggle-hdr .sec-arrow{font-family:var(--mono);font-size:13px;color:var(--text-faint);transition:transform .25s;flex-shrink:0}
-  .theme-toggle-hdr.open .sec-arrow{transform:rotate(180deg);color:var(--gold)}
+  /* theme-toggle-hdr replaced by sec-collapse-hdr */
 
   /* ---- SIGNAL EXPLAIN POPUP ---- */
   .se-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -560,6 +541,37 @@
   .se-footer{padding:0 24px 20px;display:flex;justify-content:flex-end}
   .se-dismiss{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:8px 18px;border:1px solid var(--line-bright);background:transparent;color:var(--text-dim);cursor:pointer;border-radius:5px;transition:all .15s;text-transform:uppercase}
   .se-dismiss:hover{border-color:var(--gold);color:var(--gold)}
+  /* Holdings popup — trade idea section */
+  .ho-tradeidea{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .ho-lev-sides{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .ho-lev-side-hdr{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .ho-lev-side-hdr.bull{color:#3fd17e}.ho-lev-side-hdr.bear{color:#ff5c61}
+  .ho-lev-col{display:flex;flex-direction:column;gap:7px}
+  .ho-lev-card{padding:9px 11px;border-radius:7px}
+  .ho-lev-card.bull{background:rgba(63,209,126,.06);border:1px solid rgba(63,209,126,.22)}
+  .ho-lev-card.bear{background:rgba(255,92,97,.06);border:1px solid rgba(255,92,97,.22)}
+  .ho-lev-tk{font-family:var(--mono);font-size:15px;font-weight:800}
+  .ho-lev-card.bull .ho-lev-tk{color:#3fd17e}
+  .ho-lev-card.bear .ho-lev-tk{color:#ff5c61}
+  .ho-lev-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;margin-left:5px;vertical-align:middle}
+  .ho-lev-card.bull .ho-lev-badge{background:rgba(63,209,126,.18);color:#3fd17e}
+  .ho-lev-card.bear .ho-lev-badge{background:rgba(255,92,97,.18);color:#ff5c61}
+  .ho-lev-name{font-size:10px;color:var(--text-dim);line-height:1.4;margin-top:3px}
+  .ho-lev-thesis{font-size:10px;color:var(--text-faint);line-height:1.4;margin-top:3px;font-style:italic}
+  .ho-lev-warn{font-family:var(--mono);font-size:9px;color:#e06b6b;opacity:.8;margin-top:10px;line-height:1.5}
+  /* Holdings popup — fast movers section */
+  .ho-movers{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+  .ho-movers-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#4ec994;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .ho-movers-loading{font-family:var(--mono);font-size:11px;color:var(--text-faint);display:flex;align-items:center;gap:8px;padding:4px 0}
+  .ho-mover-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .ho-mover-row:last-child{border-bottom:none}
+  .ho-mover-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:14px;flex-shrink:0;text-align:center}
+  .ho-mover-tk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);min-width:52px;flex-shrink:0}
+  .ho-mover-co{font-size:11px;color:var(--text-dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ho-mover-price{font-family:var(--mono);font-size:11px;color:var(--text-faint);min-width:52px;text-align:right;flex-shrink:0}
+  .ho-mover-chg{font-family:var(--mono);font-size:13px;font-weight:700;min-width:62px;text-align:right;flex-shrink:0}
+  .ho-mover-chg.up{color:#4ec994}.ho-mover-chg.dn{color:#e06b6b}
+  .ho-scroll-body{max-height:72vh;overflow-y:auto;padding-right:2px}
   .pulse-card{cursor:pointer}
 </style>
 </head>
@@ -579,12 +591,12 @@
   <div class="wrap">
     <button class="tab active" data-go="hero">Overview</button>
     <button class="tab live-tab" data-go="live">⬤ Live Signal</button>
+    <button class="tab" data-go="performers">🏆 Best Performers</button>
     <button class="tab" data-go="sectors">ETFs + Themes</button>
     <button class="tab" data-go="ratios">Ratios</button>
     <button class="tab" data-go="regime">Regimes</button>
     <button class="tab" data-go="playbook">Playbook</button>
     <button class="tab" data-go="caveats">Caveats</button>
-    <button class="tab" data-go="performers">🏆 Best Performers</button>
   </div>
 </nav>
 
@@ -618,10 +630,10 @@
       <button class="refresh-btn" id="refreshBtn" onclick="loadLiveData()"><span class="spinner-sm"></span>↺ Refresh</button>
     </div>
 
-    <div id="staleBanner" style="display:none;align-items:center;gap:12px;padding:10px 16px;margin-bottom:14px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.25);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--amber)">
-      <span style="font-size:14px">⚠</span>
-      <span>Data proxies temporarily unavailable — showing cached data. &nbsp;<span class="stale-age"></span></span>
-      <button onclick="loadLiveData()" style="margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 10px;border:1px solid rgba(245,166,35,.4);background:transparent;color:var(--amber);border-radius:3px;cursor:pointer">↺ Retry</button>
+    <div id="staleBanner" style="display:none;align-items:center;gap:10px;padding:10px 14px;margin-bottom:14px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.25);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--amber);flex-wrap:wrap">
+      <span style="font-size:13px;flex-shrink:0">⚠</span>
+      <span style="flex:1;min-width:160px">Showing pre-cached data · <span class="stale-age"></span> · <span class="stale-hint" style="color:var(--text-faint)">server refresh runs every 30 min</span></span>
+      <button onclick="loadLiveData()" style="flex-shrink:0;font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:5px 12px;border:1px solid rgba(245,166,35,.4);background:transparent;color:var(--amber);border-radius:3px;cursor:pointer;white-space:nowrap">↺ Refresh</button>
     </div>
 
     <div id="liveRegimeBanner">
@@ -659,8 +671,26 @@
       <div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
     </div>
 
-    <div class="theme-toggle-hdr" id="themeToggleHdr" onclick="toggleThemeSection()" title="Click to expand / collapse">
-      <div class="row-label" style="color:var(--gold);margin-bottom:0">⬤ Theme Signal Lights — Green = add exposure · Red = cut first</div>
+    <div class="breakdown" id="liveBreakdown" style="display:none">
+      <div class="breakdown-title">All Signals at a Glance</div>
+      <div class="bd-grid" id="bdGrid"></div>
+    </div>
+
+    <div class="sec-head" style="margin-top:16px">
+      <div>
+        <div class="num">ALL RATIO CARDS · <span id="ratioCardsCount"></span></div>
+        <h3 style="margin:4px 0 2px">Live signal cards — all ratios</h3>
+        <p style="margin:0">Top 8 bull + top 8 bear shown · click button below to see all</p>
+      </div>
+    </div>
+    <div id="livePulseGrid" style="padding-top:12px"><div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data…</div></div>
+
+    <div class="sec-head sec-collapse-hdr" id="themeToggleHdr" onclick="toggleThemeSection()" title="Click to expand / collapse" style="margin-top:16px">
+      <div>
+        <div class="num">SIGNAL ENGINE / THEME INDICATORS</div>
+        <h3 style="margin:4px 0 2px">Theme Signal Lights</h3>
+        <p style="margin:0">Green = add exposure · Red = cut first · Powered by SMH/SPY, ITA/SPY, ARKK/SPY ratios</p>
+      </div>
       <span class="sec-arrow">▼</span>
     </div>
     <div class="sec-collapsible collapsed" id="themeSignalsWrap" style="max-height:0">
@@ -670,27 +700,6 @@
         <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
       </div>
     </div>
-
-    <div class="breakdown" id="liveBreakdown" style="display:none">
-      <div class="breakdown-title">All Signals at a Glance</div>
-      <div class="bd-grid" id="bdGrid"></div>
-    </div>
-
-    <details id="ratioCardsDetails" style="margin-top:16px">
-      <summary class="ratio-cards-toggle">
-        <div class="rct-left">
-          <div class="rct-icon" id="ratioCardsArrow">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div>
-            <div class="rct-title">All Ratio Cards <span id="ratioCardsCount" class="rct-count"></span></div>
-            <div class="rct-hint">Sorted by signal strength — strong bull first, strong bear last</div>
-          </div>
-        </div>
-        <div class="rct-cta">Click to expand</div>
-      </summary>
-      <div style="margin-top:0" id="livePulseGrid"><div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data…</div></div>
-    </details>
 
     <div class="live-note">Data via Yahoo Finance (~15 min delay) · SMA20 = trend · SMA50 = regime · Copper proxy = CPER · GLD/SPY inverted · Theme signals: SMH/SPY (tech themes), ITA/SPY (defense), ARKK/SPY (speculative) · Theme ETFs are high-beta — last to add, first to cut · Not investment advice.</div>
   </section>
@@ -837,17 +846,28 @@
     <button class="se-close" onclick="closeHoldingsPopup()" aria-label="Close">✕</button>
     <div class="se-top">
       <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px">Top 10 Holdings</div>
-      <div class="ho-ticker" style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--gold)"></div>
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <div class="ho-ticker" style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--gold)"></div>
+        <div class="ho-etf-price" style="font-family:var(--mono);font-size:13px;display:none"></div>
+      </div>
       <div class="ho-name" style="font-size:13px;color:var(--text);font-weight:600;margin-top:2px"></div>
       <div class="ho-cat" style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:4px;margin-bottom:16px"></div>
     </div>
     <div class="se-divider"></div>
-    <div class="se-body" style="padding:16px 24px">
-      <div class="ho-table-wrap" style="overflow-x:auto"></div>
+    <div class="se-body ho-scroll-body" style="padding:16px 24px">
+      <div class="ho-table-wrap"></div>
       <div class="ho-note hac-note" style="margin-top:12px;display:none"></div>
+      <div class="ho-movers" id="hoMovers" style="display:none">
+        <div class="ho-movers-label">⚡ Top 5 Fast Movers <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· live % change today</span></div>
+        <div id="hoMoversBody"><div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div></div>
+      </div>
+      <div class="ho-tradeidea" id="hoTradeIdea" style="display:none">
+        <div class="ho-movers-label" style="color:var(--cyan)">💡 Trade Ideas <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· 2 bull &amp; 2 bear leveraged plays</span></div>
+        <div id="hoTradeIdeaBody"></div>
+      </div>
     </div>
-    <div class="se-footer">
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-faint);flex:1">Data approximate · mid-2026 · verify on issuer website</span>
+    <div class="se-footer" style="justify-content:space-between">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--text-faint)">Holdings ≈ mid-2026 · movers: live Yahoo Finance · not investment advice</span>
       <button class="se-dismiss" onclick="closeHoldingsPopup()">Close</button>
     </div>
   </div>
@@ -987,24 +1007,16 @@ function buildExpandRow(s){
   </td></tr>`;
 }
 
-sb.innerHTML=sectors.map(s=>`<tr class="etf-main-row" data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}" data-tk="${s.t}" onclick="toggleEtfExpand('${s.t}',this)">
+sb.innerHTML=sectors.map(s=>`<tr class="etf-main-row" data-c="${s.c}" data-s="${(s.t+' '+s.n+' '+s.cat).toLowerCase()}" data-tk="${s.t}" onclick="openHoldingsPopup('${s.t}')">
   <td><span class="tk ${tkC(s.c)}">${s.t}</span></td>
   <td><div class="nm">${s.n}</div></td>
   <td><span class="tag">${s.cat}</span></td>
   <td class="sub">${s.tr}</td>
   <td><span class="aum">${s.aum}</span>${s.thin?'<br><span class="thin">THIN</span>':''}</td>
-  <td class="why">${s.why} <span class="etf-expand-hint">▾ expand</span></td>
-</tr>${buildExpandRow(s)}`).join('');
+  <td class="why">${s.why} <span class="etf-expand-hint">↗ details</span></td>
+</tr>`).join('');
 
-function toggleEtfExpand(tk, row){
-  const expRow=sb.querySelector(`tr.etf-expand-row[data-expand="${tk}"]`);
-  if(!expRow) return;
-  const isOpen=!expRow.classList.contains('hidden');
-  // Close all others first
-  sb.querySelectorAll('tr.etf-expand-row:not(.hidden)').forEach(r=>{ r.classList.add('hidden'); });
-  sb.querySelectorAll('tr.etf-main-row.expanded').forEach(r=>r.classList.remove('expanded'));
-  if(!isOpen){ expRow.classList.remove('hidden'); row.classList.add('expanded'); }
-}
+// Inline expand rows removed — ETF clicks now open the holdings popup.
 let sF='all';
 document.querySelectorAll('#sectorFilters .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{document.querySelectorAll('#sectorFilters .chip').forEach(c=>c.classList.remove('active'));ch.classList.add('active');sF=ch.dataset.f;applyS();});
@@ -1013,40 +1025,50 @@ document.getElementById('sectorSearch').addEventListener('input',applyS);
 function applyS(){const q=document.getElementById('sectorSearch').value.toLowerCase();document.querySelectorAll('#sectorBody tr').forEach(tr=>{tr.classList.toggle('hidden',!((sF==='all'||tr.dataset.c===sF)&&(!q||tr.dataset.s.includes(q))));});}
 
 const ratios=[
-  {f:['XLY','XLP'],l:'equity',title:'Consumer risk appetite · MASTER',m:'Discretionary over staples. Consumer spending ≈ 70% of US GDP.',up:'Risk-on.',dn:'Risk-off / defensive.',pos:'Rising → long equities, growth, cyclicals. Falling → trim risk, add defensives/cash.'},
-  {f:['QQQ','SPY'],l:'equity',title:'Tech / growth leadership',m:'Whether mega-cap tech / Nasdaq leads the broad market.',up:'Growth risk-on; tech leadership intact.',dn:'Leadership rotating away from tech.',pos:'Rising → favor QQQ, XLK, IXN. Falling → reduce tech beta.'},
-  {f:['SMH','SPY'],l:'equity',title:'Semiconductors — canary & tech-theme switch',m:'Semis are the most cyclical tech cohort AND the on/off switch for all tech-adjacent themes (AIQ, QTUM, BOTZ, CHAT).',up:'Strong risk-on; AI/tech demand robust. Green light for tech themes.',dn:'Early warning; red light for tech themes — cut AIQ, QTUM, CHAT first.',pos:'Green → add SMH, AIQ, QTUM, BOTZ. Red → cut those before cutting QQQ.'},
-  {f:['IWM','SPY'],l:'equity',title:'Small caps vs. large caps',m:'Willingness to own riskier, rate-sensitive small caps.',up:'Risk-on, broadening rally.',dn:'Caution; narrow / defensive market.',pos:'Rising → add small-cap / high-beta. Falling → up-in-quality, defensives.'},
-  {f:['HYG','LQD'],l:'credit',title:'Credit risk appetite · MASTER',m:'Junk bonds vs. investment-grade. Most reliable risk gauge in stress.',up:'Risk-on; credit confirms equity rallies.',dn:'Spreads widening — risk-off; leads equity weakness.',pos:'Rising → trust equity strength. Falling → de-risk immediately.'},
-  {f:['Copper','Gold'],l:'macro',title:'Growth vs. fear · MASTER',m:'Industrial demand (copper) vs. safe haven (gold). Trade via CPER/GLD.',up:'Reflation / growth optimism.',dn:'Growth fear / deflation.',pos:'Rising → cyclicals (XLI, XLF, XLE, EEM). Falling → defensives + duration.'},
-  {f:['GLD','SPY'],l:'macro',title:'Gold vs. stocks — fear gauge',m:'Safe-haven gold relative to equities.',up:'Fear, hedging, defensive regime.',dn:'Risk-on, equities preferred.',pos:'Rising → raise gold/defensive allocation. Falling → favor equities.'},
-  {f:['SPY','TLT'],l:'macro',title:'Stocks vs. bonds · MASTER',m:'Equity risk vs. the safety of long Treasuries.',up:'Risk-on; capital choosing stocks over bonds.',dn:'Risk-off / flight to safety into duration.',pos:'Rising → overweight equities. Falling → rotate to Treasuries/defensives.'},
-  {f:['IBIT','GLD'],l:'macro',title:'Bitcoin vs. Gold — speculative appetite',m:'Speculative store-of-value (BTC) vs. traditional (gold).',up:'High speculative appetite — risk-on at the frontier.',dn:'Caution; flight to traditional safety.',pos:'Rising → supportive for crypto, high-beta growth. Falling → reduce speculative exposure.'},
-  {f:['RSP','SPY'],l:'breadth',title:'Equal weight vs. cap weight — breadth',m:'Whether the average stock keeps pace with the mega-cap index.',up:'Broad participation — healthy, durable rally.',dn:'Narrow rally — fragile.',pos:"Rising → trust trend, broaden. Falling → fragility warning."},
-  {f:['IWF','IWD'],l:'equity',title:'Growth vs. Value',m:'Growth-style leadership vs. value.',up:'Growth / duration regime.',dn:'Value regime (rising rates, reflation).',pos:'Rising → growth/tech tilt. Falling → value / cyclical / financials tilt.'},
-  {f:['Offense','Defense'],l:'equity',title:'Offense vs. Defense sectors',m:'XLK+XLY / XLP+XLU, or XLK/XLU.',up:'Risk-on, offense leading.',dn:'Defense leading — risk-off.',pos:'Healthy rallies need offense leading. If led by XLU/XLP/XLV, distrust it.'},
-  {f:['EEM','EFA'],l:'breadth',title:'EM vs. Developed Mkts',m:'Global risk appetite and ex-US leadership.',up:'Global risk-on, often weak-dollar / reflation.',dn:'Risk-off; capital home to US.',pos:'Rising → add EM / global cyclicals. Falling → stay US-focused.'},
-  {f:['IYT','XLU'],l:'breadth',title:'Transports vs. Utilities (Dow Theory)',m:'Economically-sensitive transports vs. defensive utilities.',up:'Cyclical strength, economic confidence.',dn:'Defensive, slowdown signal.',pos:"Rising → cyclicals / industrials. Falling → defensives."},
-  {f:['XLK','SHY'],l:'macro',title:'Risk asset vs. cash',m:'Whether risk assets beat the risk-free 1-3yr Treasury.',up:'Risk assets attractive — risk-on.',dn:'Cash / safety winning — risk-off.',pos:'Rising → be long risk. Falling → defensive / cash.'},
-  {f:['SMH','SPY'],l:'equity',title:'Semis vs. market — tech theme leadership (duplicate)',m:'The on/off switch for all tech-adjacent themes. Same as the canary above — repeated here as the anchor for AI, quantum, robotics.',up:'Green light for AIQ, QTUM, BOTZ, CHAT.',dn:'Red light — de-risk QTUM/AIQ/CHAT first (highest beta falls hardest).',pos:'Use as the binary switch for thematic-tech exposure. Theme ETFs amplify this signal in both directions.'},
-  {f:['ITA','SPY'],l:'equity',title:'Defense vs. market — geopolitics bid',m:'Whether defense (ITA, XAR, SHLD) is outperforming the broad market.',up:'Geopolitical tension + rising defense budgets; defense leading.',dn:'Risk premium fading; capital rotating back to broad market.',pos:'Rising → overweight defense; it can rise even in risk-off. Falling → trim.'},
-  {f:['ARKK','SPY'],l:'breadth',title:'Disruptive innovation vs. market — speculative pulse',m:'High-beta innovation (ARKK) vs. the index — cleanest read on appetite for frontier themes.',up:'Speculative risk-on; frontier themes (NASA, ARKG, QTUM) catch a bid.',dn:'Risk-off at the frontier — speculative themes bleed first & worst.',pos:'Rising → green light for space/genomics/blockchain. Falling → cut speculative sleeve early.'},
-  // --- 7 added ratios ---
-  {f:['KRE','SPY'],l:'credit',title:'Regional banks vs. market — credit canary #2',m:'KRE (SPDR Regional Banking ETF) vs. SPY. Regional banks are the first to reflect credit stress, deposit flight and rate squeeze before it reaches HYG/LQD. SVB 2023 confirmed this signal leads the broad credit market.',up:'Credit system healthy; regional lending confidence intact.',dn:'Early credit stress signal — often leads HYG/LQD breakdown by days to weeks.',pos:'Rising → credit system is clear, trust equity strength. Falling → watch HYG/LQD next. If KRE breaks SMA50, de-risk credit-sensitive positions (XLF, small caps, leveraged names).'},
-  {f:['SPHB','SPLV'],l:'equity',title:'High beta vs. low vol — factor-level risk appetite',m:'SPHB (high beta S&P 500 stocks) vs. SPLV (low volatility S&P 500 stocks). The cleanest within-equity risk appetite gauge — no cross-asset noise, just pure factor rotation.',up:'Risk-on at the factor level — investors actively buying the riskiest names.',dn:'Factor rotation to defensives — a quiet but reliable early de-risking signal.',pos:'Rising → increase beta exposure across all sectors. Falling → reduce beta, shift to quality/low-vol names even if the index is still rising. Watch for divergence from SPY.'},
-  {f:['HYG','TLT'],l:'credit',title:'Credit risk vs. long-duration safety',m:'HYG (junk bonds) vs. TLT (20yr Treasuries) — different from HYG/LQD. This ratio captures both the credit spread AND the flight-to-duration move simultaneously. Extremely sensitive in rate/credit inflection points.',up:'Credit winning over safety — double risk-on signal (tight spreads + duration sell-off).',dn:'Safety winning on both legs — a powerful risk-off signal; credit stress + duration demand.',pos:'Rising → strong risk-on, equities well-supported. Falling sharply → maximum risk-off; both legs of safety demand are active. Often leads equity weakness by 3–10 days.'},
-  {f:['GLD','TLT'],l:'macro',title:'Gold vs. bonds — inflation regime gauge',m:'Gold vs. 20yr Treasuries. When gold outperforms bonds, inflation expectations are rising (real rates falling). When bonds outperform gold, deflationary/risk-off regime dominates. Separates inflationary fear from deflationary fear.',up:'Inflation regime — real rates falling; gold pricing in currency debasement or supply shock.',dn:'Deflation/disinflation — bonds winning; expect rate cuts and duration bid to dominate.',pos:'Rising → tilt toward inflation beneficiaries: commodities, TIPS, energy, miners, value. Falling → favor long duration (TLT/IEF), growth (falling real rates), and quality growth stocks.'},
-  {f:['SMH','IGV'],l:'equity',title:'Semis vs. software — where in tech is the money?',m:'SMH (semiconductors) vs. IGV (software). The AI trade has two phases: hardware buildout (semis win) and monetization (software wins). This ratio tells you which phase the market is pricing.',up:'Hardware/capex phase — NVDA, TSMC, AMAT leading. Add SMH, SOXX, XLK chip names.',dn:'Monetization/software phase — cloud, SaaS, AI apps leading. Add IGV, XLK software names, CRM, NOW, ADBE.',pos:'Rising → overweight semis, underweight software. Falling → rotate from semis into software/SaaS. When flat → both legs in balance; hold broad XLK. Watch for divergence from QQQ.'},
-  {f:['EWJ','SPY'],l:'breadth',title:'Japan vs. US — the yen carry rotation',m:'EWJ (MSCI Japan) vs. SPY. Japan equities ran to multi-decade highs in 2024-25 on yen weakness and corporate governance reforms. This ratio tracks whether capital is rotating into Japan or staying US-centric. The yen carry trade makes EWJ hyper-sensitive to JPY/USD.',up:'Japan rotation active — yen weak, Nikkei momentum, global value rotation.',dn:'Yen carry unwind — Japanese equities get hit hard; capital flows back to US.',pos:'Rising → add EWJ or Japan-exposed names. Falling sharply → risk-off warning (yen carry unwind historically triggers global vol spikes — reduce all beta immediately).'},
-  {f:['QTUM','SMH'],l:'equity',title:'Quantum heat vs. semis — thematic money flow',m:'QTUM vs. SMH. When QTUM outperforms SMH, speculative thematic capital is rotating into quantum over core chip names.',up:'Quantum narrative hot; IonQ, D-Wave, Rigetti catching bids.',dn:'Money returning to core semis — quantum narrative cooling.',pos:'Rising → consider small QTUM if regime is broadly bullish. Falling → stay in SMH/NVDA. Never own QTUM in risk-off.'},
-  // ---- New 2025-26 themes ----
-  {f:['COPX','GLD'],l:'macro',title:'Copper miners vs. gold — industrial intensity',m:'COPX (copper miner stocks) vs. GLD. Different from CPER/GLD: miner stocks carry equity risk premium + operational leverage. When miners outperform gold, markets are pricing accelerating industrial demand — AI data centers, EV buildout, grid.',up:'Industrial cycle accelerating — copper demand expected to grow. AI/EV capex cycle active.',dn:'Industrial slowdown fear — copper miners de-rated; gold preferred.',pos:'Rising → overweight COPX, XLI, XLB, XLE cyclicals. Falling → cut industrial cyclicals, add gold/defensive.'},
-  {f:['SKYY','SPY'],l:'equity',title:'Cloud/SaaS vs. market — AI monetisation phase',m:'SKYY (cloud computing ETF) vs. SPY. When cloud/SaaS outperforms, we are in the AI monetisation phase where revenue flows to software. The AI trade has two phases: hardware (SMH leads) → monetisation (SKYY/IGV leads). Watch SKYY vs. SMH for the cycle shift.',up:'AI monetisation active — SaaS + hyperscalers converting AI capex into revenue.',dn:'Hardware/capex phase dominant — stay in semis over software.',pos:'Rising → add SKYY, IGV, XLK software names. Watch SKYY/SMH: when SKYY starts leading SMH, rotate from semis into cloud.'},
-  {f:['XBI','SPY'],l:'equity',title:'Biotech risk appetite — GLP-1 · gene therapy',m:'XBI (equal-weight biotech, ~180 names) vs. SPY. XBI\'s equal weighting makes it the best gauge for broad biotech risk appetite — it captures small-cap breakouts that IBB (market-cap) misses. GLP-1 obesity drugs + gene editing are the two mega-themes running simultaneously.',up:'Biotech risk-on: FDA approvals coming, M&A active, GLP-1 pipeline expanding.',dn:'Risk-off biotech: clinical trial failures, FDA slowdowns, rate-sensitive names selling off.',pos:'Rising → add XBI, IBB, ARKG. Pair with SMH: if both rising = broad risk-on. XBI rising while SMH falling = sector rotation into healthcare.'},
-  {f:['INDA','SPY'],l:'breadth',title:'India vs. US — the decade-long rotation',m:'INDA (MSCI India) vs. SPY. India is the fastest-growing major economy: GDP growth >6%, manufacturing shift from China, Modi\'s infrastructure push, and a young demographic dividend. A structural multi-year story, not just a tactical trade.',up:'India rotation active — capital flowing from US to India; weak USD amplifies.',dn:'Capital returning to US — risk-off or strong dollar pulling EM money home.',pos:'Rising → add INDA, consider India small-cap (SMIN). Hold through volatility — this is a structural position, not a momentum trade. Falling sharply → reduce, but consider re-adding on USD weakness.'},
-  {f:['SOXX','SMH'],l:'equity',title:'Semiconductor breadth — SOXX vs. SMH',m:'SOXX (iShares, 30 holdings, capped at 10%) vs. SMH (VanEck, 25 holdings, NVDA at ~21%). When SOXX outperforms SMH, the semiconductor rally is broadening beyond NVDA/TSMC concentration into AMD, QCOM, MU, TXN, AMAT. A breadth signal within semis.',up:'Semis rally broadening — healthy, multiple chip names working. Add SOXX over SMH.',dn:'Only mega-cap semis (NVDA) working — concentration risk. Stay in SMH, not SOXX.',pos:'SOXX/SMH rising → prefer SOXX for more diversified exposure. Falling → concentration in NVDA/TSM only; use SMH or hold NVDA directly.'},
-  {f:['MAGS','SPY'],l:'equity',title:'Magnificent 7 vs. market — AI concentration gauge',m:'MAGS (equal-weight Magnificent 7 ETF: AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA) vs. SPY. When MAGS/SPY rises, the 7 largest AI-exposed companies are driving disproportionate market returns — concentration risk is building.',up:'Mega-cap AI leadership intact — MAGS outperforming. Momentum investing is working.',dn:'Broadening out — equal-weight (RSP) and value starting to lead. MAGS lagging.',pos:'Rising → stay concentrated, press MAGS names. Falling → rotate into RSP (equal weight), value, international. A MAGS/SPY breakdown while RSP/SPY rises = the healthiest kind of rotation.'},
-  {f:['PAVE','SPY'],l:'equity',title:'AI power infrastructure — PAVE vs. market',m:'PAVE (Global X US Infrastructure Development) vs. SPY. AI data centers require enormous power and physical infrastructure — this is the "picks and shovels" play that often gets overlooked. Quanta Services, EMCOR, Eaton, Vulcan Materials are the builders of the AI era.',up:'Infrastructure build cycle active — data center construction, grid modernisation, power plant buildout.',dn:'Capex cycle cooling — construction spend declining, infrastructure firms de-rated.',pos:'Rising → add PAVE, utilities (XLU, GRID), industrial electrical suppliers. PAVE rising while XLU rising = power demand story. PAVE falling while tech rising = valuation concern on capex ROI.'},
+  // ── TIER 1: CREDIT — leads equity by days to weeks ──────────────────────
+  {f:['HYG','LQD'],l:'credit',title:'Credit risk appetite · MASTER — the most reliable leading indicator',m:'Junk bonds vs. investment-grade. Most reliable risk gauge under stress — credit spreads lead equity by days to weeks. Every major equity drawdown was preceded by HYG/LQD rolling over.',up:'Risk-on; credit confirms equity rallies. Trust the move.',dn:'Spreads widening — risk-off signal. Cut equity risk before the index breaks.',pos:'Rising → trust equity strength, add beta. Falling → de-risk immediately, don\'t wait for the index.'},
+  {f:['HYG','TLT'],l:'credit',title:'Credit + duration double-signal — maximum early warning',m:'HYG (junk bonds) vs. TLT (20yr Treasuries). This ratio captures both the credit spread AND the flight-to-duration move simultaneously — two legs of safety demand at once. Leads equity weakness by 3–10 days.',up:'Double risk-on: tight spreads + duration selling off. Strong equity tailwind.',dn:'Maximum risk-off signal: credit stress + duration bid both active simultaneously.',pos:'Falling sharply → this is the highest-urgency de-risk signal on the desk. Cut beta before the equity index breaks.'},
+  {f:['KRE','SPY'],l:'credit',title:'Regional banks — credit system canary',m:'KRE (SPDR Regional Banking ETF) vs. SPY. Regional banks reflect credit stress, deposit flight, and rate squeeze before it shows up in HYG/LQD. SVB 2023 confirmed this leads the broad credit market by days.',up:'Credit system healthy; regional lending confidence intact.',dn:'Early credit stress — often leads HYG/LQD breakdown by days to weeks.',pos:'Falling → watch HYG/LQD next. If KRE breaks SMA50, de-risk XLF, small caps, leveraged names immediately.'},
+
+  // ── TIER 2: MACRO REGIME — what world are we in? ────────────────────────
+  {f:['SPY','TLT'],l:'macro',title:'Stocks vs. bonds · MASTER — the regime on/off switch',m:'Equity risk vs. safety of long Treasuries. The single most-watched cross-asset ratio by institutional allocators.',up:'Risk-on; capital choosing stocks over duration.',dn:'Risk-off / flight to safety into duration.',pos:'Rising → overweight equities, underweight duration. Falling → rotate to Treasuries/defensives.'},
+  {f:['Copper','Gold'],l:'macro',title:'Growth vs. fear · MASTER — the macro thermometer',m:'Industrial demand (copper) vs. safe haven (gold). The market\'s real-time vote on global growth. Trade via CPER/GLD.',up:'Reflation / growth optimism. Global cycle accelerating.',dn:'Growth fear / deflation. Capital pricing slowdown.',pos:'Rising → cyclicals (XLI, XLF, XLE, EEM). Falling → defensives, gold, duration.'},
+  {f:['GLD','TLT'],l:'macro',title:'Gold vs. bonds — inflation regime gauge',m:'Gold vs. 20yr Treasuries. Separates inflationary fear from deflationary fear. When gold wins → inflation/debasement. When bonds win → deflation/rate-cut regime.',up:'Inflation regime — real rates falling; gold pricing in currency debasement or supply shock.',dn:'Deflation/disinflation — bonds winning; rate cuts and duration bid dominate.',pos:'Rising → commodities, TIPS, energy, miners, value. Falling → long duration (TLT/IEF), growth stocks.'},
+  {f:['XLK','SHY'],l:'macro',title:'Risk assets vs. cash — opportunity cost signal',m:'Whether risk assets beat the risk-free 1-3yr Treasury. The simplest expression of whether you should be in the market at all.',up:'Risk assets earning their premium — be long.',dn:'Cash / safety winning — risk-adjusted case for being in markets is weakening.',pos:'Rising → be long risk. Falling → raise cash allocation.'},
+
+  // ── TIER 3: EQUITY HEALTH — is the market breadth real? ─────────────────
+  {f:['XLY','XLP'],l:'equity',title:'Consumer risk appetite · MASTER — economy\'s mood test',m:'Discretionary over staples. Consumer spending ≈ 70% of US GDP. The most direct gauge of whether the economy is healthy or retreating.',up:'Risk-on. Consumers confident; economy expanding.',dn:'Risk-off / defensive. Consumers pulling back.',pos:'Rising → long equities, growth, cyclicals. Falling → trim risk, add defensives/cash.'},
+  {f:['RSP','SPY'],l:'breadth',title:'Market breadth — equal weight vs. cap weight',m:'Whether the average stock participates in the rally or the index is carried by 7 names. Narrow rallies fail. Broad rallies last.',up:'Broad participation — healthy, durable, institutional rally.',dn:'Narrow rally dominated by mega-cap — fragile. A 5% correction can wipe the whole move.',pos:'Rising → trust the trend, broaden exposure. Falling → fragility warning, reduce size.'},
+  {f:['SPHB','SPLV'],l:'equity',title:'High beta vs. low vol — factor-level risk appetite',m:'SPHB (high beta S&P 500 stocks) vs. SPLV (low volatility). The cleanest within-equity risk gauge — no cross-asset noise, pure factor rotation. Often turns before the index.',up:'Risk-on at factor level — institutions actively buying riskiest names.',dn:'Quiet rotation to defensives — reliable early de-risking signal.',pos:'Rising → increase beta across all sectors. Falling → shift to quality/low-vol even if index still rising.'},
+  {f:['IWM','SPY'],l:'equity',title:'Small caps vs. large caps — economic confidence',m:'Willingness to own riskier, rate-sensitive small caps. Small caps need credit to be healthy, rates to be stable, and economy to be growing.',up:'Risk-on, broadening rally. Economic confidence.',dn:'Caution; narrow / defensive market. Credit stress or growth slowdown.',pos:'Rising → add small-cap / high-beta. Falling → up-in-quality, defensives.'},
+
+  // ── TIER 4: SECTOR ROTATION — where in equity? ──────────────────────────
+  {f:['QQQ','SPY'],l:'equity',title:'Tech / growth leadership — the momentum test',m:'Whether mega-cap tech / Nasdaq leads the broad market. In modern markets, QQQ/SPY is the primary risk-on indicator for growth-oriented portfolios.',up:'Growth risk-on; tech and AI narrative intact.',dn:'Leadership rotating away from tech. Often signals regime change.',pos:'Rising → favor QQQ, XLK, IXN, SMH. Falling → reduce tech beta, rotate to value.'},
+  {f:['SMH','SPY'],l:'equity',title:'Semiconductors — AI/tech cycle canary & theme switch',m:'Semis are the most cyclical tech cohort AND the binary on/off switch for all tech-adjacent themes (AIQ, QTUM, BOTZ, CHAT). First to break in tech sell-offs, first to recover.',up:'Strong risk-on; AI/tech demand robust. Green light for all tech themes.',dn:'Early warning; red light for tech themes — cut AIQ, QTUM, CHAT first.',pos:'Green → add SMH, AIQ, QTUM, BOTZ. Red → cut those before cutting QQQ.'},
+  {f:['IWF','IWD'],l:'equity',title:'Growth vs. Value — style rotation',m:'Growth-style leadership vs. value. Driven by real rates: falling real rates → growth wins; rising real rates → value wins.',up:'Growth / low-rate / tech regime.',dn:'Value regime (rising rates, reflation, commodity cycle).',pos:'Rising → growth/tech tilt. Falling → value / cyclical / financials.'},
+  {f:['Offense','Defense'],l:'equity',title:'Offense vs. Defense sectors — internal health check',m:'XLK+XLY leading XLP+XLU — the market\'s internal tug-of-war. Healthy bull markets are always led by offense.',up:'Risk-on, offense leading. Rally is institutionally backed.',dn:'Defense leading — distrust the rally. Professionals are hedging.',pos:'If XLU/XLP/XLV leading while SPY is up: distribution. Reduce.'},
+  {f:['GLD','SPY'],l:'macro',title:'Gold vs. stocks — fear gauge',m:'Safe-haven gold relative to equities. When gold outperforms, institutions are hedging tail risk.',up:'Fear, hedging, defensive regime.',dn:'Risk-on, equities preferred.',pos:'Rising → raise gold/defensive allocation. Falling → favor equities.'},
+  {f:['IBIT','GLD'],l:'macro',title:'Bitcoin vs. Gold — speculative risk appetite at the frontier',m:'Speculative store-of-value (BTC) vs. traditional (gold). When crypto leads gold, investors are reaching for risk. The most sensitive real-time read on marginal risk appetite.',up:'High speculative appetite — risk-on at the frontier.',dn:'Flight to traditional safety. Risk appetite shrinking.',pos:'Rising → supportive for high-beta growth, crypto-adjacent names. Falling → reduce speculative exposure.'},
+
+  // ── TIER 5: GLOBAL — ex-US flows & macro ────────────────────────────────
+  {f:['EEM','EFA'],l:'breadth',title:'EM vs. Developed Mkts — dollar & global risk',m:'Global risk appetite and ex-US capital flow. EM outperforms when USD weakens and global growth accelerates.',up:'Global risk-on, often weak-dollar / reflation cycle.',dn:'Risk-off; capital returning home to US safety.',pos:'Rising → add EM / global cyclicals. Falling → stay US-focused, avoid EM.'},
+  {f:['EWJ','SPY'],l:'breadth',title:'Japan vs. US — yen carry unwind warning',m:'EWJ (MSCI Japan) vs. SPY. The yen carry trade makes Japan hyper-sensitive to JPY/USD. When EWJ/SPY breaks down sharply, it often signals a global carry unwind — one of the fastest vol-spike mechanisms in markets.',up:'Japan rotation; yen weak, Nikkei momentum, global value rotation.',dn:'Yen carry unwind — triggers global vol spikes. Reduce all beta immediately.',pos:'Falling sharply → risk-off warning. Historically triggers broad deleveraging within days.'},
+  {f:['IYT','XLU'],l:'breadth',title:'Transports vs. Utilities — Dow Theory confirmation',m:'Economically-sensitive transports vs. defensive utilities. Dow Theory: a bull market must be confirmed by both industrials AND transports.',up:'Cyclical strength, economic confidence. Dow Theory buy signal.',dn:'Defensive, slowdown signal. Dow Theory non-confirmation.',pos:'Rising → cyclicals / industrials. Falling → defensives.'},
+
+  // ── TIER 6: AI CYCLE — where in the AI trade? ───────────────────────────
+  {f:['SMH','IGV'],l:'equity',title:'Semis vs. software — which phase of the AI trade?',m:'Hardware buildout phase (semis win) vs. monetisation phase (software wins). This is the most important rotation signal for AI-focused portfolios in 2025-26.',up:'Hardware/capex phase — NVDA, TSMC, AMAT leading.',dn:'Monetisation phase — cloud, SaaS, AI apps leading.',pos:'Rising → overweight semis, underweight software. Falling → rotate semis → software/SaaS.'},
+  {f:['SKYY','SPY'],l:'equity',title:'Cloud/SaaS vs. market — AI monetisation phase active?',m:'SKYY (cloud computing ETF) vs. SPY. When cloud outperforms, revenue is flowing to software — the AI trade has moved from hardware to monetisation.',up:'AI monetisation active — SaaS + hyperscalers converting capex into revenue.',dn:'Hardware/capex phase dominant — stay in semis.',pos:'Rising → add SKYY, IGV, XLK software names. Watch SKYY/SMH for the cycle shift.'},
+  {f:['MAGS','SPY'],l:'equity',title:'Magnificent 7 vs. market — AI concentration gauge',m:'MAGS (equal-weight Mag-7: AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA) vs. SPY. Measures whether AI concentration risk is building or broadening.',up:'Mega-cap AI leadership intact — momentum working.',dn:'Broadening out — equal-weight (RSP) and value starting to lead.',pos:'Falling while RSP/SPY rises = healthiest possible rotation. Rotate into RSP, value, international.'},
+  {f:['COPX','GLD'],l:'macro',title:'Copper miners vs. gold — industrial intensity of AI build',m:'COPX (copper miner stocks) vs. GLD. AI data centers + EV buildout = copper supercycle. When miners outperform gold, markets are pricing accelerating industrial demand.',up:'AI/EV capex cycle active — industrial demand expected to grow.',dn:'Industrial slowdown; copper miners de-rated, gold preferred.',pos:'Rising → COPX, XLI, XLB, XLE cyclicals. Falling → cut industrials, add gold/defensive.'},
+  {f:['SOXX','SMH'],l:'equity',title:'Semiconductor breadth — SOXX vs. SMH',m:'SOXX (30 holdings, capped 10%) vs. SMH (25 holdings, NVDA at ~21%). When SOXX leads, the semi rally is broadening beyond NVDA into AMD, QCOM, MU, TXN, AMAT.',up:'Semi rally broadening — healthy. Add SOXX over SMH.',dn:'Only NVDA/TSMC working — concentration risk. Stay in SMH.',pos:'SOXX/SMH rising → prefer SOXX. Falling → SMH or NVDA directly.'},
+  {f:['PAVE','SPY'],l:'equity',title:'AI power infrastructure — the picks-and-shovels play',m:'PAVE (US Infrastructure Development) vs. SPY. AI data centers require massive power and physical infrastructure. Quanta, EMCOR, Eaton, Vulcan — the builders of the AI era.',up:'Infrastructure build cycle active — data centers, grid, power plants.',dn:'Capex cycle cooling — construction spend declining.',pos:'Rising → PAVE, utilities (XLU, GRID). PAVE + XLU rising together = power demand story.'},
+  {f:['QTUM','SMH'],l:'equity',title:'Quantum vs. semis — next-gen thematic heat',m:'When QTUM outperforms SMH, speculative capital is rotating from core chip names into the quantum computing narrative. Pure risk-appetite signal at the frontier of tech.',up:'Quantum narrative hot; IonQ, D-Wave, Rigetti catching bids.',dn:'Capital returning to core semis — quantum cooling.',pos:'Rising → small QTUM position if regime broadly bullish. Never own in risk-off.'},
+
+  // ── TIER 7: THEMATIC / SECTOR-SPECIFIC ──────────────────────────────────
+  {f:['ITA','SPY'],l:'equity',title:'Defense vs. market — geopolitical risk premium',m:'Whether defense (ITA, XAR, SHLD) outperforms the broad market. Unique: can rise even in risk-off if geopolitical tension is the driver.',up:'Defense budgets rising; geopolitical premium active.',dn:'Risk premium fading; capital rotating to broad market.',pos:'Rising → overweight ITA. Can hold through risk-off if geopolitics is driving.'},
+  {f:['ARKK','SPY'],l:'breadth',title:'Disruptive innovation vs. market — speculative pulse',m:'High-beta innovation (ARKK) vs. the index — cleanest read on appetite for frontier themes. First to bleed in risk-off.',up:'Speculative risk-on; frontier themes catch a bid.',dn:'Risk-off at the frontier — speculative themes bleed first and worst.',pos:'Rising → green light for space/genomics. Falling → cut speculative sleeve early.'},
+  {f:['XBI','SPY'],l:'equity',title:'Biotech risk appetite — GLP-1 · gene therapy',m:'XBI (equal-weight biotech, ~180 names) vs. SPY. Equal-weighting captures small-cap biotech breakouts. GLP-1 + gene editing = dual mega-themes.',up:'Biotech risk-on: FDA approvals, M&A active, GLP-1 pipeline expanding.',dn:'Risk-off: clinical failures, FDA slowdowns, rate-sensitive names selling off.',pos:'Rising → XBI, IBB, ARKG. Pair with SMH: both rising = broad risk-on.'},
+  {f:['INDA','SPY'],l:'breadth',title:'India vs. US — decade-long structural rotation',m:'INDA (MSCI India) vs. SPY. Fastest-growing major economy: GDP >6%, manufacturing shift from China, young demographics. Structural multi-year, not tactical.',up:'India rotation active — capital flowing from US to India.',dn:'Capital returning to US — risk-off or strong dollar pulling EM home.',pos:'Rising → INDA, SMIN. Hold through volatility — structural position. Falling sharply → reduce, re-add on USD weakness.'},
 ];
 const lC={equity:'var(--amber)',credit:'var(--green)',macro:'var(--cyan)',breadth:'var(--violet)'};
 const lN={equity:'Equity',credit:'Credit',macro:'Macro',breadth:'Breadth'};
@@ -1100,7 +1122,7 @@ const CORE_R=[
   {key:'SPY/TLT', num:'SPY', den:'TLT', master:true,  inv:false, label:'Stocks vs Long Bonds',         lens:'macro',  theme:false},
   {key:'CPER/GLD',num:'CPER',den:'GLD', master:true,  inv:false, label:'Copper/Gold (Growth vs Fear)', lens:'macro',  theme:false},
   {key:'QQQ/SPY', num:'QQQ', den:'SPY', master:false, inv:false, label:'Tech / Growth Leadership',     lens:'equity', theme:false},
-  {key:'SMH/SPY', num:'SMH', den:'SPY', master:false, inv:false, label:'Semis — Tech Theme Switch',    lens:'equity', theme:false},
+  // SMH/SPY lives in THEME_R only — removing from CORE_R to avoid duplicate in Live Signal Cards
   {key:'IWM/SPY', num:'IWM', den:'SPY', master:false, inv:false, label:'Small vs Large Caps',          lens:'equity', theme:false},
   {key:'RSP/SPY', num:'RSP', den:'SPY', master:false, inv:false, label:'Breadth (Equal vs Cap Wt)',     lens:'breadth',theme:false},
   {key:'GLD/SPY', num:'GLD', den:'SPY', master:false, inv:true,  label:'Gold vs Stocks (Fear)',        lens:'macro',  theme:false},
@@ -1120,8 +1142,7 @@ const CORE_R=[
   // --- New 2025-26 trending theme core ratios ---
   {key:'COPX/GLD',num:'COPX',den:'GLD', master:false, inv:false, label:'Copper Miners vs Gold (Industrial Intensity)',lens:'macro',theme:false},
   {key:'SKYY/SPY',num:'SKYY',den:'SPY', master:false, inv:false, label:'Cloud/SaaS vs Market (AI Monetisation)',lens:'equity',theme:false},
-  {key:'XBI/SPY', num:'XBI', den:'SPY', master:false, inv:false, label:'Biotech Risk Appetite (GLP-1 · Gene Editing)',lens:'equity',theme:false},
-  {key:'INDA/SPY',num:'INDA',den:'SPY', master:false, inv:false, label:'India vs US (EM Rotation)',     lens:'breadth',theme:false},
+  // XBI/SPY and INDA/SPY live in THEME_R only — removing from CORE_R to avoid duplicates
 ];
 const THEME_R=[
   {key:'SMH/SPY', num:'SMH', den:'SPY', master:false, inv:false, label:'Tech Themes On/Off (Semis)',   lens:'equity', theme:true, themeDesc:'Green → add AIQ, QTUM, BOTZ, CHAT · Red → cut tech themes first'},
@@ -1144,10 +1165,12 @@ async function yfetch(ticker){
   const q1=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=150d`;
   const q2=`https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=150d`;
   const proxies=[
-    {u:`https://corsproxy.io/?url=${encodeURIComponent(q1)}`,          p:r=>r},
-    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q1)}`, p:r=>JSON.parse(r.contents)},
-    {u:`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(q1)}`, p:r=>r},
-    {u:`https://corsproxy.io/?url=${encodeURIComponent(q2)}`,          p:r=>r},
+    {u:`https://corsproxy.io/?url=${encodeURIComponent(q1)}`,                        p:r=>r},
+    {u:`https://corsproxy.io/?url=${encodeURIComponent(q2)}`,                        p:r=>r},
+    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q1)}`,               p:r=>JSON.parse(r.contents)},
+    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q2)}`,               p:r=>JSON.parse(r.contents)},
+    {u:`https://thingproxy.freeboard.io/fetch/${q1}`,                                p:r=>r},
+    {u:`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(q1)}`,          p:r=>r},
     {u:q2, p:r=>r},
     {u:q1, p:r=>r},
   ];
@@ -1196,15 +1219,22 @@ function loadCache(){
   }catch(e){return null;}
 }
 function showStaleBanner(ageMin){
-  const ago=ageMin<60?`${ageMin} min ago`:`${(ageMin/60).toFixed(1)}h ago`;
+  const ago=ageMin<60?`${ageMin} min ago`:ageMin<120?`${Math.round(ageMin/60)}h ago`:`${(ageMin/60).toFixed(1)}h ago`;
+  const hint=ageMin>90?'server may have missed a cycle':'server refresh runs every 30 min';
   const b=document.getElementById('staleBanner');
-  if(b){b.style.display='flex';b.querySelector('.stale-age').textContent=`Last successful update: ${ago}`;}
+  if(!b)return;
+  b.style.display='flex';
+  const ageEl=b.querySelector('.stale-age');
+  const hintEl=b.querySelector('.stale-hint');
+  if(ageEl)ageEl.textContent=`last updated ${ago}`;
+  if(hintEl)hintEl.textContent=hint;
 }
 function showDemoBanner(){
   const b=document.getElementById('staleBanner');
-  if(b){b.style.display='flex';b.style.borderColor='rgba(245,166,35,.4)';
-    b.querySelector('.stale-age').textContent='';
-    b.innerHTML=`<span style="color:var(--amber)">⚠ Live data unavailable — showing a recent snapshot. <b>Hit Refresh</b> to try fetching live prices.</span>`;}
+  if(b){b.style.display='flex';
+    const ageEl=b.querySelector('.stale-age');if(ageEl)ageEl.textContent='using built-in snapshot';
+    const hintEl=b.querySelector('.stale-hint');if(hintEl)hintEl.textContent='tap Refresh to load live data';
+  }
 }
 /* ---- Built-in snapshot so new visitors always see a working dashboard ---- */
 /* Values represent a realistic recent regime. Refreshed by live data when proxies work. */
@@ -1219,7 +1249,7 @@ function seedData(){
     ['CPER/GLD',0,0.342,0.329,0.317,0.338,  'strong-bull',1,1],
     // CORE
     ['QQQ/SPY',0, 1.312,1.298,1.280,1.305, 'strong-bull',1,1],
-    ['SMH/SPY',0, 0.751,0.728,0.712,0.740,  'strong-bull',1,1],
+    // SMH/SPY is theme-only — static entry at theme section below
     ['IWM/SPY',0, 0.445,0.451,0.458,0.448,  'bear',0,0],
     ['RSP/SPY',0, 0.612,0.618,0.622,0.614,  'bear',0,0],
     ['GLD/SPY',0, 0.192,0.197,0.203,0.194,  'bear',0,0],
@@ -1237,9 +1267,7 @@ function seedData(){
     ['EWJ/SPY',0, 0.108,0.110,0.112,0.109,  'bear',0,0],
     ['COPX/GLD',0,0.285,0.278,0.271,0.282,  'bull',1,1],
     ['SKYY/SPY',0,0.462,0.451,0.441,0.458,  'strong-bull',1,1],
-    ['XBI/SPY',0, 0.148,0.152,0.156,0.150,  'bear',0,0],
-    ['INDA/SPY',0,0.094,0.096,0.098,0.095,  'bear',0,0],
-    // THEMES
+    // THEMES  (XBI/SPY and INDA/SPY are theme-only — no core entry)
     ['SMH/SPY',1, 0.751,0.728,0.712,0.740,  'strong-bull',1,1],
     ['ITA/SPY',1, 0.382,0.371,0.362,0.378,  'strong-bull',1,1],
     ['ARKK/SPY',1,0.072,0.069,0.066,0.071,  'strong-bull',1,1],
@@ -1284,8 +1312,6 @@ function buildCard(r,isThemeBig){
   const arr=r.curr>r.prev5?'↗':'↘';
   const tExtra=r.themeDesc?`<div style="font-family:var(--mono);font-size:9.5px;color:${col};margin-top:-4px;line-height:1.5;border-left:2px solid ${col};padding-left:8px">${r.themeDesc}</div>`:'';
   return `<div class="pulse-card ${sig}${isThemeBig?' theme-card':''}">
-    ${r.master?'<div class="pc-master-badge">MASTER</div>':''}
-    ${r.theme&&!r.master?'<div class="pc-theme-badge">THEME</div>':''}
     <div class="pc-header"><div class="signal-light ${slc(sig)}"></div><div class="pc-pair">${r.key}</div><div class="pc-verdict-chip ${sig}">${SIG_LABEL[sig]}</div></div>
     <div class="pc-label">${r.label}</div>${tExtra}
     <div class="pc-vals">
@@ -1301,20 +1327,52 @@ function buildCard(r,isThemeBig){
 
 function renderSplitGrid(data,id){
   const order=['strong-bull','bull','strong-bear','bear'];
-  const bull=data.filter(r=>!r.error&&r.cl.bullish).sort((a,b)=>order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig));
-  const bear=data.filter(r=>!r.error&&!r.cl.bullish).sort((a,b)=>order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig));
+  // strength: how far the ratio is above (positive) or below (negative) SMA20
+  // accounts for inverted ratios (GLD/SPY etc.) so sign always matches bullish direction
+  const strength=r=>(r.inv?-1:1)*((r.curr-r.s20)/r.s20);
+  const bull=data.filter(r=>!r.error&&r.cl.bullish).sort((a,b)=>{
+    const t=order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig);
+    return t!==0?t:strength(b)-strength(a); // same tier → strongest (furthest above SMA20) first
+  });
+  const bear=data.filter(r=>!r.error&&!r.cl.bullish).sort((a,b)=>{
+    const t=order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig);
+    return t!==0?t:strength(a)-strength(b); // same tier → weakest (furthest below SMA20) first
+  });
   const errs=data.filter(r=>r.error);
+  const N=8; // cards shown per group before "Show all"
+  const bull5=bull.slice(0,N), bullRest=bull.slice(N);
+  const bear5=bear.slice(0,N), bearRest=bear.slice(N);
+  const total=bull.length+bear.length;
   let h='';
-  if(bull.length){
+  if(bull5.length){
     h+=`<div class="signal-group-hdr bull-hdr"><span class="sg-label">▲ Bullish</span><span class="sg-count">${bull.length} ratio${bull.length>1?'s':''}</span><div class="sg-line"></div></div>`;
-    h+=`<div class="pulse-grid">${bull.map(r=>buildCard(r,false)).join('')}</div>`;
+    h+=`<div class="pulse-grid">${bull5.map(r=>buildCard(r,false)).join('')}</div>`;
   }
-  if(bear.length){
+  if(bear5.length){
     h+=`<div class="signal-group-hdr bear-hdr"><span class="sg-label">▼ Bearish</span><span class="sg-count">${bear.length} ratio${bear.length>1?'s':''}</span><div class="sg-line"></div></div>`;
-    h+=`<div class="pulse-grid">${bear.map(r=>buildCard(r,false)).join('')}</div>`;
+    h+=`<div class="pulse-grid">${bear5.map(r=>buildCard(r,false)).join('')}</div>`;
+  }
+  const hasRest=bullRest.length||bearRest.length;
+  if(hasRest){
+    h+=`<div id="ratioCardsRest" style="display:none">`;
+    if(bullRest.length) h+=`<div class="pulse-grid">${bullRest.map(r=>buildCard(r,false)).join('')}</div>`;
+    if(bearRest.length) h+=`<div class="pulse-grid">${bearRest.map(r=>buildCard(r,false)).join('')}</div>`;
+    h+=`</div>`;
+    const remaining=bullRest.length+bearRest.length;
+    h+=`<button class="show-all-ratios-btn" id="showAllRatiosBtn" onclick="toggleAllRatioCards()"><span>Show all ${total} ratio cards &nbsp;(${remaining} more)</span><span class="btn-arrow">▼</span></button>`;
   }
   if(errs.length) h+=`<div class="pulse-grid" style="margin-top:10px;opacity:.4">${errs.map(r=>buildCard(r,false)).join('')}</div>`;
   document.getElementById(id).innerHTML=h||'<div class="live-error-msg">No data</div>';
+}
+function toggleAllRatioCards(){
+  const rest=document.getElementById('ratioCardsRest');
+  const btn=document.getElementById('showAllRatiosBtn');
+  if(!rest||!btn)return;
+  const open=rest.style.display==='none';
+  rest.style.display=open?'block':'none';
+  btn.classList.toggle('open',open);
+  const span=btn.querySelector('span:first-child');
+  if(span) span.textContent=open?'Show less':'Show all ratio cards';
 }
 
 /* ================================================================
@@ -1367,7 +1425,11 @@ function buildBPCard(e,rank){
     <div class="bp-ticker" style="color:${col}">${e.ticker}</div>
     <div class="bp-name">${BP_NAMES[e.ticker]||''}</div>
     <div class="bp-pct" style="color:${col}">${pctStr} <span style="font-size:9px;opacity:.6">vs SPY SMA20</span></div>
-    <div class="bp-meta">ratio momentum ${chg5Str} (5d) &nbsp;·&nbsp; ${e.bullish?'SMA20▲SMA50':'SMA20▼SMA50'}</div>
+    <div class="pc-sma-row" style="margin-top:5px">
+      <span class="sma-pill ${e.bullish?'above':'below'}">${e.bullish?'▲ ABOVE':'▼ BELOW'} SMA20</span>
+      <span class="sma50-txt">SMA20 ${e.s20>e.s50?'▲':'▼'} SMA50</span>
+    </div>
+    <div class="bp-meta" style="margin-top:3px">5d momentum ${chg5Str}</div>
     <div class="bp-spark">${bpSpark(e.closes,e.bullish)}</div>
   </div>`;
 }
@@ -1487,7 +1549,14 @@ function renderBanner(data){
   document.getElementById('rbTime').textContent='Updated '+new Date().toLocaleTimeString();
   const b=document.querySelector('.regime-banner');if(b){b.className=`regime-banner ${cls}`;b.style.setProperty('--rb-col',rbCol);}
   document.getElementById('liveBreakdown').style.display='block';
-  document.getElementById('bdGrid').innerHTML=valid.map(r=>{const c=r.cl.bullish?'green':'red';const col=r.cl.bullish?'#3fd17e':'#ff5c61';const pct=((r.curr-r.s20)/r.s20*100);return `<div class="bd-row" data-ratio="${r.key}" data-sig="${r.cl.sig}" style="cursor:pointer" title="Click to understand this signal"><div class="bd-light ${r.theme?'gold':c}"></div><div class="bd-pair" style="color:${col}">${r.key}</div><div class="bd-label">${r.label}</div><div class="bd-pct" style="color:${col}">${(pct>=0?'+':'')+pct.toFixed(2)}%</div></div>`;}).join('');
+  const bdOrder=['strong-bull','bull','bear','strong-bear'];
+  const bdSorted=[...valid].sort((a,b)=>{
+    const td=bdOrder.indexOf(a.cl.sig)-bdOrder.indexOf(b.cl.sig);
+    if(td!==0)return td;
+    const pa=((a.curr-a.s20)/a.s20*100),pb=((b.curr-b.s20)/b.s20*100);
+    return a.cl.bullish?pb-pa:pa-pb; // bull: highest pct first; bear: lowest (most negative) first
+  });
+  document.getElementById('bdGrid').innerHTML=bdSorted.map(r=>{const c=r.cl.bullish?'green':'red';const col=r.cl.bullish?'#3fd17e':'#ff5c61';const pct=((r.curr-r.s20)/r.s20*100);return `<div class="bd-row" data-ratio="${r.key}" data-sig="${r.cl.sig}" style="cursor:pointer" title="Click to understand this signal"><div class="bd-light ${r.theme?'gold':c}"></div><div class="bd-pair" style="color:${col}">${r.key}</div><div class="bd-label">${r.label}</div><div class="bd-pct" style="color:${col}">${(pct>=0?'+':'')+pct.toFixed(2)}%</div></div>`;}).join('');
 }
 
 let loading=false;
@@ -1496,7 +1565,14 @@ function renderAll(aD){
   const tD=aD.filter(r=>r.theme);
   renderBanner(aD);
   document.getElementById('liveMasters').innerHTML=cD.filter(r=>r.master).map(r=>buildCard(r,false)).join('');
-  document.getElementById('liveThemes').innerHTML=tD.map(r=>buildCard(r,true)).join('');
+  const tOrder=['strong-bull','bull','bear','strong-bear'];
+  const tSorted=[...tD].sort((a,b)=>{
+    const td=tOrder.indexOf(a.cl.sig)-tOrder.indexOf(b.cl.sig);
+    if(td!==0)return td;
+    const pa=((a.curr-a.s20)/a.s20*100),pb=((b.curr-b.s20)/b.s20*100);
+    return a.cl.bullish?pb-pa:pa-pb;
+  });
+  document.getElementById('liveThemes').innerHTML=tSorted.map(r=>buildCard(r,true)).join('');
   renderSplitGrid(aD,'livePulseGrid');
   const validN=aD.filter(r=>!r.error).length;
   const el=document.getElementById('ratioCardsCount');
@@ -1519,9 +1595,17 @@ async function loadDataJson(){
       if(r.error)return r;
       const cfg=cfgMap.get(`${r.key}|${r.theme?1:0}`)||{};
       const cl=classify(r.curr,r.s20,r.s50,r.inv??cfg.inv??false);
-      return{...cfg,...r,vals:[],cl};
+      return{...cfg,...r,vals:Array.isArray(r.vals)?r.vals:[],cl};
     }).filter(Boolean);
     if(json.data.length<10)return null;
+    // Store ticker_prices, etf_holdings + timestamp globally for instant popup use
+    if(json.ticker_prices && typeof json.ticker_prices==='object'){
+      window.tickerPrices=json.ticker_prices;
+      window.tickerPricesTs=json.ts||null;
+    }
+    if(json.etf_holdings && typeof json.etf_holdings==='object'){
+      window.etfHoldings=json.etf_holdings; // real full ETF holdings from Yahoo Finance
+    }
     return json;
   }catch(e){console.warn('loadDataJson failed:',e);return null;}
 }
@@ -1542,7 +1626,7 @@ async function loadLiveData(){
     renderAll(dj.data);
     saveCache(dj.data);                       // save into localStorage too
     const ageMin=Math.round((Date.now()-dj.ts)/60000);
-    if(ageMin>45){showStaleBanner(ageMin);}else{hideStaleBanner();}
+    if(ageMin>60){showStaleBanner(ageMin);}else{hideStaleBanner();}
     dot.className='live-dot on';
     stxt.textContent='updated · '+new Date(dj.ts).toLocaleTimeString();
     shownFromServer=true;
@@ -1613,37 +1697,37 @@ setInterval(()=>{loadLiveData();loadBestPerformers();},5*60*1000);
 const HOLDINGS=[
   // ---- US SECTORS ----
   {t:'XLK',n:'Technology Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['AAPL','Apple',22.1],['NVDA','NVIDIA',21.4],['MSFT','Microsoft',20.8],['AVGO','Broadcom',4.9],['META','Meta',3.3],['AMD','AMD',2.1],['CRM','Salesforce',1.9],['ADBE','Adobe',1.8],['AMAT','Applied Materials',1.5],['QCOM','Qualcomm',1.4]],
+   h:[['AAPL','Apple',22.1],['NVDA','NVIDIA',21.4],['MSFT','Microsoft',20.8],['AVGO','Broadcom',4.9],['META','Meta',3.3],['AMD','AMD',2.1],['CRM','Salesforce',1.9],['ADBE','Adobe',1.8],['AMAT','Applied Materials',1.5],['QCOM','Qualcomm',1.4],['ORCL','Oracle',1.3],['CSCO','Cisco',1.2],['NOW','ServiceNow',1.1],['INTU','Intuit',1.0],['PANW','Palo Alto Networks',0.9],['KLAC','KLA Corp',0.8],['LRCX','Lam Research',0.8],['MU','Micron Technology',0.7],['MRVL','Marvell Tech',0.7],['SNPS','Synopsys',0.6],['CDNS','Cadence Design',0.6],['FTNT','Fortinet',0.5]],
    note:'Heavily concentrated — top 3 names are ~64% of the fund.'},
   {t:'XLF',n:'Financial Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['BRK.B','Berkshire Hathaway',13.9],['JPM','JPMorgan Chase',11.5],['V','Visa',8.5],['MA','Mastercard',7.2],['BAC','Bank of America',3.9],['WFC','Wells Fargo',3.6],['GS','Goldman Sachs',3.2],['MS','Morgan Stanley',2.9],['BLK','BlackRock',2.5],['SPGI','S&P Global',2.2]],
+   h:[['BRK.B','Berkshire Hathaway',13.9],['JPM','JPMorgan Chase',11.5],['V','Visa',8.5],['MA','Mastercard',7.2],['BAC','Bank of America',3.9],['WFC','Wells Fargo',3.6],['GS','Goldman Sachs',3.2],['MS','Morgan Stanley',2.9],['BLK','BlackRock',2.5],['SPGI','S&P Global',2.2],['CME','CME Group',2.0],['ICE','Intercontinental Exch.',1.9],['AXP','American Express',1.8],['C','Citigroup',1.7],['USB','US Bancorp',1.5],['PNC','PNC Financial',1.4],['TRV','Travelers',1.3],['COF','Capital One',1.2],['MET','MetLife',1.1],['AON','Aon',1.0]],
    note:'Rate-sensitive; JPM + Berkshire dominate. Watch 10Y yield for direction.'},
   {t:'XLE',n:'Energy Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['XOM','Exxon Mobil',22.3],['CVX','Chevron',17.1],['COP','ConocoPhillips',8.2],['EOG','EOG Resources',5.1],['SLB','Schlumberger',5.0],['MPC','Marathon Petroleum',4.2],['VLO','Valero Energy',3.7],['PSX','Phillips 66',3.3],['OXY','Occidental Petroleum',3.1],['PXD','Pioneer Natural Res.',2.9]],
+   h:[['XOM','Exxon Mobil',22.3],['CVX','Chevron',17.1],['COP','ConocoPhillips',8.2],['EOG','EOG Resources',5.1],['SLB','Schlumberger',5.0],['MPC','Marathon Petroleum',4.2],['VLO','Valero Energy',3.7],['PSX','Phillips 66',3.3],['OXY','Occidental Petroleum',3.1],['PXD','Pioneer Natural Res.',2.9],['HAL','Halliburton',2.5],['BKR','Baker Hughes',2.4],['DVN','Devon Energy',2.2],['FANG','Diamondback Energy',2.1],['HES','Hess Corp',1.9],['MRO','Marathon Oil',1.7],['OKE','ONEOK',1.6],['WMB','Williams Companies',1.5],['KMI','Kinder Morgan',1.4],['LNG','Cheniere Energy',1.3]],
    note:'Crude oil price is the primary driver — track WTI/Brent alongside XLE.'},
   {t:'XLV',n:'Health Care Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['UNH','UnitedHealth Group',10.2],['LLY','Eli Lilly',9.5],['JNJ','Johnson & Johnson',7.1],['ABBV','AbbVie',6.3],['MRK','Merck',5.6],['PFE','Pfizer',4.6],['TMO','Thermo Fisher',4.1],['DHR','Danaher',3.6],['ABT','Abbott Labs',3.3],['ISRG','Intuitive Surgical',3.1]],
+   h:[['UNH','UnitedHealth Group',10.2],['LLY','Eli Lilly',9.5],['JNJ','Johnson & Johnson',7.1],['ABBV','AbbVie',6.3],['MRK','Merck',5.6],['PFE','Pfizer',4.6],['TMO','Thermo Fisher',4.1],['DHR','Danaher',3.6],['ABT','Abbott Labs',3.3],['ISRG','Intuitive Surgical',3.1],['ELV','Elevance Health',2.8],['CVS','CVS Health',2.6],['AMGN','Amgen',2.4],['CI','Cigna',2.2],['BMY','Bristol-Myers Squibb',2.0],['MDT','Medtronic',1.8],['BSX','Boston Scientific',1.7],['SYK','Stryker',1.6],['BDX','Becton Dickinson',1.4],['GEHC','GE HealthCare',1.3],['ZTS','Zoetis',1.2],['VRTX','Vertex Pharma',1.1]],
    note:'Defensive-growth mix. LLY weight surged on GLP-1 drug demand.'},
   {t:'XLI',n:'Industrial Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['GEV','GE Aerospace',5.2],['RTX','RTX Corp',4.6],['CAT','Caterpillar',4.5],['HON','Honeywell',4.1],['DE','Deere & Company',3.6],['LMT','Lockheed Martin',3.1],['PH','Parker Hannifin',2.9],['NOC','Northrop Grumman',2.6],['ETN','Eaton',2.6],['UNP','Union Pacific',2.4]],
+   h:[['GEV','GE Aerospace',5.2],['RTX','RTX Corp',4.6],['CAT','Caterpillar',4.5],['HON','Honeywell',4.1],['DE','Deere & Company',3.6],['LMT','Lockheed Martin',3.1],['PH','Parker Hannifin',2.9],['NOC','Northrop Grumman',2.6],['ETN','Eaton',2.6],['UNP','Union Pacific',2.4],['CTAS','Cintas',2.2],['RSG','Republic Services',2.1],['FDX','FedEx',1.9],['NSC','Norfolk Southern',1.8],['CSX','CSX Corp',1.7],['ROK','Rockwell Automation',1.6],['EMR','Emerson Electric',1.5],['JCI','Johnson Controls',1.4],['AME','AMETEK',1.3],['PCAR','PACCAR',1.2],['URI','United Rentals',1.1],['PWR','Quanta Services',1.0]],
    note:'Cyclical sector — sensitive to PMI, capex cycles, and defense budgets.'},
   {t:'XLC',n:'Communication Services Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['META','Meta Platforms',23.1],['GOOGL','Alphabet A',15.4],['GOOG','Alphabet C',13.2],['NFLX','Netflix',5.3],['TMUS','T-Mobile US',4.2],['CMCSA','Comcast',4.0],['DIS','Walt Disney',3.2],['T','AT&T',2.6],['CHTR','Charter Comm.',2.1],['EA','Electronic Arts',1.9]],
+   h:[['META','Meta Platforms',23.1],['GOOGL','Alphabet A',15.4],['GOOG','Alphabet C',13.2],['NFLX','Netflix',5.3],['TMUS','T-Mobile US',4.2],['CMCSA','Comcast',4.0],['DIS','Walt Disney',3.2],['T','AT&T',2.6],['CHTR','Charter Comm.',2.1],['EA','Electronic Arts',1.9],['VZ','Verizon',1.8],['WBD','Warner Bros. Discovery',1.6],['OMC','Omnicom Group',1.4],['TTWO','Take-Two Interactive',1.2],['LYV','Live Nation',1.1],['FOXA','Fox Corp A',1.0],['PARA','Paramount Global',0.9],['NWSA','News Corp A',0.8],['IPG','Interpublic Group',0.7],['MTCH','Match Group',0.6]],
    note:'Meta + Alphabet = ~52%. Effectively a mega-cap tech/social proxy.'},
   {t:'XLU',n:'Utilities Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['NEE','NextEra Energy',14.8],['SO','Southern Company',7.2],['DUK','Duke Energy',6.6],['SRE','Sempra',5.1],['D','Dominion Energy',4.6],['AEP','Am. Electric Power',4.1],['EXC','Exelon',4.0],['ED','Consolidated Edison',3.1],['XEL','Xcel Energy',3.0],['WEC','WEC Energy',2.6]],
+   h:[['NEE','NextEra Energy',14.8],['SO','Southern Company',7.2],['DUK','Duke Energy',6.6],['SRE','Sempra',5.1],['D','Dominion Energy',4.6],['AEP','Am. Electric Power',4.1],['EXC','Exelon',4.0],['ED','Consolidated Edison',3.1],['XEL','Xcel Energy',3.0],['WEC','WEC Energy',2.6],['ES','Eversource Energy',2.4],['ETR','Entergy',2.3],['PPL','PPL Corp',2.1],['FE','FirstEnergy',2.0],['CNP','CenterPoint Energy',1.8],['NI','NiSource',1.6],['AES','AES Corp',1.5],['PNW','Pinnacle West',1.4],['LNT','Alliant Energy',1.3],['EVRG','Evergy',1.2]],
    note:'Bond proxy — rises when rates fall. Watch 10Y Treasury yield inversely.'},
   {t:'XLY',n:'Consumer Discretionary Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['AMZN','Amazon',24.2],['TSLA','Tesla',15.8],['HD','Home Depot',9.1],['MCD',"McDonald's",4.6],['LOW',"Lowe's",4.1],['TJX','TJX Companies',3.6],['BKNG','Booking Holdings',3.1],['NKE','Nike',2.6],['SBUX','Starbucks',2.1],['TGT','Target',1.9]],
+   h:[['AMZN','Amazon',24.2],['TSLA','Tesla',15.8],['HD','Home Depot',9.1],['MCD',"McDonald's",4.6],['LOW',"Lowe's",4.1],['TJX','TJX Companies',3.6],['BKNG','Booking Holdings',3.1],['NKE','Nike',2.6],['SBUX','Starbucks',2.1],['TGT','Target',1.9],['GM','General Motors',1.8],['F','Ford Motor',1.7],['CMG','Chipotle Mexican Grill',1.6],['YUM','Yum! Brands',1.5],['HLT','Hilton Worldwide',1.4],['MAR','Marriott Intl.',1.3],['GRMN','Garmin',1.2],['ORLY',"O'Reilly Auto Parts",1.1],['RH','RH (Restoration Hardware)',1.0],['BBY','Best Buy',0.9]],
    note:'Amazon + Tesla = ~40%. The purest "risk-on consumer" gauge vs. XLP.'},
   {t:'XLP',n:'Consumer Staples Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['PG','Procter & Gamble',14.9],['COST','Costco',12.3],['WMT','Walmart',10.1],['KO','Coca-Cola',9.2],['PEP','PepsiCo',8.1],['PM','Philip Morris',4.2],['MDLZ','Mondelez',3.6],['CL','Colgate-Palmolive',3.1],['EL','Estée Lauder',2.6],['GIS','General Mills',2.1]],
+   h:[['PG','Procter & Gamble',14.9],['COST','Costco',12.3],['WMT','Walmart',10.1],['KO','Coca-Cola',9.2],['PEP','PepsiCo',8.1],['PM','Philip Morris',4.2],['MDLZ','Mondelez',3.6],['CL','Colgate-Palmolive',3.1],['EL','Estée Lauder',2.6],['GIS','General Mills',2.1],['STZ','Constellation Brands',1.9],['HSY','Hershey',1.8],['MKC','McCormick',1.7],['CHD','Church & Dwight',1.6],['KHC','Kraft Heinz',1.5],['SJM','J.M. Smucker',1.4],['HRL','Hormel Foods',1.3],['CAG','Conagra Brands',1.2],['CPB','Campbell Soup',1.1],['TAP','Molson Coors',1.0]],
    note:'Defensive leg of the XLY/XLP ratio. Outperforms in recessions and risk-off.'},
   {t:'XLRE',n:'Real Estate Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['PLD','Prologis',10.3],['AMT','American Tower',8.4],['EQIX','Equinix',8.1],['SPG','Simon Property',5.2],['CCI','Crown Castle',5.0],['SBAC','SBA Comms.',4.3],['DLR','Digital Realty',4.1],['PSA','Public Storage',3.6],['O','Realty Income',3.2],['WELL','Welltower',3.1]],
+   h:[['PLD','Prologis',10.3],['AMT','American Tower',8.4],['EQIX','Equinix',8.1],['SPG','Simon Property',5.2],['CCI','Crown Castle',5.0],['SBAC','SBA Comms.',4.3],['DLR','Digital Realty',4.1],['PSA','Public Storage',3.6],['O','Realty Income',3.2],['WELL','Welltower',3.1],['EXR','Extra Space Storage',2.8],['IRM','Iron Mountain',2.6],['VTR','Ventas',2.4],['ARE','Alexandria Real Estate',2.2],['EQR','Equity Residential',2.0],['AVB','AvalonBay Communities',1.9],['MAA','Mid-America Apartment',1.8],['UDR','UDR Inc.',1.6],['NNN','NNN REIT',1.5],['INVH','Invitation Homes',1.4]],
    note:'Rate-sensitive. Digital infrastructure (towers, data centers) now ~40% of fund.'},
   {t:'XLB',n:'Materials Select Sector SPDR',cat:'US Sector',group:'US Sectors',
-   h:[['LIN','Linde',18.2],['SHW','Sherwin-Williams',5.4],['APD','Air Products',5.1],['ECL','Ecolab',4.6],['NUE','Nucor',4.1],['FCX','Freeport-McMoRan',4.0],['BALL','Ball Corp',3.6],['LYB','LyondellBasell',3.1],['CF','CF Industries',2.6],['IFF','Intl. Flavors',2.5]],
+   h:[['LIN','Linde',18.2],['SHW','Sherwin-Williams',5.4],['APD','Air Products',5.1],['ECL','Ecolab',4.6],['NUE','Nucor',4.1],['FCX','Freeport-McMoRan',4.0],['BALL','Ball Corp',3.6],['LYB','LyondellBasell',3.1],['CF','CF Industries',2.6],['IFF','Intl. Flavors',2.5],['NEM','Newmont',2.3],['PPG','PPG Industries',2.2],['ALB','Albemarle',2.0],['CE','Celanese',1.9],['DD','DuPont',1.8],['IP','International Paper',1.6],['VMC','Vulcan Materials',1.5],['MLM','Martin Marietta',1.4],['RPM','RPM International',1.3],['WRK','WestRock',1.2]],
    note:'Cyclical. Copper/commodities price is the leading macro driver for XLB.'},
 
   // ---- GLOBAL SECTORS ----
@@ -1662,13 +1746,13 @@ const HOLDINGS=[
    h:[['AAPL','Apple',7.1],['NVDA','NVIDIA',6.9],['MSFT','Microsoft',6.6],['AMZN','Amazon',3.9],['META','Meta Platforms',2.8],['GOOGL','Alphabet A',2.4],['BRK.B','Berkshire Hathaway',1.9],['GOOG','Alphabet C',1.8],['TSLA','Tesla',1.7],['AVGO','Broadcom',1.6]],
    note:'The benchmark. Top 10 = ~37% of the fund. Rest = 490 stocks at tiny weights.'},
   {t:'QQQ',n:'Invesco QQQ Trust (Nasdaq-100)',cat:'Macro',group:'Macro / Asset Class',
-   h:[['AAPL','Apple',10.3],['NVDA','NVIDIA',8.4],['MSFT','Microsoft',8.2],['AMZN','Amazon',5.1],['META','Meta',4.3],['AVGO','Broadcom',3.6],['TSLA','Tesla',2.9],['GOOGL','Alphabet A',2.6],['COST','Costco',2.3],['GOOG','Alphabet C',2.2]],
+   h:[['AAPL','Apple',10.3],['NVDA','NVIDIA',8.4],['MSFT','Microsoft',8.2],['AMZN','Amazon',5.1],['META','Meta',4.3],['AVGO','Broadcom',3.6],['TSLA','Tesla',2.9],['GOOGL','Alphabet A',2.6],['COST','Costco',2.3],['GOOG','Alphabet C',2.2],['ADBE','Adobe',1.6],['AMD','AMD',1.5],['NFLX','Netflix',1.4],['ISRG','Intuitive Surgical',1.3],['TXN','Texas Instruments',1.2],['QCOM','Qualcomm',1.1],['INTU','Intuit',1.0],['CSCO','Cisco',0.9],['REGN','Regeneron',0.9],['HON','Honeywell',0.8],['PANW','Palo Alto Networks',0.7],['MRVL','Marvell Technology',0.6]],
    note:'No financials vs. SPY. Top-heavy tech/growth index — highest beta of the big 3.'},
   {t:'SMH',n:'VanEck Semiconductor ETF',cat:'Macro',group:'Macro / Asset Class',
-   h:[['NVDA','NVIDIA',20.8],['TSM','TSMC',14.1],['AVGO','Broadcom',8.3],['ASML','ASML',5.2],['TXN','Texas Instruments',4.4],['AMAT','Applied Materials',4.2],['LRCX','Lam Research',4.0],['KLAC','KLA Corp',3.2],['MRVL','Marvell Technology',3.1],['QCOM','Qualcomm',2.6]],
+   h:[['NVDA','NVIDIA',20.8],['TSM','TSMC',14.1],['AVGO','Broadcom',8.3],['ASML','ASML',5.2],['TXN','Texas Instruments',4.4],['AMAT','Applied Materials',4.2],['LRCX','Lam Research',4.0],['KLAC','KLA Corp',3.2],['MRVL','Marvell Technology',3.1],['QCOM','Qualcomm',2.6],['AMD','AMD',2.4],['INTC','Intel',2.2],['ON','ON Semiconductor',2.1],['ADI','Analog Devices',1.9],['MPWR','Monolithic Power',1.8],['NXPI','NXP Semiconductors',1.7],['SWKS','Skyworks Solutions',1.5],['ENTG','Entegris',1.4],['WOLF','Wolfspeed',1.2],['TER','Teradyne',1.1]],
    note:'NVDA alone is ~21%. The canary for AI capex demand — moves first.'},
   {t:'IWM',n:'iShares Russell 2000 ETF',cat:'Macro',group:'Macro / Asset Class',
-   h:[['SMCI','Super Micro Computer',0.5],['AXON','Axon Enterprise',0.5],['MSTR','MicroStrategy',0.4],['SAIA','Saia Inc.',0.4],['CELH','Celsius Holdings',0.4],['SPSC','SPS Commerce',0.4],['RMBS','Rambus',0.3],['VRRM','Verra Mobility',0.3],['HWC','Hancock Whitney',0.3],['IDCC','InterDigital',0.3]],
+   h:[['SMCI','Super Micro Computer',0.5],['AXON','Axon Enterprise',0.5],['MSTR','MicroStrategy',0.4],['SAIA','Saia Inc.',0.4],['CELH','Celsius Holdings',0.4],['SPSC','SPS Commerce',0.4],['RMBS','Rambus',0.3],['VRRM','Verra Mobility',0.3],['HWC','Hancock Whitney',0.3],['IDCC','InterDigital',0.3],['TGTX','TG Therapeutics',0.3],['FTLF','FitLife Brands',0.3],['SMPL','Simply Good Foods',0.3],['PLXS','Plexus Corp',0.3],['KFRC','Kforce Inc.',0.2],['CSWI','CSW Industrials',0.2],['UFPI','UFP Industries',0.2],['INVA','Innoviva',0.2],['PRCT','PROCEPT BioRobotics',0.2],['HTLF','Heartland Financial',0.2]],
    note:'~2,000 holdings — no single name >0.5%. Breadth & risk-appetite gauge, not a concentration bet.'},
   {t:'TLT',n:'iShares 20+ Year Treasury Bond ETF',cat:'Macro',group:'Macro / Asset Class',
    h:[['US 30Y','US Treasury 30Y Bond (4.25% 2054)',12.3],['US 30Y','US Treasury 30Y Bond (4.75% 2053)',10.2],['US 30Y','US Treasury 30Y Bond (3.875% 2043)',9.4],['US 30Y','US Treasury 30Y Bond (4.50% 2039)',8.6],['US 20Y','US Treasury 20Y Bond (3.5% 2042)',7.8],['US 30Y','US Treasury 30Y Bond (3.625% 2053)',7.1],['US 30Y','US Treasury 30Y Bond (4.00% 2052)',6.8],['US 20Y','US Treasury 20Y Bond (4.0% 2043)',6.3],['US 30Y','US Treasury 30Y Bond (4.125% 2054)',5.9],['US 30Y','US Treasury 30Y Bond (3.00% 2048)',5.2]],
@@ -1688,7 +1772,7 @@ const HOLDINGS=[
 
   // ---- THEMES ----
   {t:'ITA',n:'iShares U.S. Aerospace & Defense ETF',cat:'Theme — Defense',group:'Trending Themes',
-   h:[['RTX','RTX Corp',17.1],['LHX','L3Harris Technologies',8.3],['NOC','Northrop Grumman',7.4],['LMT','Lockheed Martin',7.2],['GEV','GE Aerospace',6.1],['BA','Boeing',5.3],['TDG','TransDigm Group',5.1],['HWM','Howmet Aerospace',4.2],['HEI','HEICO Corp',4.1],['TXT','Textron',3.6]],
+   h:[['RTX','RTX Corp',17.1],['LHX','L3Harris Technologies',8.3],['NOC','Northrop Grumman',7.4],['LMT','Lockheed Martin',7.2],['GEV','GE Aerospace',6.1],['BA','Boeing',5.3],['TDG','TransDigm Group',5.1],['HWM','Howmet Aerospace',4.2],['HEI','HEICO Corp',4.1],['TXT','Textron',3.6],['LDOS','Leidos Holdings',3.2],['CACI','CACI International',2.8],['BAH','Booz Allen Hamilton',2.6],['SAIC','Science Applications Intl.',2.4],['DRS','Leonardo DRS',2.2],['KTOS','Kratos Defense',2.0],['MOG.A','Moog Inc.',1.8],['SPR','Spirit AeroSystems',1.6],['CW','Curtiss-Wright',1.5],['MRCY','Mercury Systems',1.4]],
    note:'Most liquid defense ETF. Geopolitical premium — can rise even in broad risk-off.'},
   {t:'XAR',n:'SPDR S&P Aerospace & Defense ETF',cat:'Theme — Defense',group:'Trending Themes',
    h:[['RTX','RTX Corp',3.2],['LHX','L3Harris',3.1],['NOC','Northrop Grumman',3.0],['LMT','Lockheed Martin',3.0],['BA','Boeing',3.0],['SPR','Spirit AeroSystems',3.0],['MRCY','Mercury Systems',2.9],['CW','Curtiss-Wright',2.8],['FLIR','Teledyne FLIR',2.8],['DCO','Ducommun',2.7]],
@@ -1706,19 +1790,19 @@ const HOLDINGS=[
    h:[['RKLB','Rocket Lab',10.8],['LHX','L3Harris',8.2],['TRMB','Trimble',7.4],['KTOS','Kratos Defense',6.3],['JOBY','Joby Aviation',5.2],['MKF','Markforged',4.8],['PATH','UiPath',4.2],['PROTO','Proto Labs',4.1],['DE','Deere & Company',3.6],['SPIR','Spire Global',3.2]],
    note:'Active ARK fund — broader tech stack, not pure-play space. Holdings change frequently.'},
   {t:'QTUM',n:'Defiance Quantum ETF',cat:'Theme — Quantum',group:'Trending Themes',
-   h:[['IONQ','IonQ',5.3],['QBTS','D-Wave Quantum',5.1],['RGTI','Rigetti Computing',4.8],['IBM','IBM',4.4],['GOOGL','Alphabet',4.2],['HON','Honeywell',4.0],['MSFT','Microsoft',3.6],['LMT','Lockheed Martin',3.2],['NVDA','NVIDIA',3.1],['ARQQ','Arqit Quantum',2.9]],
+   h:[['IONQ','IonQ',5.3],['QBTS','D-Wave Quantum',5.1],['RGTI','Rigetti Computing',4.8],['IBM','IBM',4.4],['GOOGL','Alphabet',4.2],['HON','Honeywell',4.0],['MSFT','Microsoft',3.6],['LMT','Lockheed Martin',3.2],['NVDA','NVIDIA',3.1],['ARQQ','Arqit Quantum',2.9],['QUBT','Quantum Computing Inc.',2.7],['QBTS','D-Wave Quantum',2.5],['COHU','Cohu Inc.',2.3],['ENTG','Entegris',2.1],['MKSI','MKS Instruments',2.0],['ONTO','Onto Innovation',1.9],['FORM','FormFactor',1.8],['SLAB','Silicon Labs',1.7],['AMBA','Ambarella',1.6],['CEVA','CEVA Inc.',1.5]],
    note:'First and largest quantum ETF. Pure-play quantum names are tiny — IBM/GOOGL provide liquidity.'},
   {t:'AIQ',n:'Global X AI & Technology ETF',cat:'Theme — AI',group:'Trending Themes',
-   h:[['NVDA','NVIDIA',6.4],['GOOGL','Alphabet',5.3],['META','Meta Platforms',5.1],['BIDU','Baidu',4.6],['MSFT','Microsoft',4.2],['005930','Samsung',3.6],['ACN','Accenture',3.2],['0700','Tencent',3.1],['NOW','ServiceNow',2.6],['PLTR','Palantir',2.5]],
+   h:[['NVDA','NVIDIA',6.4],['GOOGL','Alphabet',5.3],['META','Meta Platforms',5.1],['BIDU','Baidu',4.6],['MSFT','Microsoft',4.2],['ACN','Accenture',3.2],['NOW','ServiceNow',2.6],['PLTR','Palantir',2.5],['AMD','AMD',2.3],['AMZN','Amazon',2.1],['AAPL','Apple',2.0],['CRM','Salesforce',1.9],['SNOW','Snowflake',1.8],['DDOG','Datadog',1.7],['AI','C3.ai',1.6],['VRNS','Varonis Systems',1.5],['SNPS','Synopsys',1.4],['KLAC','KLA Corp',1.3],['PATH','UiPath',1.2],['SOUN','SoundHound AI',1.1]],
    note:'Broad AI — includes Chinese AI names (Baidu, Tencent). 84 holdings, well diversified.'},
   {t:'CHAT',n:'Roundhill Generative AI & Technology ETF',cat:'Theme — AI',group:'Trending Themes',
    h:[['NVDA','NVIDIA',8.1],['MSFT','Microsoft',7.4],['GOOGL','Alphabet',6.3],['META','Meta Platforms',6.1],['AMZN','Amazon',5.2],['CRM','Salesforce',3.6],['ORCL','Oracle',3.4],['PLTR','Palantir',3.2],['ADBE','Adobe',3.0],['SNOW','Snowflake',2.8]],
    note:'Active fund. Revenue-purity screen for genAI — holdings subject to manager discretion.'},
   {t:'BOTZ',n:'Global X Robotics & AI ETF',cat:'Theme — Robotics',group:'Trending Themes',
-   h:[['NVDA','NVIDIA',9.3],['ISRG','Intuitive Surgical',8.4],['6861','Keyence (Japan)',7.2],['6954','Fanuc (Japan)',6.1],['ABB','ABB Ltd',6.0],['AVAV','AeroVironment',5.3],['6273','SMC Corp (Japan)',4.2],['IRBT','iRobot',3.8],['ZBRA','Zebra Technologies',3.6],['CGNX','Cognex',3.2]],
+   h:[['NVDA','NVIDIA',9.3],['ISRG','Intuitive Surgical',8.4],['ABB','ABB Ltd',6.0],['AVAV','AeroVironment',5.3],['IRBT','iRobot',3.8],['ZBRA','Zebra Technologies',3.6],['CGNX','Cognex',3.2],['TER','Teradyne',2.9],['ROK','Rockwell Automation',2.7],['PATH','UiPath',2.5],['KTOS','Kratos Defense',2.3],['MKSI','MKS Instruments',2.1],['BRKS','Brooks Automation',1.9],['ESLT','Elbit Systems',1.8],['ONTO','Onto Innovation',1.7],['ROP','Roper Technologies',1.6],['PLTR','Palantir',1.5],['GRMN','Garmin',1.4],['IROQ','iRobot',1.3],['RMBS','Rambus',1.2]],
    note:'~30% Japanese robotics names (Fanuc, Keyence, SMC). Exposed to JPY/USD FX.'},
   {t:'CIBR',n:'First Trust Nasdaq Cybersecurity ETF',cat:'Theme — Cyber',group:'Trending Themes',
-   h:[['CRWD','CrowdStrike',10.2],['CSCO','Cisco Systems',9.4],['AVGO','Broadcom',8.1],['PANW','Palo Alto Networks',7.8],['FTNT','Fortinet',5.4],['ZS','Zscaler',5.1],['OKTA','Okta',4.3],['S','SentinelOne',4.1],['GEN','Gen Digital',3.2],['TENB','Tenable',3.1]],
+   h:[['CRWD','CrowdStrike',10.2],['CSCO','Cisco Systems',9.4],['AVGO','Broadcom',8.1],['PANW','Palo Alto Networks',7.8],['FTNT','Fortinet',5.4],['ZS','Zscaler',5.1],['OKTA','Okta',4.3],['S','SentinelOne',4.1],['GEN','Gen Digital',3.2],['TENB','Tenable',3.1],['CYBR','CyberArk Software',2.8],['QLYS','Qualys',2.6],['VRNS','Varonis Systems',2.4],['CHKP','Check Point Software',2.2],['EPIQ','Epiq Systems',2.0],['NET','Cloudflare',1.9],['RPD','Rapid7',1.8],['SAIL','SailPoint',1.7],['ACSC','Accenture Security',1.6],['ATEN','A10 Networks',1.5]],
    note:'Deepest liquidity of the cyber ETFs. CRWD + CSCO + Broadcom = ~28%.'},
   {t:'URA',n:'Global X Uranium ETF',cat:'Theme — Nuclear',group:'Trending Themes',
    h:[['CCJ','Cameco',23.4],['NXE','NexGen Energy',8.2],['PDN','Paladin Energy',7.4],['KAP','Kazatomprom',7.1],['URC','Uranium Royalty Corp',5.3],['DNN','Denison Mines',5.1],['EFR','Energy Fuels',4.2],['EU','enCore Energy',3.4],['UEC','Uranium Energy',3.2],['YCA','Yellow Cake plc',3.1]],
@@ -1743,13 +1827,13 @@ const HOLDINGS=[
    note:'Active ARK flagship. The purest "speculative risk appetite" barometer — watch ARKK/SPY ratio.'},
   // ---- Hedge fund trending themes ----
   {t:'SOXX',n:'iShares Semiconductor ETF',cat:'Semiconductors (Broad)',group:'Trending Themes',
-   h:[['NVDA','NVIDIA',8.4],['AVGO','Broadcom',7.8],['AMD','AMD',6.1],['TSM','TSMC ADR',5.9],['QCOM','Qualcomm',5.2],['AMAT','Applied Materials',5.1],['LRCX','Lam Research',5.0],['TXN','Texas Instruments',4.9],['KLAC','KLA Corp',4.8],['MU','Micron Technology',4.6]],
+   h:[['NVDA','NVIDIA',8.4],['AVGO','Broadcom',7.8],['AMD','AMD',6.1],['TSM','TSMC ADR',5.9],['QCOM','Qualcomm',5.2],['AMAT','Applied Materials',5.1],['LRCX','Lam Research',5.0],['TXN','Texas Instruments',4.9],['KLAC','KLA Corp',4.8],['MU','Micron Technology',4.6],['INTC','Intel',4.2],['ON','ON Semiconductor',3.8],['ADI','Analog Devices',3.6],['MRVL','Marvell Technology',3.4],['MPWR','Monolithic Power',3.1],['NXPI','NXP Semiconductors',2.9],['SWKS','Skyworks Solutions',2.7],['ENTG','Entegris',2.4],['TER','Teradyne',2.2],['WOLF','Wolfspeed',1.9]],
    note:'More diversified than SMH — NVDA capped at ~8% vs. 21% in SMH. Includes Micron (DRAM/HBM). Rising SOXX/SMH = rally broadening.'},
   {t:'MAGS',n:'Roundhill Magnificent 7 ETF',cat:'Mega-Cap AI',group:'Trending Themes',
    h:[['AAPL','Apple',14.3],['MSFT','Microsoft',14.3],['NVDA','NVIDIA',14.2],['AMZN','Amazon',14.2],['GOOGL','Alphabet',14.2],['META','Meta Platforms',14.1],['TSLA','Tesla',14.0],['—','Equal-weighted quarterly','—'],['—','Rebalances every quarter','—'],['—','No other holdings','—']],
    note:'Pure equal-weight Magnificent 7. MAGS/SPY rising = mega-cap concentration building. Falling = market broadening — historically a healthy sign.'},
   {t:'PAVE',n:'Global X U.S. Infrastructure Development ETF',cat:'Infrastructure / AI Power',group:'Trending Themes',
-   h:[['VMC','Vulcan Materials',5.2],['MLM','Martin Marietta',5.1],['ETN','Eaton Corp',4.8],['PH','Parker Hannifin',4.5],['ACM','AECOM',4.3],['J','Jacobs Engineering',4.1],['PWR','Quanta Services',4.0],['EME','EMCOR Group',3.9],['FIX','Comfort Systems USA',3.8],['ROAD','Construction Partners',3.7]],
+   h:[['VMC','Vulcan Materials',5.2],['MLM','Martin Marietta',5.1],['ETN','Eaton Corp',4.8],['PH','Parker Hannifin',4.5],['ACM','AECOM',4.3],['J','Jacobs Engineering',4.1],['PWR','Quanta Services',4.0],['EME','EMCOR Group',3.9],['FIX','Comfort Systems USA',3.8],['ROAD','Construction Partners',3.7],['NVR','NVR Inc.',3.5],['MDU','MDU Resources',3.3],['TREX','Trex Company',3.1],['AAON','AAON Inc.',2.9],['IESC','IEC Electronics',2.7],['MYRG','MYR Group',2.5],['APOG','Apogee Enterprises',2.3],['AEIS','Advanced Energy',2.1],['STRL','Sterling Infrastructure',2.0],['GVA','Granite Construction',1.9]],
    note:'The "AI power picks-and-shovels" play. AI data centers need massive electrical infrastructure. Rising PAVE/SPY = infrastructure capex cycle active.'},
   {t:'XBI',n:'SPDR S&P Biotech ETF',cat:'Biotech (Equal Weight)',group:'Trending Themes',
    h:[['CRSP','CRISPR Therapeutics',2.1],['RARE','Ultragenyx Pharma',2.0],['BCAB','BioAtla',1.9],['EXAS','Exact Sciences',1.9],['NTRA','Natera',1.8],['VCYT','Veracyte',1.8],['RXRX','Recursion Pharma',1.8],['RCUS','Arcus Biosciences',1.7],['SRRK','Scholar Rock',1.7],['ARQT','Arcutis Biotherapeutics',1.7]],
@@ -1764,7 +1848,7 @@ const HOLDINGS=[
    h:[['FCX','Freeport-McMoRan',12.3],['SCCO','Southern Copper',8.4],['IVN','Ivanhoe Mines',7.2],['FM','First Quantum Minerals',6.8],['ANTO','Antofagasta',6.3],['LUN','Lundin Mining',5.8],['HBM','Hudbay Minerals',4.2],['CS','Capstone Copper',3.9],['TKO','Taseko Mines',3.6],['CPMC','Copper Mountain',3.2]],
    note:'AI + EV structural copper demand. Miners carry equity premium over spot copper (CPER) — more volatile, more leveraged. Watch COPX/GLD vs. CPER/GLD for miner premium.'},
   {t:'SKYY',n:'First Trust Cloud Computing ETF',cat:'Cloud / SaaS',group:'Trending Themes',
-   h:[['AMZN','Amazon (AWS)',6.2],['MSFT','Microsoft (Azure)',6.1],['GOOGL','Alphabet (GCP)',5.8],['CRM','Salesforce',5.2],['ORCL','Oracle',4.9],['SNOW','Snowflake',4.1],['NET','Cloudflare',3.8],['DDOG','Datadog',3.5],['MDB','MongoDB',3.2],['NOW','ServiceNow',3.1]],
+   h:[['AMZN','Amazon (AWS)',6.2],['MSFT','Microsoft (Azure)',6.1],['GOOGL','Alphabet (GCP)',5.8],['CRM','Salesforce',5.2],['ORCL','Oracle',4.9],['SNOW','Snowflake',4.1],['NET','Cloudflare',3.8],['DDOG','Datadog',3.5],['MDB','MongoDB',3.2],['NOW','ServiceNow',3.1],['CFLT','Confluent',2.9],['ZS','Zscaler',2.7],['HUBS','HubSpot',2.5],['TEAM','Atlassian',2.3],['TWLO','Twilio',2.1],['BOX','Box Inc.',2.0],['ESTC','Elastic NV',1.9],['FSLY','Fastly',1.8],['GTLB','GitLab',1.7],['DOCN','DigitalOcean',1.6]],
    note:'AI monetisation play. When SKYY outperforms SMH, the AI trade is shifting from hardware to software revenue. This is the later-cycle, more sustainable phase.'},
   {t:'FINX',n:'Global X FinTech ETF',cat:'Fintech',group:'Trending Themes',
    h:[['V','Visa',9.4],['MA','Mastercard',8.8],['PYPL','PayPal',7.6],['SQ','Block (Square)',6.3],['INTU','Intuit',5.8],['FI','Fiserv',5.4],['ADYEN','Adyen (AMS)',4.3],['AFRM','Affirm',4.1],['COIN','Coinbase',3.8],['SOFI','SoFi Technologies',3.6]],
@@ -1809,55 +1893,470 @@ const HOLDINGS=[
 ];
 
 
+// ---- FMP API KEY (for full ETF holdings scan) ----
+// Get a FREE key at https://financialmodelingprep.com (250 calls/day, no credit card)
+// Paste your key below between the quotes. Leave empty to use stored holdings fallback.
+const FMP_KEY = '';
+
+// ---- LEVERAGED ETF TRADE IDEAS ----
+// Bull + Bear leveraged ETFs per ETF — shown as 2 bull / 2 bear trade ideas in the popup
+// Format: {bull:[{t,n,lev,thesis}], bear:[{t,n,lev,thesis}]}
+const LEVERAGED_MAP = {
+  // US Sectors
+  XLK: {
+    bull:[{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'Tech leadership + strong momentum'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Mega-cap tech / AI tailwind'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Tech rotation out / rates spike'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad Nasdaq breakdown hedge'}]},
+  XLF: {
+    bull:[{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×',thesis:'Rate environment favours banks'},{t:'DPST',n:'Direxion Daily Regional Banks Bull 3X',lev:'3×',thesis:'Regional credit expansion'}],
+    bear:[{t:'FAZ',n:'Direxion Daily Financial Bear 3X',lev:'3×',thesis:'Credit stress / yield curve inversion'},{t:'SKF',n:'ProShares UltraShort Financials 2X',lev:'2×',thesis:'Broad financial sector hedge'}]},
+  XLE: {
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Oil supply squeeze / geopolitical risk'},{t:'NRGU',n:'MicroSectors Big Oil Index 3X',lev:'3×',thesis:'Major integrated oil outperformance'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Demand slowdown / crude weakness'},{t:'DRIP',n:'Direxion Daily S&P Oil & Gas E&P Bear 2X',lev:'2×',thesis:'E&P names rolling over'}]},
+  XLV: {
+    bull:[{t:'CURE',n:'Direxion Daily Healthcare Bull 3X',lev:'3×',thesis:'Defensive rotation into healthcare'},{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×',thesis:'Biotech breakout / FDA catalysts'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Biotech failure / rate pressure'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Broad market selloff hedge'}]},
+  XLI: {
+    bull:[{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'Infrastructure spending / re-shoring'},{t:'TPOR',n:'Direxion Daily Transportation Bull 3X',lev:'3×',thesis:'Freight recovery / Dow Theory confirm'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Cyclical slowdown hedge'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Risk-off rotation out of growth'}]},
+  XLC: {
+    bull:[{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×',thesis:'Ad revenue rebound / streaming growth'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Mega-cap communication leaders'}],
+    bear:[{t:'WEBS',n:'Direxion Daily Dow Jones Internet Bear 3X',lev:'3×',thesis:'Digital ad slowdown / regulation'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad tech / comm breakdown'}]},
+  XLU: {
+    bull:[{t:'UTSL',n:'Direxion Daily Utilities Bull 3X',lev:'3×',thesis:'Rate cut cycle / defensive rotation'},{t:'TMF',n:'Direxion Daily 20+Yr Treasury Bull 3X',lev:'3×',thesis:'Long-duration play on falling rates'}],
+    bear:[{t:'TBT',n:'ProShares UltraShort 20+ Year Treasury 2X',lev:'2×',thesis:'Rates rising / inflation sticky'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-on rotation out of defensives'}]},
+  XLY: {
+    bull:[{t:'WANT',n:'Direxion Daily Consumer Disc. Bull 3X',lev:'3×',thesis:'Consumer spending resilient'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Amazon / Tesla momentum play'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Consumer pullback / recession fears'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Discretionary leading broad weakness'}]},
+  XLP: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Staples outperform in stagflation'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×',thesis:'Broad market + staples leadership'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-on rotation out of defensives'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad market hedge'}]},
+  XLRE:{
+    bull:[{t:'DRN',n:'Direxion Daily Real Estate Bull 3X',lev:'3×',thesis:'Rate cuts boost REIT valuations'},{t:'NAIL',n:'Direxion Daily Homebuilders Bull 3X',lev:'3×',thesis:'Housing supply shortage + rate ease'}],
+    bear:[{t:'DRV',n:'Direxion Daily Real Estate Bear 3X',lev:'3×',thesis:'Rates stay high / office vacancy surge'},{t:'REK',n:'ProShares Short Real Estate',lev:'1×',thesis:'Conservative REIT hedge'}]},
+  XLB: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Commodity boom / infrastructure demand'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Materials + energy joint upswing'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Commodity demand slowdown'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Cyclicals leading broad retreat'}]},
+  // Global Sectors
+  IXN: {
+    bull:[{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'Global tech leadership / AI capex'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'US mega-cap proxy for global tech'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Global tech selloff / China risk'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad tech breakdown hedge'}]},
+  IXJ: {
+    bull:[{t:'CURE',n:'Direxion Daily Healthcare Bull 3X',lev:'3×',thesis:'Global healthcare defensive bid'},{t:'LABU',n:'Direxion Daily Biotech Bull 3X',lev:'3×',thesis:'Biotech / pharma breakout'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Drug pricing pressure / pipeline fails'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Global risk-off hedge'}]},
+  IXC: {
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Global oil supply cuts'},{t:'NRGU',n:'MicroSectors Big Oil Index 3X',lev:'3×',thesis:'Major oil supermajor strength'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Global demand slowdown / green shift'},{t:'DRIP',n:'Direxion Daily S&P Oil & Gas E&P Bear 2X',lev:'2×',thesis:'E&P balance sheet stress'}]},
+  IXG: {
+    bull:[{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×',thesis:'Global rate normalisation boost'},{t:'DPST',n:'Direxion Daily Regional Banks Bull 3X',lev:'3×',thesis:'Regional lending growth'}],
+    bear:[{t:'FAZ',n:'Direxion Daily Financial Bear 3X',lev:'3×',thesis:'Global credit tightening'},{t:'SKF',n:'ProShares UltraShort Financials 2X',lev:'2×',thesis:'Systemic risk hedge'}]},
+  MXI: {
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Materials supercycle demand'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Broad commodity-driven rally'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Global growth scare / China slowdown'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-off materials exit'}]},
+  KXI: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Global staples defensive premium'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×',thesis:'Broad market + staples leadership'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-on rotation out of defensives'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad market hedge'}]},
+  // Macro / Asset Class
+  SPY: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Strong breadth / macro tailwind'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×',thesis:'Momentum continuation play'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Breadth failing / macro deterioration'},{t:'SPXU',n:'ProShares UltraPro Short S&P500 3X',lev:'3×',thesis:'Aggressive broad market hedge'}]},
+  QQQ: {
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Nasdaq momentum / AI leadership'},{t:'QLD',n:'ProShares Ultra QQQ 2X',lev:'2×',thesis:'Moderate leveraged tech exposure'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Tech breakdown / rates spike'},{t:'QID',n:'ProShares UltraShort QQQ 2X',lev:'2×',thesis:'Measured Nasdaq short hedge'}]},
+  IWM: {
+    bull:[{t:'TNA',n:'Direxion Daily Small Cap Bull 3X',lev:'3×',thesis:'Small-cap rate-sensitive rally'},{t:'URTY',n:'ProShares UltraPro Russell 2000 3X',lev:'3×',thesis:'Breadth expansion / risk-on'}],
+    bear:[{t:'TZA',n:'Direxion Daily Small Cap Bear 3X',lev:'3×',thesis:'Credit crunch hits small caps first'},{t:'SRTY',n:'ProShares UltraPro Short Russell2000 3X',lev:'3×',thesis:'Small-cap leverage risk in downturn'}]},
+  RSP: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Breadth expanding / equal-weight leadership'},{t:'HIBL',n:'Direxion S&P 500 High Beta Bull 3X',lev:'3×',thesis:'Risk-on breadth chase'}],
+    bear:[{t:'HIBS',n:'Direxion S&P 500 High Beta Bear 3X',lev:'3×',thesis:'High-beta names selling off hardest'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Broad equal-weight breakdown'}]},
+  TLT: {
+    bull:[{t:'TMF',n:'Direxion Daily 20+ Year Treasury Bull 3X',lev:'3×',thesis:'Rate cut cycle / recession hedge'},{t:'UBT',n:'ProShares Ultra 20+ Year Treasury 2X',lev:'2×',thesis:'Duration extension as yields fall'}],
+    bear:[{t:'TMV',n:'Direxion Daily 20+ Year Treasury Bear 3X',lev:'3×',thesis:'Inflation sticky / rates stay higher'},{t:'TBT',n:'ProShares UltraShort 20+ Year Treasury 2X',lev:'2×',thesis:'Moderate duration short'}]},
+  LQD: {
+    bull:[{t:'TMF',n:'Direxion Daily 20+ Yr Treasury Bull 3X',lev:'3×',thesis:'Credit spreads tightening'},{t:'UBT',n:'ProShares Ultra 20+ Treasury 2X',lev:'2×',thesis:'Rate easing boosts IG credit'}],
+    bear:[{t:'TMV',n:'Direxion Daily 20+ Year Treasury Bear 3X',lev:'3×',thesis:'Credit spreads widening / rate risk'},{t:'TBT',n:'ProShares UltraShort 20+ Year Treasury 2X',lev:'2×',thesis:'Rate spike hurts IG duration'}]},
+  HYG: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Risk-on credit rally'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Equity proxy — HYG follows stocks'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Credit stress / HYG leads equity down'},{t:'TZA',n:'Direxion Daily Small Cap Bear 3X',lev:'3×',thesis:'HYG stress = small-cap pain first'}]},
+  GLD: {
+    bull:[{t:'UGL',n:'ProShares Ultra Gold 2X',lev:'2×',thesis:'Dollar weakness / safe-haven bid'},{t:'NUGT',n:'Direxion Daily Gold Miners Bull 2X',lev:'2×',thesis:'Miners leverage gold upside'}],
+    bear:[{t:'GLL',n:'ProShares UltraShort Gold 2X',lev:'2×',thesis:'Dollar strength / risk-on sells gold'},{t:'DUST',n:'Direxion Daily Gold Miners Bear 2X',lev:'2×',thesis:'Miners collapse on gold breakdown'}]},
+  IBIT:{
+    bull:[{t:'BITX',n:'Volatility Shares 2x Bitcoin ETF',lev:'2×',thesis:'BTC momentum / institutional inflows'},{t:'BITU',n:'ProShares Ultra Bitcoin 2X',lev:'2×',thesis:'Crypto risk-on acceleration'}],
+    bear:[{t:'SBIT',n:'ProShares Short Bitcoin ETF',lev:'1×',thesis:'BTC breakdown / macro risk-off'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Crypto correlates with broad risk-off'}]},
+  SMH: {
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'AI capex + chip cycle upswing'},{t:'USD',n:'ProShares Ultra Semiconductors 2X',lev:'2×',thesis:'Moderate semi exposure on breakout'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'Chip inventory glut / demand miss'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Tech selloff drags semis'}]},
+  EEM: {
+    bull:[{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×',thesis:'EM rally / dollar weakness'},{t:'EET',n:'ProShares Ultra MSCI Emerging Mkts 2X',lev:'2×',thesis:'China/EM reopening play'}],
+    bear:[{t:'EDZ',n:'Direxion Daily Emerging Markets Bear 3X',lev:'3×',thesis:'Dollar surge / EM capital flight'},{t:'EEV',n:'ProShares UltraShort MSCI Emerging Mkts 2X',lev:'2×',thesis:'EM contagion / China slowdown'}]},
+  EFA: {
+    bull:[{t:'EFO',n:'ProShares Ultra MSCI EAFE 2X',lev:'2×',thesis:'Europe/Japan recovery + weak dollar'},{t:'EURL',n:'Direxion Daily Europe Bull 3X',lev:'3×',thesis:'European equity breakout'}],
+    bear:[{t:'EFZ',n:'ProShares Short MSCI EAFE',lev:'1×',thesis:'Europe recession / yen strength headwind'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Global developed market risk-off'}]},
+  SHY: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Short rates falling = risk-on signal'},{t:'TNA',n:'Direxion Daily Small Cap Bull 3X',lev:'3×',thesis:'Rate-sensitive small caps benefit'}],
+    bear:[{t:'TBF',n:'ProShares Short 20+ Year Treasury',lev:'1×',thesis:'Short-end rates rising / hawkish Fed'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Rising short rates = market pressure'}]},
+  IWF: {
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Growth factor outperformance'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'Growth leadership in risk-on'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Growth-to-value rotation'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Growth factor breakdown / rates spike'}]},
+  IWD: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Value factor + financials/energy bid'},{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×',thesis:'Value = banks + energy outperform'}],
+    bear:[{t:'FAZ',n:'Direxion Daily Financial Bear 3X',lev:'3×',thesis:'Value names underperform in panic'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Broad market hedge'}]},
+  IYT: {
+    bull:[{t:'TPOR',n:'Direxion Daily Transportation Bull 3X',lev:'3×',thesis:'Freight volumes + Dow Theory confirm'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'Economic expansion / re-shoring'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Transport leading recession signal'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Dow Theory non-confirmation hedge'}]},
+  // Defense
+  ITA: {
+    bull:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'Defense budget expansion / geopolitical'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'Defense + industrial spending'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Defense budget cuts risk'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Risk-off sells cyclicals'}]},
+  XAR: {
+    bull:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'NATO spending + contract wins'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'Aerospace + industrial co-movement'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Geopolitical de-escalation sells defense'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad risk-off hedge'}]},
+  SHLD:{
+    bull:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'Cybersecurity + defense budget surge'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Tech-heavy defense beneficiaries'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Tech budget cuts hit cyber names'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-off hits high-P/E defense tech'}]},
+  // Space
+  NASA:{
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Space = high-beta tech proxy'},{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'Government space contracts'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Space names trade like speculative tech'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-off crushes thematic names'}]},
+  UFO: {
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Space comm = high-beta tech'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×',thesis:'Satellite internet overlap with web'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Thematic names sold first in risk-off'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Tech selloff = space ETF drag'}]},
+  ARKX:{
+    bull:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'Space + drone infrastructure build-out'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Innovation = QQQ correlation'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'ARK thematic names high beta to down'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Innovation theme collapses in risk-off'}]},
+  // Quantum
+  QTUM:{
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'Quantum = next-gen chip investment'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Speculative tech leadership'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'Quantum hype fade / semis roll'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Speculative tech gets hit hardest'}]},
+  // AI
+  AIQ: {
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'AI capex supercycle'},{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'AI = chip demand explosion'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'AI bubble concerns / valuation reset'},{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'AI capex pause = chip drawdown'}]},
+  CHAT:{
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Generative AI adoption acceleration'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'LLM demand = tech sector bid'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'AI hype peak / revenue miss fears'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Thematic unwind hits high-beta names'}]},
+  BOTZ:{
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'Robotics = chip + automation demand'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'AI/robotics co-movement with Nasdaq'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'Automation capex cuts in slowdown'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Thematic ETFs bleed in risk-off'}]},
+  CIBR:{
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Cyber budgets grow in every regime'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'Cyber = SaaS premium expansion'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'IT budget freeze hits cyber first'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad tech selloff drags cyber'}]},
+  // Nuclear/Energy
+  URA: {
+    bull:[{t:'NRGU',n:'MicroSectors Big Oil Index 3X (proxy)',lev:'3×',thesis:'Energy supercycle / uranium supply crunch'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Nuclear revival + AI power demand'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Uranium price collapse / oversupply'},{t:'DRIP',n:'Direxion Daily S&P Oil & Gas E&P Bear 2X',lev:'2×',thesis:'Energy complex breakdown hedge'}]},
+  // Blockchain/Crypto
+  BLOK:{
+    bull:[{t:'BITX',n:'Volatility Shares 2x Bitcoin ETF',lev:'2×',thesis:'Crypto bull market / blockchain adoption'},{t:'BITU',n:'ProShares Ultra Bitcoin 2X',lev:'2×',thesis:'BTC as institutional reserve asset'}],
+    bear:[{t:'SBIT',n:'ProShares Short Bitcoin ETF',lev:'1×',thesis:'Crypto regulation / BTC bear market'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-off wipes crypto equities'}]},
+  // Clean Energy
+  ICLN:{
+    bull:[{t:'KLNE',n:'Direxion Daily Global Clean Energy Bull 2X',lev:'2×',thesis:'Energy transition / green policy tailwind'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Clean tech = growth factor play'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Policy reversal / subsidy cuts'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Clean energy = high-beta growth names'}]},
+  TAN: {
+    bull:[{t:'KLNE',n:'Direxion Daily Global Clean Energy Bull 2X',lev:'2×',thesis:'Solar installations + IRA incentives'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Broad bull market lifts solar'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Rising rates crush solar DCF valuations'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Solar = high-duration growth proxy'}]},
+  // Lithium/Batteries
+  LIT: {
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X (proxy)',lev:'3×',thesis:'EV demand + battery storage surge'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Broad industrial / EV expansion'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'EV demand miss / lithium oversupply'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Cyclical materials selloff'}]},
+  // Genomics/Biotech
+  ARKG:{
+    bull:[{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×',thesis:'Genomics / CRISPR clinical catalysts'},{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×',thesis:'Biotech sector breakout'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Trial failures / speculative unwind'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'High-beta names sold hardest in risk-off'}]},
+  ARKK:{
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Innovation / disruptive tech rerating'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×',thesis:'SaaS + internet names rebounding'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'High-valuation growth corrects sharply'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Innovation ETFs = maximum drawdown in bear'}]},
+  // Semiconductors Broad
+  SOXX:{
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'Chip upcycle / AI demand explosive'},{t:'USD',n:'ProShares Ultra Semiconductors 2X',lev:'2×',thesis:'Moderate semi leverage on breakout'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'Chip inventory cycle turning'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Semi weakness leads tech lower'}]},
+  // Magnificent 7
+  MAGS:{
+    bull:[{t:'FNGU',n:'MicroSectors FANG+ Index 3X',lev:'3×',thesis:'Mega-cap AI earnings power'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Mega-cap concentration = QQQ rally'}],
+    bear:[{t:'FNGD',n:'MicroSectors FANG+ Index -3X',lev:'3×',thesis:'Mag-7 multiple compression / antitrust'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Mega-cap selloff = Nasdaq collapse'}]},
+  // Infrastructure
+  PAVE:{
+    bull:[{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'IIJA spending + re-shoring wave'},{t:'NAIL',n:'Direxion Daily Homebuilders Bull 3X',lev:'3×',thesis:'Construction + housing infrastructure'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Fiscal tightening / infrastructure delays'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Cyclical industrials lead broad retreat'}]},
+  // Biotech
+  XBI: {
+    bull:[{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×',thesis:'Small-cap biotech M&A + FDA approvals'},{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×',thesis:'Biotech sector mean-reversion rally'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Clinical trial failures / FDA rejection'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Speculative biotech down 2-3× in risk-off'}]},
+  IBB: {
+    bull:[{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×',thesis:'Large-cap pharma earnings + pipeline'},{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×',thesis:'Broad biotech sector breakout'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Drug pricing reform / pipeline drying up'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Healthcare spending slowdown hedge'}]},
+  // India
+  INDA:{
+    bull:[{t:'INDL',n:'Direxion Daily MSCI India Bull 2X',lev:'2×',thesis:'India structural growth / FII inflows'},{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×',thesis:'EM risk-on led by India'}],
+    bear:[{t:'EDZ',n:'Direxion Daily Emerging Markets Bear 3X',lev:'3×',thesis:'Dollar surge / EM capital outflow'},{t:'EEV',n:'ProShares UltraShort MSCI Emerging Mkts 2X',lev:'2×',thesis:'India election risk / EM contagion'}]},
+  // Copper/Materials
+  COPX:{
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X (proxy)',lev:'2×',thesis:'AI data-centre copper demand boom'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X (proxy)',lev:'3×',thesis:'China stimulus = copper supercycle'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X (proxy)',lev:'2×',thesis:'China slowdown / copper demand crash'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Global recession = commodities selloff'}]},
+  // Cloud/SaaS
+  SKYY:{
+    bull:[{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×',thesis:'Cloud migration + AI workloads'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'SaaS = Nasdaq growth leadership'}],
+    bear:[{t:'WEBS',n:'Direxion Daily Dow Jones Internet Bear 3X',lev:'3×',thesis:'SaaS multiple compression / churn'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Cloud capex cuts in downturn'}]},
+  // FinTech
+  FINX:{
+    bull:[{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×',thesis:'FinTech + payments volume growth'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Digital payments = tech factor'}],
+    bear:[{t:'FAZ',n:'Direxion Daily Financial Bear 3X',lev:'3×',thesis:'Credit cycle turning / FinTech margins'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'FinTech = leveraged to rate headwinds'}]},
+  // Rare earths / Metals
+  REMX:{
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X (proxy)',lev:'2×',thesis:'EV + defense rare earth demand'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X (proxy)',lev:'3×',thesis:'China supply chain diversification'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X (proxy)',lev:'2×',thesis:'China export controls ease / oversupply'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Global demand slowdown = metals dump'}]},
+  // Turkey / EM
+  TUR: {
+    bull:[{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×',thesis:'Turkey disinflation + EM carry trade'},{t:'EET',n:'ProShares Ultra MSCI Emerging Mkts 2X',lev:'2×',thesis:'EM risk-on flows into Turkey'}],
+    bear:[{t:'EDZ',n:'Direxion Daily Emerging Markets Bear 3X',lev:'3×',thesis:'Lira collapse / geopolitical risk'},{t:'EEV',n:'ProShares UltraShort MSCI Emerging Mkts 2X',lev:'2×',thesis:'Turkey contagion to broader EM'}]},
+};
+
 // ---- HOLDINGS POPUP ----
 HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
-// Rebuild all expand rows now that HOLDINGS_MAP is populated
-sectors.forEach(s=>{
-  const old=sb.querySelector(`tr.etf-expand-row[data-expand="${s.t}"]`);
-  if(old){const tmp=document.createElement('tbody');tmp.innerHTML=buildExpandRow(s);old.replaceWith(tmp.firstElementChild);}
-});
 
 function holdingsBar(w,max){
   const pct=Math.min(100,(w/max)*100).toFixed(1);
   return `<span class="h-wt-bar"><span class="h-wt-fill" style="width:${pct}%"></span></span>`;
 }
-function holdingsWt(w,max){
-  if(isNaN(w)) return `<span class="h-wt">—</span>`;
-  const pct=Math.min(100,(w/max)*100).toFixed(1);
-  return `<div class="h-wt-wrap">
-    <span class="h-wt">${w.toFixed(1)}%</span>
-    <span class="h-wt-bar"><span class="h-wt-fill" style="width:${pct}%"></span></span>
-  </div>`;
+function holdingsWt(w){
+  if(isNaN(w)||w===0) return `<span style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">—</span>`;
+  return `<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${w.toFixed(1)}%</span>`;
+}
+
+// Fast movers — scans as many holdings as possible, returns top 5 by % change
+// OPTION A: FMP API (full ETF holdings — set FMP_KEY above)
+// OPTION B: expanded stored holdings (~20 per ETF) — always works as fallback
+async function fetchFastMovers(holdings, etfTicker){
+  const stockRe=/^[A-Z]{1,6}(\.[A-Z])?$/;
+  const nameMap=new Map(holdings.map(r=>[r[0],r[1]]));
+
+  // OPTION A — FMP API: get complete live holdings list (requires FMP_KEY)
+  let tickers=[];
+  if(FMP_KEY && etfTicker){
+    const fmpUrl=`https://financialmodelingprep.com/api/v3/etf-holder/${etfTicker}?apikey=${FMP_KEY}`;
+    const fmpPx=[
+      fmpUrl,                                                           // direct (FMP supports CORS)
+      `https://corsproxy.io/?url=${encodeURIComponent(fmpUrl)}`,       // proxy fallback
+    ];
+    for(const pu of fmpPx){
+      try{
+        const resp=await ftch(pu,9000);if(!resp.ok)continue;
+        const raw=await resp.json();
+        if(!Array.isArray(raw)||!raw.length)continue;
+        tickers=raw.map(h=>h.asset).filter(t=>t&&stockRe.test(t));
+        if(tickers.length)break;
+      }catch(e){}
+    }
+  }
+
+  // OPTION B — expanded stored holdings (~20 per ETF, always available)
+  if(!tickers.length) tickers=holdings.map(r=>r[0]).filter(t=>stockRe.test(t));
+
+  // Parallel-fetch % change + price for every ticker in the list
+  const fetchOne=async tk=>{
+    const q1=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
+    const q2=`https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
+    const pxs=[
+      {u:`https://corsproxy.io/?url=${encodeURIComponent(q1)}`,          p:r=>r},
+      {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q1)}`, p:r=>JSON.parse(r.contents)},
+      {u:`https://corsproxy.io/?url=${encodeURIComponent(q2)}`,          p:r=>r},
+    ];
+    for(const px of pxs){
+      try{
+        const resp=await ftch(px.u,7000);if(!resp.ok)continue;
+        const raw=await resp.json();const json=px.p(raw);
+        const res=json?.chart?.result?.[0];if(!res)continue;
+        const closes=res.indicators.quote[0].close.filter(c=>c!=null&&isFinite(c));
+        if(closes.length<2)continue;
+        const price=closes[closes.length-1];
+        return {t:tk,n:nameMap.get(tk)||res.meta?.shortName||tk,chg:((price-closes[closes.length-2])/closes[closes.length-2])*100,price};
+      }catch(e){}
+    }
+    return null;
+  };
+
+  const results=await Promise.allSettled(tickers.map(tk=>fetchOne(tk)));
+  const valid=results.filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
+  window._fmPool=valid.length;
+  return valid.sort((a,b)=>b.chg-a.chg).slice(0,5);
 }
 
 function openHoldingsPopup(ticker){
   const e=HOLDINGS_MAP.get(ticker);
   const overlay=document.getElementById('holdingsOverlay');
+  const moversWrap=document.getElementById('hoMovers');
+  const moversBody=document.getElementById('hoMoversBody');
+  const tradeWrap=document.getElementById('hoTradeIdea');
+  const tradeBody=document.getElementById('hoTradeIdeaBody');
+
   if(!e){
-    // No holdings data — show a minimal popup
     overlay.querySelector('.ho-ticker').textContent=ticker;
     overlay.querySelector('.ho-name').textContent='';
     overlay.querySelector('.ho-cat').textContent='';
     overlay.querySelector('.ho-table-wrap').innerHTML=`<div style="color:var(--text-faint);font-family:var(--mono);font-size:12px;padding:20px 0;text-align:center">No holdings data available for ${ticker}.</div>`;
     overlay.querySelector('.ho-note').textContent='';
+    moversWrap.style.display='none';
+    if(tradeWrap) tradeWrap.style.display='none';
     overlay.classList.add('open');
     document.body.style.overflow='hidden';
     return;
   }
+
+  // ── Data age label ────────────────────────────────────────────────────────
+  const tp_cache=window.tickerPrices;
+  function fmtAge(ts){
+    if(!ts)return'';
+    const min=Math.round((Date.now()-ts)/60000);
+    if(min<1)return'just now';
+    if(min<60)return`${min} min ago`;
+    const h=Math.floor(min/60);return`${h}h ${min%60}m ago`;
+  }
+  function fmtPrice(p){return`$${p<10?p.toFixed(3):p<100?p.toFixed(2):p.toFixed(1)}`;}
+  function fmtChg(c){
+    const sign=c>=0?'+':'';
+    const col=c>=0?'var(--green)':'var(--red)';
+    return`<span style="color:${col};font-weight:700">${sign}${c.toFixed(2)}%</span>`;
+  }
+
+  // Build top 10 holdings as flex rows (no table = no horizontal overflow)
   const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
-  const rows=e.h.map((r,i)=>{
-    const w=parseFloat(r[2]);
-    return `<tr><td class="h-rank">${i+1}</td><td class="h-tk">${r[0]}</td><td class="h-co">${r[1]}</td><td>${holdingsWt(w,maxW)}</td></tr>`;
+  // Use absolute scale (cap at 30%) so small weights stay visually small
+  const barScale=Math.max(maxW,30);
+  const rows=e.h.slice(0,10).map((r,i)=>{
+    const w=parseFloat(r[2])||0;
+    const barPct=barScale>0?Math.min(100,(w/barScale)*100).toFixed(1):0;
+    const stp=tp_cache&&tp_cache[r[0]];
+    const todayHtml=stp
+      ?`<span style="color:var(--text-dim)">${fmtPrice(stp.p)}</span> ${fmtChg(stp.c)}`
+      :`<span style="color:var(--text-faint)">—</span>`;
+    const wtTxt=w?w.toFixed(1)+'%':'—';
+    return `<div class="h-row">
+      <span class="h-rank">${i+1}</span>
+      <span class="h-tk">${r[0]}</span>
+      <span class="h-co-wrap"><span class="h-co" title="${r[1]}">${r[1]}</span></span>
+      <span class="h-wt-group">
+        <span class="h-wt-bar-outer"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
+        <span class="h-wt-num">${wtTxt}</span>
+      </span>
+      <span class="h-today">${todayHtml}</span>
+    </div>`;
   }).join('');
+
   overlay.querySelector('.ho-ticker').textContent=e.t;
   overlay.querySelector('.ho-name').textContent=e.n;
   overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
-  overlay.querySelector('.ho-table-wrap').innerHTML=`<table class="holdings-table"><thead><tr><th>#</th><th>Ticker</th><th>Company / Security</th><th style="text-align:right">Weight</th></tr></thead><tbody>${rows}</tbody></table>`;
+  overlay.querySelector('.ho-table-wrap').innerHTML=`<div class="h-list">
+    <div class="h-list-hdr"><span>#</span><span>Ticker</span><span>Company</span><span>Wt %</span><span style="text-align:right">Today</span></div>
+    ${rows}</div>`;
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
   noteEl.style.display=e.note?'block':'none';
+
+  // ── ETF own price/change ──────────────────────────────────────────────────
+  const priceEl=overlay.querySelector('.ho-etf-price');
+  if(priceEl){
+    const tp=tp_cache&&tp_cache[ticker];
+    if(tp){
+      const ageStr=window.tickerPricesTs?`<span style="color:var(--text-faint);font-size:10px;margin-left:8px">updated ${fmtAge(window.tickerPricesTs)}</span>`:'';
+      priceEl.innerHTML=`<span style="color:var(--text-dim)">${fmtPrice(tp.p)}</span>&nbsp;${fmtChg(tp.c)}${ageStr}`;
+      priceEl.style.display='';
+    }else{priceEl.style.display='none';}
+  }
+
+  // Trade Idea — render 2 bull + 2 bear leveraged ETF ideas
+  const levs=LEVERAGED_MAP[ticker];
+  if(levs&&tradeWrap&&tradeBody){
+    function renderLevCard(l,side){
+      const ltp=window.tickerPrices&&window.tickerPrices[l.t];
+      let priceHtml='';
+      if(ltp){
+        const sign=ltp.c>=0?'+':'';
+        const col=ltp.c>=0?'var(--green)':'var(--red)';
+        const pStr=`$${ltp.p<10?ltp.p.toFixed(3):ltp.p<100?ltp.p.toFixed(2):ltp.p.toFixed(1)}`;
+        priceHtml=`<div style="font-family:var(--mono);font-size:11px;margin-top:4px"><span style="color:var(--text-dim)">${pStr}</span> <span style="color:${col};font-weight:700">${sign}${ltp.c.toFixed(2)}%</span></div>`;
+      }
+      return `<div class="ho-lev-card ${side}">
+        <div><span class="ho-lev-tk">${l.t}</span><span class="ho-lev-badge">${l.lev}</span></div>
+        <div class="ho-lev-name">${l.n}</div>
+        ${l.thesis?`<div class="ho-lev-thesis">${l.thesis}</div>`:''}
+        ${priceHtml}
+      </div>`;
+    }
+    const bullCards=(levs.bull||[]).map(l=>renderLevCard(l,'bull')).join('');
+    const bearCards=(levs.bear||[]).map(l=>renderLevCard(l,'bear')).join('');
+    tradeBody.innerHTML=`<div class="ho-lev-sides">
+      <div>
+        <div class="ho-lev-side-hdr bull">▲ BULL PLAY</div>
+        <div class="ho-lev-col">${bullCards}</div>
+      </div>
+      <div>
+        <div class="ho-lev-side-hdr bear">▼ BEAR PLAY</div>
+        <div class="ho-lev-col">${bearCards}</div>
+      </div>
+    </div>
+    <div class="ho-lev-warn">⚠ Leveraged ETFs reset daily — short-term trades only. High risk.</div>`;
+    tradeWrap.style.display='block';
+  } else if(tradeWrap){tradeWrap.style.display='none';}
+
+  // ── Helper: render movers rows ────────────────────────────────────────────
+  function renderMoversRows(movers,pool,ageLabel){
+    if(!movers.length){
+      moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">No data available</div>`;
+      return;
+    }
+    const lbl=moversWrap.querySelector('.ho-movers-label');
+    const scanTxt=pool>movers.length?`· scanned ${pool} holdings`:'';
+    if(lbl) lbl.innerHTML=`⚡ Top 5 Fast Movers <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;color:var(--text-faint)">${scanTxt} · ${ageLabel}</span>`;
+    moversBody.innerHTML=movers.map((m,i)=>{
+      const cls=m.chg>=0?'up':'dn';
+      return `<div class="ho-mover-row">
+        <span class="ho-mover-rank">${i+1}</span>
+        <span class="ho-mover-tk">${m.t}</span>
+        <span class="ho-mover-co">${m.n}</span>
+        ${m.price!=null?`<span class="ho-mover-price">${fmtPrice(m.price)}</span>`:''}
+        <span class="ho-mover-chg ${cls}">${fmtChg(m.chg)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Open the overlay
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
+
+  // ── Fast movers — priority order: ───────────────────────────────────────────
+  //   1. Real full ETF holdings (Yahoo Finance via workflow) × cached prices
+  //   2. Hardcoded 22 holdings × cached prices  (if no live holdings in cache)
+  //   3. Live CORS proxy fetch                  (if no price cache at all)
+  moversWrap.style.display='block';
+  const ageLabel=window.tickerPricesTs?`data from ${fmtAge(window.tickerPricesTs)}`:'via GitHub Actions';
+
+  if(tp_cache && Object.keys(tp_cache).length>10){
+    // Decide which holding list to scan:
+    //   - window.etfHoldings[ticker] = real holdings pulled from Yahoo Finance by workflow
+    //   - e.h = hardcoded 22 stocks (fallback)
+    const liveHoldings=window.etfHoldings&&window.etfHoldings[ticker];
+    const scanList = liveHoldings && liveHoldings.length
+      ? liveHoldings                                // [{t,n,w}, ...] from Yahoo
+      : e.h.map(r=>({t:r[0],n:r[1],w:r[2]}));     // hardcoded [{t,n,w}]
+
+    const movers=scanList.map(h=>{
+      const d=tp_cache[h.t];
+      return d?{t:h.t,n:h.n,chg:d.c,price:d.p}:null;
+    }).filter(Boolean).sort((a,b)=>b.chg-a.chg);
+
+    const src=liveHoldings?'full ETF scan':'22 holdings';
+    renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · ${src}`);
+
+  } else {
+    // No price cache — fall back to live CORS proxy fetch using hardcoded 22
+    moversBody.innerHTML=`<div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div>`;
+    fetchFastMovers(e.h,ticker).then(movers=>{
+      renderMoversRows(movers,window._fmPool||movers.length,'live · 22 holdings fallback');
+    }).catch(()=>{
+      moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable</div>`;
+    });
+  }
 }
 
 function closeHoldingsPopup(){
@@ -2274,4 +2773,3 @@ function toggleRatiosSection(){ toggleCollapse('ratiosToggleHdr','ratiosWrap'); 
 </script>
 </body>
 </html>
-<!-- Fri Jun  5 00:12:20 +03 2026 -->
