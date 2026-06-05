@@ -1789,51 +1789,27 @@ function holdingsWt(w,max){
   </div>`;
 }
 
-// Fetch live % change + price for ETF holdings
-// PRIMARY: single batch v7/quote request (all tickers in one call — avoids rate limits)
-// FALLBACK: individual v8/chart requests
+// Fetch live % change + price for top holdings
+// Fetches only top 5 equity tickers via v8/chart (proven proxy chain, sequential to avoid rate-limits)
 async function fetchFastMovers(holdings){
   const stockRe=/^[A-Z]{1,6}(\.[A-Z])?$/;
   const nameMap=new Map(holdings.map(r=>[r[0],r[1]]));
-  const valid=holdings.map(r=>r[0]).filter(t=>stockRe.test(t)).slice(0,10);
+  // Only top 5 (by weight order) valid equity tickers — keeps proxy load low
+  const valid=holdings.map(r=>r[0]).filter(t=>stockRe.test(t)).slice(0,5);
   if(!valid.length) return [];
 
-  // --- PRIMARY: batch v7/quote (1 request for all tickers) ---
-  const syms=valid.join(',');
-  const q7a=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}`;
-  const q7b=`https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}`;
-  const batchPx=[
-    {u:`https://corsproxy.io/?url=${encodeURIComponent(q7a)}`,          p:r=>r},
-    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q7a)}`, p:r=>JSON.parse(r.contents)},
-    {u:`https://corsproxy.io/?url=${encodeURIComponent(q7b)}`,          p:r=>r},
-    {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q7b)}`, p:r=>JSON.parse(r.contents)},
-  ];
-  for(const px of batchPx){
-    try{
-      const resp=await ftch(px.u,9000);
-      if(!resp.ok) continue;
-      const raw=await resp.json();
-      const json=px.p(raw);
-      const quotes=(json?.quoteResponse?.result)||[];
-      if(!quotes.length) continue;
-      const movers=quotes
-        .filter(q=>q.regularMarketChangePercent!=null)
-        .map(q=>({t:q.symbol, n:nameMap.get(q.symbol)||q.shortName||q.symbol, chg:q.regularMarketChangePercent, price:q.regularMarketPrice}))
-        .sort((a,b)=>b.chg-a.chg)
-        .slice(0,5);
-      if(movers.length) return movers;
-    }catch(e){/* try next */}
-  }
-
-  // --- FALLBACK: individual v8/chart per ticker ---
-  const results=await Promise.allSettled(valid.map(async tk=>{
+  // Fetch tickers sequentially with a tiny stagger — avoids parallel rate-limiting
+  const out=[];
+  for(const tk of valid){
     const q1=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
     const q2=`https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
     const proxies=[
       {u:`https://corsproxy.io/?url=${encodeURIComponent(q1)}`,          p:r=>r},
       {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q1)}`, p:r=>JSON.parse(r.contents)},
       {u:`https://corsproxy.io/?url=${encodeURIComponent(q2)}`,          p:r=>r},
+      {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q2)}`, p:r=>JSON.parse(r.contents)},
     ];
+    let got=null;
     for(const px of proxies){
       try{
         const resp=await ftch(px.u,8000);
@@ -1846,16 +1822,13 @@ async function fetchFastMovers(holdings){
         if(closes.length<2) continue;
         const price=closes[closes.length-1];
         const chg=((price-closes[closes.length-2])/closes[closes.length-2])*100;
-        return {t:tk, n:nameMap.get(tk)||tk, chg, price};
+        got={t:tk,n:nameMap.get(tk)||tk,chg,price};
+        break;
       }catch(e){}
     }
-    return null;
-  }));
-  return results
-    .filter(r=>r.status==='fulfilled'&&r.value)
-    .map(r=>r.value)
-    .sort((a,b)=>b.chg-a.chg)
-    .slice(0,5);
+    if(got) out.push(got);
+  }
+  return out.sort((a,b)=>b.chg-a.chg).slice(0,5);
 }
 
 function openHoldingsPopup(ticker){
