@@ -1288,8 +1288,17 @@ function buildCard(r,isThemeBig){
 
 function renderSplitGrid(data,id){
   const order=['strong-bull','bull','strong-bear','bear'];
-  const bull=data.filter(r=>!r.error&&r.cl.bullish).sort((a,b)=>order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig));
-  const bear=data.filter(r=>!r.error&&!r.cl.bullish).sort((a,b)=>order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig));
+  // strength: how far the ratio is above (positive) or below (negative) SMA20
+  // accounts for inverted ratios (GLD/SPY etc.) so sign always matches bullish direction
+  const strength=r=>(r.inv?-1:1)*((r.curr-r.s20)/r.s20);
+  const bull=data.filter(r=>!r.error&&r.cl.bullish).sort((a,b)=>{
+    const t=order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig);
+    return t!==0?t:strength(b)-strength(a); // same tier → strongest (furthest above SMA20) first
+  });
+  const bear=data.filter(r=>!r.error&&!r.cl.bullish).sort((a,b)=>{
+    const t=order.indexOf(a.cl.sig)-order.indexOf(b.cl.sig);
+    return t!==0?t:strength(a)-strength(b); // same tier → weakest (furthest below SMA20) first
+  });
   const errs=data.filter(r=>r.error);
   const N=8; // cards shown per group before "Show all"
   const bull5=bull.slice(0,N), bullRest=bull.slice(N);
