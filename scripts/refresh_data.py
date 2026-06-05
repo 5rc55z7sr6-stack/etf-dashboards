@@ -45,6 +45,15 @@ THEME_R = [
 ALL_R = CORE_R + THEME_R
 SMA_S, SMA_L = 20, 50
 
+# ── Best Performers groups (must match JS BP_GROUPS exactly) ──────────────────
+BP_GROUPS = {
+    'US Sectors':      ['XLK','XLF','XLE','XLV','XLI','XLC','XLU','XLY','XLP','XLRE','XLB'],
+    'Global Sectors':  ['IXN','IXJ','IXC','IXG','MXI','KXI'],
+    'Macro / Asset':   ['QQQ','IWM','SMH','SOXX','IBIT','GLD','EEM','EFA','RSP','HYG','TLT','MAGS','SKYY','FINX','INDA'],
+    'Trending Themes': ['ITA','XAR','SHLD','NASA','UFO','QTUM','AIQ','CHAT','BOTZ','CIBR','URA','ARKK','ARKG','XBI','COPX','PAVE','BLOK','ICLN','TAN','LIT','REMX'],
+}
+ALL_BP_TICKERS = list({t for g in BP_GROUPS.values() for t in g} | {'SPY'})
+
 # ── All 62 ETFs on the dashboard ──────────────────────────────────────────────
 ETF_TICKERS = [
     'XLK','XLF','XLE','XLV','XLI','XLC','XLU','XLY','XLP','XLRE','XLB',
@@ -253,6 +262,76 @@ for r in ALL_R:
     print(f"  {r['key']:12s} → {cl}")
 
 # ──────────────────────────────────────────────────────────────────────────────
+# STEP 2.5 — Download 1y closes for BP tickers not already fetched
+# ──────────────────────────────────────────────────────────────────────────────
+bp_need_1y = [t for t in ALL_BP_TICKERS if valid_tk(t) and t not in closes]
+if bp_need_1y:
+    print(f"\nFetching 1y closes for {len(bp_need_1y)} Best Performer tickers...")
+    try:
+        raw_bp = yf.download(bp_need_1y, period="1y", interval="1d",
+                             auto_adjust=True, progress=False, threads=True)
+        if isinstance(raw_bp.columns, pd.MultiIndex):
+            bp_df = raw_bp["Close"]
+            for t in bp_need_1y:
+                if t in bp_df.columns:
+                    s = bp_df[t].dropna()
+                    if len(s) >= 25:
+                        closes[t] = s
+        elif len(bp_need_1y) == 1:
+            s = raw_bp["Close"].dropna()
+            if len(s) >= 25:
+                closes[bp_need_1y[0]] = s
+    except Exception as e:
+        print(f"BP 1y fetch warning: {e}", file=sys.stderr)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# STEP 2.6 — Compute BP scores: ETF/SPY relative strength + SMA20/50
+# ──────────────────────────────────────────────────────────────────────────────
+def compute_bp(ticker, spy_s):
+    etf_s = closes.get(ticker)
+    if etf_s is None or spy_s is None or len(etf_s) < 25:
+        return None
+    common = etf_s.index.intersection(spy_s.index)
+    if len(common) < 25:
+        return None
+    ratio = (etf_s[common] / spy_s[common]).values.tolist()
+    curr  = ratio[-1]
+    s20   = sma(ratio, 20)
+    s50   = sma(ratio, min(50, len(ratio)))
+    pct   = (curr - s20) / s20 * 100
+    prev5 = ratio[max(0, len(ratio) - 6)]
+    chg5  = (curr - prev5) / prev5 * 100
+    bullish = curr > s20
+    if   curr > s20 and s20 > s50: sig = "strong-bull"
+    elif curr > s20:                sig = "bull"
+    elif s20 < s50:                 sig = "strong-bear"
+    else:                           sig = "bear"
+    etf_price = float(etf_s.iloc[-1])
+    return {
+        "curr":     round(curr, 6),
+        "s20":      round(s20, 6),
+        "s50":      round(s50, 6),
+        "pct":      round(pct, 3),
+        "chg5":     round(chg5, 3),
+        "sig":      sig,
+        "bullish":  bullish,
+        "closes":   [round(v, 6) for v in ratio[-20:]],
+        "etfPrice": round(etf_price, 2),
+    }
+
+spy_s = closes.get('SPY')
+bp_scores = {}
+if spy_s is not None:
+    for grp, tickers in BP_GROUPS.items():
+        for tk in tickers:
+            score = compute_bp(tk, spy_s)
+            if score:
+                bp_scores[tk] = score
+    print(f"BP scores: {len(bp_scores)}/{sum(len(v) for v in BP_GROUPS.values())} ETFs computed")
+else:
+    print("WARNING: SPY closes not available — BP scores skipped")
+
+# ──────────────────────────────────────────────────────────────────────────────
 # STEP 3 — Price download for all ETFs + holdings + leveraged ETFs (5d, fast)
 # ──────────────────────────────────────────────────────────────────────────────
 all_price_tks = sorted(set(
@@ -309,7 +388,8 @@ output = {
     "generated":     datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     "data":          results,
     "ticker_prices": ticker_prices,
-    "etf_holdings":  etf_holdings_map,   # real full holdings per ETF from Yahoo
+    "etf_holdings":  etf_holdings_map,
+    "bp_scores":     bp_scores,          # pre-computed ETF/SPY relative strength — no CORS needed
 }
 with open("data.json", "w") as f:
     json.dump(output, f, separators=(",",":"))

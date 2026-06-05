@@ -1471,54 +1471,78 @@ function scoreBP(ticker, pm){
   return { ticker, curr, s20, s50, pct, chg5, bullish, sig, closes: vals.slice(-20), etfPrice };
 }
 
+function renderBPScores(scores, source){
+  // Render Best Performers from pre-computed {ticker: {curr,s20,s50,pct,chg5,sig,bullish,closes,etfPrice}}
+  const sigRank = {'strong-bull':4,'bull':3,'bear':2,'strong-bear':1};
+  let html = '';
+  for(const [grp, tickers] of Object.entries(BP_GROUPS)){
+    const scored = tickers.map(t => scores[t] ? ({ticker:t, ...scores[t]}) : null).filter(Boolean);
+    if(!scored.length) continue;
+    scored.sort((a,b)=>{const d=sigRank[b.sig]-sigRank[a.sig];return d!==0?d:b.pct-a.pct;});
+    const top5 = scored.slice(0,5);
+    const bullN = scored.filter(e=>e.bullish).length;
+    const col = BP_COLORS[grp]||'var(--text-faint)';
+    html += `<div class="bp-group">
+      <div class="bp-group-hdr">
+        <div class="bp-group-name" style="color:${col}">${grp}</div>
+        <div class="bp-group-line"></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);white-space:nowrap">
+          ${bullN}/${scored.length} beating SPY &nbsp;·&nbsp; ${source}
+        </div>
+      </div>
+      <div class="bp-row">${top5.map((e,i)=>buildBPCard(e,i+1)).join('')}</div>
+    </div>`;
+  }
+  document.getElementById('bpGroups').innerHTML = html ||
+    '<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:16px">No data available.</div>';
+}
+
 async function loadBestPerformers(){
   const btn = document.getElementById('bpRefreshBtn');
   if(btn){ btn.disabled=true; btn.classList.add('loading'); }
-  document.getElementById('bpGroups').innerHTML = '<div class="bp-loading"><div class="spinner" style="border-top-color:var(--gold)"></div><span>Computing ETF / SPY relative strength…</span></div>';
 
-  // Need SPY + all group ETFs
+  // ── FAST PATH: use pre-computed scores from data.json (no CORS needed) ────
+  if(window._bpScores && Object.keys(window._bpScores).length > 5){
+    const ageMin = window.tickerPricesTs ? Math.round((Date.now()-window.tickerPricesTs)/60000) : null;
+    const src = ageMin!==null ? `updated ${ageMin}m ago` : 'via GitHub Actions';
+    renderBPScores(window._bpScores, src);
+    if(btn){ btn.disabled=false; btn.classList.remove('loading'); }
+    return;
+  }
+
+  // ── SLOW PATH: live CORS fetch fallback (when data.json bp_scores missing) ─
+  document.getElementById('bpGroups').innerHTML = '<div class="bp-loading"><div class="spinner" style="border-top-color:var(--gold)"></div><span>Computing ETF / SPY relative strength…</span></div>';
   const allTickers = [...new Set(['SPY', ...Object.values(BP_GROUPS).flat()])];
   const results = await Promise.allSettled(allTickers.map(t => yfetch(t)));
   const pm = {};
   allTickers.forEach((t, i) => {
     if(results[i].status === 'fulfilled' && results[i].value) pm[t] = results[i].value;
   });
-
   if(!pm['SPY']){
-    document.getElementById('bpGroups').innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--red);padding:16px">Could not load SPY data — relative strength analysis requires it. Retry in 30s.</div>';
+    document.getElementById('bpGroups').innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--red);padding:16px">Could not load SPY data. Retry in 30s.</div>';
     if(btn){ btn.disabled=false; btn.classList.remove('loading'); }
     return;
   }
-
+  const sigRank = {'strong-bull':4,'bull':3,'bear':2,'strong-bear':1};
   let html = '';
   for(const [grp, tickers] of Object.entries(BP_GROUPS)){
     const scored = tickers.map(t => scoreBP(t, pm)).filter(Boolean);
     if(!scored.length) continue;
-
-    // Primary sort: strong-bull → bull → bear → strong-bear
-    // Secondary: % above SMA20 of ratio (outperformance margin)
-    const sigRank = {'strong-bull':4,'bull':3,'bear':2,'strong-bear':1};
-    scored.sort((a, b) => {
-      const d = sigRank[b.sig] - sigRank[a.sig];
-      return d !== 0 ? d : b.pct - a.pct;
-    });
-
-    const top5    = scored.slice(0, 5);
-    const bullN   = scored.filter(e => e.bullish).length;
-    const col     = BP_COLORS[grp] || 'var(--text-faint)';
-
+    scored.sort((a,b)=>{const d=sigRank[b.sig]-sigRank[a.sig];return d!==0?d:b.pct-a.pct;});
+    const top5 = scored.slice(0,5);
+    const bullN = scored.filter(e=>e.bullish).length;
+    const col = BP_COLORS[grp]||'var(--text-faint)';
     html += `<div class="bp-group">
       <div class="bp-group-hdr">
         <div class="bp-group-name" style="color:${col}">${grp}</div>
         <div class="bp-group-line"></div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);white-space:nowrap">
-          ${bullN}/${scored.length} beating SPY &nbsp;·&nbsp; ${scored.length} ETFs ranked
+          ${bullN}/${scored.length} beating SPY &nbsp;·&nbsp; live fetch
         </div>
       </div>
-      <div class="bp-row">${top5.map((e, i) => buildBPCard(e, i+1)).join('')}</div>
+      <div class="bp-row">${top5.map((e,i)=>buildBPCard(e,i+1)).join('')}</div>
     </div>`;
   }
-
   document.getElementById('bpGroups').innerHTML = html ||
     '<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:16px">No data available.</div>';
   if(btn){ btn.disabled=false; btn.classList.remove('loading'); }
@@ -1655,7 +1679,10 @@ async function loadDataJson(){
       window.tickerPricesTs=json.ts||null;
     }
     if(json.etf_holdings && typeof json.etf_holdings==='object'){
-      window.etfHoldings=json.etf_holdings; // real full ETF holdings from Yahoo Finance
+      window.etfHoldings=json.etf_holdings;
+    }
+    if(json.bp_scores && typeof json.bp_scores==='object'){
+      window._bpScores=json.bp_scores; // pre-computed ETF/SPY relative strength
     }
     return json;
   }catch(e){console.warn('loadDataJson failed:',e);return null;}
@@ -1737,9 +1764,9 @@ async function loadLiveData(){
   }
   loading=false;if(btn){btn.disabled=false;btn.classList.remove('loading');}
 }
-loadLiveData();
-loadBestPerformers(); // runs independently, doesn't block live signal
-setInterval(()=>{loadLiveData();loadBestPerformers();},5*60*1000);
+// loadLiveData loads data.json first (populates _bpScores), then loadBestPerformers uses it instantly
+loadLiveData().then(()=>loadBestPerformers());
+setInterval(()=>{loadLiveData().then(()=>loadBestPerformers());},5*60*1000);
 
 /* ================================================================
    HOLDINGS DATA & ACCORDION
