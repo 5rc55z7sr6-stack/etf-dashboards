@@ -302,153 +302,168 @@
      MOBILE — phones up to 480px
   ============================================================ */
   @media(max-width:480px){
-    /* Header — stack brand and info vertically */
-    .head-inner{padding:10px 14px;flex-direction:column;align-items:flex-start;gap:6px}
-    .brand h1{font-size:15px;letter-spacing:-.3px}
+    /* ── Prevent any horizontal overflow ── */
+    body{overflow-x:hidden}
+    .wrap{padding:0 12px;max-width:100vw}
+
+    /* ── Header ── */
+    .head-inner{padding:10px 12px;flex-direction:row;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap}
+    .brand h1{font-size:14px;letter-spacing:-.3px}
     .brand .mark{font-size:9px;padding:3px 6px}
-    .head-right{align-items:flex-start;gap:3px;width:100%}
-    .ticker-clock{font-size:9px;letter-spacing:.3px}
+    /* Hide the long subtitle text on mobile — just show Live dot */
+    .head-right{align-items:flex-end;gap:3px}
+    .ticker-clock{display:none} /* "INTERMARKET + THEMATIC INTELLIGENCE · SESSION…" is too long */
+    .live-badge{font-size:9px;gap:4px}
 
-    /* Tabs — horizontal scroll strip */
-    nav.tabs .wrap{gap:0}
-    .tab{font-size:10px;letter-spacing:.4px;padding:10px 11px;flex-shrink:0}
+    /* ── Tabs — scrollable strip, no wrap ── */
+    nav.tabs .wrap{gap:0;padding:0}
+    .tab{font-size:10px;letter-spacing:.3px;padding:11px 10px;flex-shrink:0}
 
-    /* Global spacing */
-    .wrap{padding:0 12px}
-    section{padding:26px 0}
-    .sec-head{margin-bottom:14px;gap:10px}
-    .sec-head h3{font-size:19px;letter-spacing:-.5px}
-    .sec-head p{font-size:12.5px}
+    /* ── Global spacing ── */
+    section{padding:24px 0}
+    .sec-head{margin-bottom:12px;gap:8px}
+    .sec-head h3{font-size:18px;letter-spacing:-.5px}
+    .sec-head p{font-size:12px}
     .num{font-size:9px;letter-spacing:1px}
 
-    /* Hero */
-    .hero{padding:22px 0 16px}
-    .hero-inner{grid-template-columns:1fr;gap:20px}
-
+    /* ── Hero ── */
+    .hero{padding:20px 0 14px}
+    .hero-inner{grid-template-columns:1fr;gap:16px}
     .hero .kicker{font-size:9px;letter-spacing:1.5px;margin-bottom:8px}
-    .hero h2{font-size:clamp(21px,6.5vw,30px);letter-spacing:-1px}
-    .hero p{font-size:12.5px}
-    .masters{grid-template-columns:1fr 1fr}
-    .master{padding:11px 12px}
+    .hero h2{font-size:clamp(22px,7vw,30px);letter-spacing:-1px;max-width:100%}
+    .hero p{font-size:12px}
+    .masters{grid-template-columns:1fr 1fr;gap:1px}
+    .master{padding:10px 11px}
     .master .ratio{font-size:13px}
-    .master .desc{font-size:10.5px}
+    .master .lab{font-size:9px}
+    .master .desc{font-size:10px}
 
-    /* Filter chips — single scrollable row, no wrapping */
+    /* ── Filter chips — single scrollable row ── */
     .filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
     .filters::-webkit-scrollbar{display:none}
     .chip{flex-shrink:0;font-size:10px;padding:5px 10px}
 
-    /* Regime banner — stack to single column */
-    .regime-banner{grid-template-columns:1fr;gap:12px;padding:14px 16px}
-    .regime-light-wrap{flex-direction:row;padding:10px 14px;gap:12px;min-width:0}
-    .rl-light{width:32px;height:32px;flex-shrink:0}
+    /* ── Regime banner — full-width stacked layout ── */
+    .regime-banner{grid-template-columns:1fr;gap:10px;padding:14px 14px}
+    .regime-light-wrap{flex-direction:row;padding:10px 12px;gap:10px;min-width:0;width:100%}
+    .rl-light{width:30px;height:30px;flex-shrink:0}
     .rl-call{font-size:13px;text-align:left}
     .rl-score{text-align:left}
-    .rb-kicker{font-size:9px;letter-spacing:1px}
-    .rb-call{font-size:20px}
-    .rb-score-big{font-size:26px}
-    .rb-right{align-items:flex-start}
+    .rb-kicker{font-size:8.5px;letter-spacing:.5px;white-space:normal;line-height:1.4} /* allow wrap */
+    .rb-call{font-size:19px;letter-spacing:-.3px}
+    .rb-advice{font-size:12px;max-width:100%;line-height:1.45}
+    .rb-score-big{font-size:24px}
+    .rb-right{align-items:flex-start;width:100%}
     .rb-meter-track{min-width:0;width:100%}
-    .rb-stats{gap:8px}.rb-stat{font-size:10px}
+    .rb-stats{gap:6px;flex-wrap:wrap}.rb-stat{font-size:9.5px}
 
-    /* Live master + theme rows — 2 columns */
+    /* ── Core master + theme rows — 2 cols ── */
     .master-live-row{grid-template-columns:1fr 1fr;gap:7px}
     .theme-live-row{grid-template-columns:1fr 1fr;gap:7px}
     .row-label{font-size:9px;letter-spacing:1px;margin-bottom:6px}
 
-    /* Pulse cards — compact */
-    .pulse-card{padding:10px 11px;gap:7px}
-    .pc-pair{font-size:12px}.master-live-row .pc-pair,.theme-live-row .pc-pair{font-size:13px}
-    .pc-verdict-chip{font-size:8px;padding:2px 6px;letter-spacing:.8px}
-    .pc-label{font-size:10px}
-    .pc-vals{grid-template-columns:repeat(3,1fr)}
-    .pc-val{padding:5px 5px}
-    .pc-val-h{font-size:7.5px}
-    .pc-val-n{font-size:11px}
-    .pc-spark{height:20px}
-    .pc-master-badge,.pc-theme-badge{font-size:6.5px;padding:1px 5px;bottom:8px;left:9px}
+    /* ── Pulse cards — compact but readable ── */
+    .pulse-card{padding:10px 10px;gap:6px}
+    .pc-header{gap:5px;flex-wrap:nowrap}
+    .pc-pair{font-size:12px;flex-shrink:0}
+    .master-live-row .pc-pair,.theme-live-row .pc-pair{font-size:12px}
+    .pc-verdict-chip{font-size:7.5px;padding:2px 5px;letter-spacing:.5px;flex-shrink:0}
+    .pc-label{font-size:9.5px;line-height:1.3}
+    .pc-vals{grid-template-columns:repeat(3,1fr);gap:1px}
+    .pc-val{padding:5px 4px}
+    .pc-val-h{font-size:7px;letter-spacing:.3px}
+    .pc-val-n{font-size:10.5px}
+    .pc-spark{height:18px}
     .pc-lens{display:none}
-    .signal-light{width:14px;height:14px}
+    .signal-light{width:12px;height:12px;flex-shrink:0}
     .pulse-grid{grid-template-columns:1fr 1fr;gap:8px}
+    .sma-pill{font-size:8px;padding:2px 6px}
+    .sma50-txt{font-size:8.5px}
 
-    /* Signal group headers */
+    /* ── Signal group headers ── */
+    .signal-group-hdr{padding:8px 10px 5px}
     .sg-label{font-size:9px;letter-spacing:1px}
     .sg-count{font-size:9px}
 
-    /* Ratio cards expand toggle */
-    .ratio-cards-toggle{padding:12px 14px;gap:8px;flex-wrap:wrap}
+    /* ── Ratio cards expand toggle ── */
+    .ratio-cards-toggle{padding:11px 12px;gap:7px;flex-wrap:wrap}
     .rct-title{font-size:11px}.rct-hint{font-size:10px;margin-top:2px}
     .rct-cta{font-size:10px;padding:5px 10px}
-    .rct-icon{width:26px;height:26px}
+    .rct-icon{width:24px;height:24px}
 
-    /* Ratio cards grid */
+    /* ── Ratio cards grid — 1 col ── */
     .ratio-grid{grid-template-columns:1fr;gap:10px}
     .rcard{padding:13px}
     .rcard .formula{font-size:14px}
     .rcard .rtitle{font-size:12px}
     .rcard .measure,.sig .t,.pos{font-size:11.5px}
 
-    /* All signals breakdown */
-    .bd-grid{grid-template-columns:1fr 1fr;gap:5px}
-    .bd-row{padding:6px 8px;gap:6px}
-    .bd-pair{font-size:11px;min-width:64px}
-    .bd-label{font-size:10px}
+    /* ── All Signals at a Glance — 2 cols, tighter ── */
+    .bd-grid{grid-template-columns:1fr 1fr;gap:4px}
+    .bd-row{padding:6px 7px;gap:5px}
+    .bd-pair{font-size:10.5px;min-width:58px}
+    .bd-label{font-size:9.5px}
+    .bd-pct{font-size:10px;min-width:44px}
+    .breakdown-title{font-size:10px;letter-spacing:1.5px;margin-bottom:8px}
 
-    /* Regime archetypes */
-    .reg{padding:14px}
-    .reg h4{font-size:14px}
+    /* ── Regime archetypes ── */
+    .reg{padding:12px 13px}
+    .reg h4{font-size:13px}
     .reg .bt{font-size:11.5px}
 
-    /* Playbook */
-    .step{padding:14px}
-    .step .sn{font-size:28px;top:10px;right:12px}
-    .step h4{font-size:13px}.step p{font-size:12px}
+    /* ── Playbook ── */
+    .step{padding:13px}
+    .step .sn{font-size:26px;top:10px;right:10px}
+    .step h4{font-size:13px}.step p{font-size:11.5px}
     .trig{grid-template-columns:1fr;gap:3px;padding:10px 12px}
     .trig .cond{font-size:11px}.trig .act{font-size:11px}
 
-    /* Caveats */
+    /* ── Caveats ── */
     .cav{padding:12px 13px}
     .cav h5{font-size:12px}.cav p{font-size:11.5px}
 
-    /* Best performers */
-    .bp-wrap{padding:12px 10px}
-    .bp-header{margin-bottom:10px;flex-direction:column;gap:4px}
-    .bp-title{font-size:13px}
+    /* ── Best Performers ── */
     .bp-row{grid-template-columns:1fr 1fr;gap:6px}
     .bp-card{padding:9px 10px}
     .bp-ticker{font-size:12px}
     .bp-pct{font-size:11px}
     .bp-meta{font-size:8px;display:none}
-    .bp-name{font-size:9px;-webkit-line-clamp:1}
+    .bp-name{font-size:9px}
     .bp-spark{height:16px}
-    .bp-methodology{display:none} /* too cluttered on mobile — hidden */
+    .bp-methodology{display:none}
     .bp-group-name{font-size:9px;letter-spacing:1px}
-    #performers .sec-head p{display:none} /* hide long desc on mobile */
+    #performers .sec-head p{display:none}
     #performers .sec-head{flex-direction:column;align-items:flex-start;gap:8px}
 
-    /* Popups — slide up from bottom like native sheet */
+    /* ── Popups — slide up from bottom like native sheet ── */
     .se-overlay{padding:0;align-items:flex-end}
     .se-box{
-      border-radius:18px 18px 0 0;
+      border-radius:18px 18px 0 0 !important;
       max-width:100% !important;
       width:100% !important;
-      max-height:88vh;
+      max-height:90vh;
       overflow-y:auto;
     }
-    .se-top{padding:16px 16px 0}
-    .se-body{padding:12px 16px}
-    .se-footer{padding:0 16px 20px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+    .se-top{padding:14px 14px 0}
+    .se-body,.ho-scroll-body{padding:10px 14px !important}
+    .se-footer{padding:0 14px 16px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
     .se-pair{font-size:18px}
     .se-headline{font-size:14px}
-    .se-explain{font-size:13px}
-    .ho-ticker{font-size:21px !important}
-    .ho-table-wrap{overflow-x:hidden}
-    .h-today{min-width:80px}
-    .h-wt-bar{width:55px}
-    .h-wt{font-size:12px}
+    .se-explain,.se-what{font-size:12.5px}
+    .ho-ticker{font-size:20px !important}
+    .ho-etf-price{font-size:11px !important}
+    /* Holdings table rows — tighter on mobile */
+    .h-rank{width:18px;font-size:9px}
+    .h-tk{width:42px;font-size:11px}
+    .h-today{min-width:72px;font-size:10px}
+    .h-list-hdr{font-size:8px !important;padding:5px 8px !important}
+    .h-row{padding:6px 8px}
+    /* Fast movers + trade idea */
+    .ho-movers-label{font-size:10px}
+    .ho-lev-card{min-width:0;flex:1}
 
-    /* Footer */
-    footer{font-size:9.5px;line-height:1.6;padding:18px 0}
+    /* ── Footer ── */
+    footer{font-size:9px;line-height:1.6;padding:16px 0}
   }
 
   /* ---- ETF INLINE EXPAND ---- */
@@ -1517,7 +1532,14 @@ function renderAll(aD){
   const tD=aD.filter(r=>r.theme);
   renderBanner(aD);
   document.getElementById('liveMasters').innerHTML=cD.filter(r=>r.master).map(r=>buildCard(r,false)).join('');
-  document.getElementById('liveThemes').innerHTML=tD.map(r=>buildCard(r,true)).join('');
+  const tOrder=['strong-bull','bull','bear','strong-bear'];
+  const tSorted=[...tD].sort((a,b)=>{
+    const td=tOrder.indexOf(a.cl.sig)-tOrder.indexOf(b.cl.sig);
+    if(td!==0)return td;
+    const pa=((a.curr-a.s20)/a.s20*100),pb=((b.curr-b.s20)/b.s20*100);
+    return a.cl.bullish?pb-pa:pa-pb;
+  });
+  document.getElementById('liveThemes').innerHTML=tSorted.map(r=>buildCard(r,true)).join('');
   renderSplitGrid(aD,'livePulseGrid');
   const validN=aD.filter(r=>!r.error).length;
   const el=document.getElementById('ratioCardsCount');
