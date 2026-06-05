@@ -1105,7 +1105,7 @@ const CORE_R=[
   {key:'SPY/TLT', num:'SPY', den:'TLT', master:true,  inv:false, label:'Stocks vs Long Bonds',         lens:'macro',  theme:false},
   {key:'CPER/GLD',num:'CPER',den:'GLD', master:true,  inv:false, label:'Copper/Gold (Growth vs Fear)', lens:'macro',  theme:false},
   {key:'QQQ/SPY', num:'QQQ', den:'SPY', master:false, inv:false, label:'Tech / Growth Leadership',     lens:'equity', theme:false},
-  {key:'SMH/SPY', num:'SMH', den:'SPY', master:false, inv:false, label:'Semis — Tech Theme Switch',    lens:'equity', theme:false},
+  // SMH/SPY lives in THEME_R only — removing from CORE_R to avoid duplicate in Live Signal Cards
   {key:'IWM/SPY', num:'IWM', den:'SPY', master:false, inv:false, label:'Small vs Large Caps',          lens:'equity', theme:false},
   {key:'RSP/SPY', num:'RSP', den:'SPY', master:false, inv:false, label:'Breadth (Equal vs Cap Wt)',     lens:'breadth',theme:false},
   {key:'GLD/SPY', num:'GLD', den:'SPY', master:false, inv:true,  label:'Gold vs Stocks (Fear)',        lens:'macro',  theme:false},
@@ -1223,7 +1223,7 @@ function seedData(){
     ['CPER/GLD',0,0.342,0.329,0.317,0.338,  'strong-bull',1,1],
     // CORE
     ['QQQ/SPY',0, 1.312,1.298,1.280,1.305, 'strong-bull',1,1],
-    ['SMH/SPY',0, 0.751,0.728,0.712,0.740,  'strong-bull',1,1],
+    // SMH/SPY is theme-only — static entry at theme section below
     ['IWM/SPY',0, 0.445,0.451,0.458,0.448,  'bear',0,0],
     ['RSP/SPY',0, 0.612,0.618,0.622,0.614,  'bear',0,0],
     ['GLD/SPY',0, 0.192,0.197,0.203,0.194,  'bear',0,0],
