@@ -515,6 +515,14 @@
   .se-footer{padding:0 24px 20px;display:flex;justify-content:flex-end}
   .se-dismiss{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:8px 18px;border:1px solid var(--line-bright);background:transparent;color:var(--text-dim);cursor:pointer;border-radius:5px;transition:all .15s;text-transform:uppercase}
   .se-dismiss:hover{border-color:var(--gold);color:var(--gold)}
+  /* Holdings popup — trade idea section */
+  .ho-tradeidea{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .ho-lev-cards{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .ho-lev-card{flex:1;min-width:130px;padding:10px 12px;background:rgba(70,214,210,.06);border:1px solid rgba(70,214,210,.2);border-radius:8px}
+  .ho-lev-tk{font-family:var(--mono);font-size:16px;font-weight:800;color:var(--cyan)}
+  .ho-lev-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;background:rgba(70,214,210,.18);border-radius:3px;color:var(--cyan);margin-left:5px;vertical-align:middle}
+  .ho-lev-name{font-size:10px;color:var(--text-dim);line-height:1.5;margin-top:4px}
+  .ho-lev-warn{font-family:var(--mono);font-size:9px;color:#e06b6b;opacity:.8;margin-top:10px;line-height:1.5}
   /* Holdings popup — fast movers section */
   .ho-movers{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
   .ho-movers-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#4ec994;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -816,6 +824,10 @@
       <div class="ho-movers" id="hoMovers" style="display:none">
         <div class="ho-movers-label">⚡ Top 5 Fast Movers <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· live % change today</span></div>
         <div id="hoMoversBody"><div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div></div>
+      </div>
+      <div class="ho-tradeidea" id="hoTradeIdea" style="display:none">
+        <div class="ho-movers-label" style="color:var(--cyan)">💡 Trade Idea <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· leveraged ETFs for this theme</span></div>
+        <div id="hoTradeIdeaBody"></div>
       </div>
     </div>
     <div class="se-footer" style="justify-content:space-between">
@@ -1778,6 +1790,96 @@ const HOLDINGS=[
 // Paste your key below between the quotes. Leave empty to use stored holdings fallback.
 const FMP_KEY = '';
 
+// ---- LEVERAGED ETF TRADE IDEAS ----
+// 2 leveraged ETFs per ETF — shown as trade ideas in the popup
+// Format: [{t:ticker, n:name, lev:'3×'}]
+const LEVERAGED_MAP = {
+  // US Sectors
+  XLK: [{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  XLF: [{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×'},{t:'DPST',n:'Direxion Daily Regional Banks Bull 3X',lev:'3×'}],
+  XLE: [{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'},{t:'NRGU',n:'MicroSectors Big Oil Index 3X',lev:'3×'}],
+  XLV: [{t:'CURE',n:'Direxion Daily Healthcare Bull 3X',lev:'3×'},{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×'}],
+  XLI: [{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'},{t:'TPOR',n:'Direxion Daily Transportation Bull 3X',lev:'3×'}],
+  XLC: [{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  XLU: [{t:'UTSL',n:'Direxion Daily Utilities Bull 3X',lev:'3×'},{t:'TMF',n:'Direxion Daily 20+Yr Treasury Bull 3X',lev:'3×'}],
+  XLY: [{t:'WANT',n:'Direxion Daily Consumer Disc. Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  XLP: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×'}],
+  XLRE:[{t:'DRN',n:'Direxion Daily Real Estate Bull 3X',lev:'3×'},{t:'NAIL',n:'Direxion Daily Homebuilders Bull 3X',lev:'3×'}],
+  XLB: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'}],
+  // Global Sectors (US proxy leveraged)
+  IXN: [{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  IXJ: [{t:'CURE',n:'Direxion Daily Healthcare Bull 3X',lev:'3×'},{t:'LABU',n:'Direxion Daily Biotech Bull 3X',lev:'3×'}],
+  IXC: [{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'},{t:'NRGU',n:'MicroSectors Big Oil Index 3X',lev:'3×'}],
+  IXG: [{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×'},{t:'DPST',n:'Direxion Daily Regional Banks Bull 3X',lev:'3×'}],
+  MXI: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'}],
+  KXI: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×'}],
+  // Macro / Asset Class
+  SPY: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×'}],
+  QQQ: [{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'QLD',n:'ProShares Ultra QQQ 2X',lev:'2×'}],
+  IWM: [{t:'TNA',n:'Direxion Daily Small Cap Bull 3X',lev:'3×'},{t:'URTY',n:'ProShares UltraPro Russell 2000 3X',lev:'3×'}],
+  RSP: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'HIBL',n:'Direxion S&P 500 High Beta Bull 3X',lev:'3×'}],
+  TLT: [{t:'TMF',n:'Direxion Daily 20+ Year Treasury Bull 3X',lev:'3×'},{t:'UBT',n:'ProShares Ultra 20+ Year Treasury 2X',lev:'2×'}],
+  LQD: [{t:'TMF',n:'Direxion Daily 20+ Yr Treasury Bull 3X',lev:'3×'},{t:'UBT',n:'ProShares Ultra 20+ Treasury 2X',lev:'2×'}],
+  HYG: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  GLD: [{t:'UGL',n:'ProShares Ultra Gold 2X',lev:'2×'},{t:'NUGT',n:'Direxion Daily Gold Miners Bull 2X',lev:'2×'}],
+  IBIT:[{t:'BITX',n:'Volatility Shares 2x Bitcoin ETF',lev:'2×'},{t:'BITU',n:'ProShares Ultra Bitcoin 2X',lev:'2×'}],
+  SMH: [{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'},{t:'USD',n:'ProShares Ultra Semiconductors 2X',lev:'2×'}],
+  EEM: [{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×'},{t:'EET',n:'ProShares Ultra MSCI Emerging Mkts 2X',lev:'2×'}],
+  EFA: [{t:'EFO',n:'ProShares Ultra MSCI EAFE 2X',lev:'2×'},{t:'EURL',n:'Direxion Daily Europe Bull 3X',lev:'3×'}],
+  SHY: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'TNA',n:'Direxion Daily Small Cap Bull 3X',lev:'3×'}],
+  IWF: [{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'}],
+  IWD: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×'}],
+  IYT: [{t:'TPOR',n:'Direxion Daily Transportation Bull 3X',lev:'3×'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'}],
+  // Defense
+  ITA: [{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'}],
+  XAR: [{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'}],
+  SHLD:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  // Space
+  NASA:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X (closest proxy)',lev:'3×'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'}],
+  UFO: [{t:'TQQQ',n:'ProShares UltraPro QQQ 3X (closest proxy)',lev:'3×'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'}],
+  ARKX:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X (closest proxy)',lev:'3×'},{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×'}],
+  // Quantum
+  QTUM:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  // AI
+  AIQ: [{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'}],
+  CHAT:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'}],
+  BOTZ:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  CIBR:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'}],
+  // Nuclear/Energy
+  URA: [{t:'NRGU',n:'MicroSectors Big Oil Index 3X (proxy)',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'}],
+  // Blockchain/Crypto
+  BLOK:[{t:'BITX',n:'Volatility Shares 2x Bitcoin ETF',lev:'2×'},{t:'BITU',n:'ProShares Ultra Bitcoin 2X',lev:'2×'}],
+  // Clean Energy
+  ICLN:[{t:'KLNE',n:'Direxion Daily Global Clean Energy Bull 2X',lev:'2×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X (proxy)',lev:'3×'}],
+  TAN: [{t:'KLNE',n:'Direxion Daily Global Clean Energy Bull 2X',lev:'2×'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'}],
+  // Lithium/Batteries
+  LIT: [{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X (proxy)',lev:'3×'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'}],
+  // Genomics/Biotech
+  ARKG:[{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×'},{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×'}],
+  ARKK:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'}],
+  // Semiconductors Broad
+  SOXX:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'},{t:'USD',n:'ProShares Ultra Semiconductors 2X',lev:'2×'}],
+  // Magnificent 7
+  MAGS:[{t:'FNGU',n:'MicroSectors FANG+ Index 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  // Infrastructure
+  PAVE:[{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'},{t:'NAIL',n:'Direxion Daily Homebuilders Bull 3X',lev:'3×'}],
+  // Biotech
+  XBI: [{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×'},{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×'}],
+  IBB: [{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×'},{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×'}],
+  // India
+  INDA:[{t:'INDL',n:'Direxion Daily MSCI India Bull 2X',lev:'2×'},{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×'}],
+  // Copper/Materials
+  COPX:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X (proxy)',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X (proxy)',lev:'2×'}],
+  // Cloud/SaaS
+  SKYY:[{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  // FinTech
+  FINX:[{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  // Rare earths / Metals
+  REMX:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X (proxy)',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X (proxy)',lev:'2×'}],
+  // Turkey / EM
+  TUR: [{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×'},{t:'EET',n:'ProShares Ultra MSCI Emerging Mkts 2X',lev:'2×'}],
+};
+
 // ---- HOLDINGS POPUP ----
 HOLDINGS_MAP=new Map(HOLDINGS.map(e=>[e.t,e]));
 
@@ -1857,6 +1959,8 @@ function openHoldingsPopup(ticker){
   const overlay=document.getElementById('holdingsOverlay');
   const moversWrap=document.getElementById('hoMovers');
   const moversBody=document.getElementById('hoMoversBody');
+  const tradeWrap=document.getElementById('hoTradeIdea');
+  const tradeBody=document.getElementById('hoTradeIdeaBody');
 
   if(!e){
     overlay.querySelector('.ho-ticker').textContent=ticker;
@@ -1865,6 +1969,7 @@ function openHoldingsPopup(ticker){
     overlay.querySelector('.ho-table-wrap').innerHTML=`<div style="color:var(--text-faint);font-family:var(--mono);font-size:12px;padding:20px 0;text-align:center">No holdings data available for ${ticker}.</div>`;
     overlay.querySelector('.ho-note').textContent='';
     moversWrap.style.display='none';
+    if(tradeWrap) tradeWrap.style.display='none';
     overlay.classList.add('open');
     document.body.style.overflow='hidden';
     return;
@@ -1883,6 +1988,17 @@ function openHoldingsPopup(ticker){
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
   noteEl.style.display=e.note?'block':'none';
+
+  // Trade Idea — render leveraged ETFs for this theme
+  const levs=LEVERAGED_MAP[ticker];
+  if(levs&&tradeWrap&&tradeBody){
+    tradeBody.innerHTML=`<div class="ho-lev-cards">${levs.map(l=>`<div class="ho-lev-card">
+      <div><span class="ho-lev-tk">${l.t}</span><span class="ho-lev-badge">${l.lev}</span></div>
+      <div class="ho-lev-name">${l.n}</div>
+    </div>`).join('')}</div>
+    <div class="ho-lev-warn">⚠ Leveraged ETFs reset daily and decay over time — short-term trades only. High risk.</div>`;
+    tradeWrap.style.display='block';
+  } else if(tradeWrap){tradeWrap.style.display='none';}
 
   // Show fast movers section with loading spinner
   moversWrap.style.display='block';
