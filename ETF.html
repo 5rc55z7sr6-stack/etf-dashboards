@@ -2007,9 +2007,9 @@ function openHoldingsPopup(ticker){
     return;
   }
 
-  // Build top 10 holdings table
+  // Build top 10 holdings table (display only top 10; full e.h used for fast movers scan)
   const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
-  const rows=e.h.map((r,i)=>{
+  const rows=e.h.slice(0,10).map((r,i)=>{
     const w=parseFloat(r[2]);
     return `<tr><td class="h-rank">${i+1}</td><td class="h-tk">${r[0]}</td><td class="h-co">${r[1]}</td><td>${holdingsWt(w,maxW)}</td></tr>`;
   }).join('');
@@ -2047,7 +2047,6 @@ function openHoldingsPopup(ticker){
 
   // ── Helper: render movers rows ────────────────────────────────────────────
   function renderMoversRows(movers,pool){
-    if(!overlay.classList.contains('open'))return;
     if(!movers.length){
       moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">No data available</div>`;
       return;
@@ -2068,6 +2067,10 @@ function openHoldingsPopup(ticker){
       </div>`;
     }).join('');
   }
+
+  // Open the overlay
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
 
   // ── Fast movers: use data.json cache if available, else fetch live ────────
   moversWrap.style.display='block';
