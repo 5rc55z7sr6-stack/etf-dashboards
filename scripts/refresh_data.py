@@ -240,8 +240,10 @@ for r in ALL_R:
     s20    = sma(ratio, SMA_S)
     s50    = sma(ratio, SMA_L)
     cl     = classify(curr, s20, s50, r.get("inv", False))
+    # Save last 22 ratio values for sparkline rendering in the frontend
+    vals = [round(v, 6) for v in ratio[-22:]]
     results.append({**r, "error": False, "curr": round(curr,6), "s20": round(s20,6),
-                    "s50": round(s50,6), "prev5": round(prev5,6), "cl": cl})
+                    "s50": round(s50,6), "prev5": round(prev5,6), "cl": cl, "vals": vals})
     print(f"  {r['key']:12s} → {cl}")
 
 # ──────────────────────────────────────────────────────────────────────────────

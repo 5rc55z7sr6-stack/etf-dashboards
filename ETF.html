@@ -1538,7 +1538,7 @@ async function loadDataJson(){
       if(r.error)return r;
       const cfg=cfgMap.get(`${r.key}|${r.theme?1:0}`)||{};
       const cl=classify(r.curr,r.s20,r.s50,r.inv??cfg.inv??false);
-      return{...cfg,...r,vals:[],cl};
+      return{...cfg,...r,vals:Array.isArray(r.vals)?r.vals:[],cl};
     }).filter(Boolean);
     if(json.data.length<10)return null;
     // Store ticker_prices, etf_holdings + timestamp globally for instant popup use
