@@ -286,8 +286,8 @@
   .h-co-wrap{flex:1;min-width:0;padding-right:6px}
   .h-co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--text);display:block}
   /* bar lives right after ticker; wt% number is a standalone right column */
-  .h-wt-bar-outer{width:72px;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;flex-shrink:0;margin-right:8px;align-self:center}
-  .h-wt-bar-fill{height:100%;background:var(--gold);border-radius:3px}
+  .h-wt-bar-outer{width:72px;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;flex-shrink:0;margin-right:8px;align-self:center}
+  .h-wt-bar-fill{height:100%;background:#e8c14a;border-radius:3px}
   .h-wt-num{flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--text-faint);width:36px;text-align:right;padding-right:10px}
   .h-today{flex-shrink:0;text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:80px}
   .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
@@ -2084,9 +2084,11 @@ function openHoldingsPopup(ticker){
 
   // Build top 10 holdings as flex rows (no table = no horizontal overflow)
   const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
+  // Use absolute scale (cap at 30%) so small weights stay visually small
+  const barScale=Math.max(maxW,30);
   const rows=e.h.slice(0,10).map((r,i)=>{
     const w=parseFloat(r[2])||0;
-    const barPct=maxW>0?Math.min(100,(w/maxW)*100).toFixed(1):0;
+    const barPct=barScale>0?Math.min(100,(w/barScale)*100).toFixed(1):0;
     const stp=tp_cache&&tp_cache[r[0]];
     const todayHtml=stp
       ?`<span style="color:var(--text-dim)">${fmtPrice(stp.p)}</span> ${fmtChg(stp.c)}`
