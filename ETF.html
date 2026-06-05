@@ -814,7 +814,10 @@
     <button class="se-close" onclick="closeHoldingsPopup()" aria-label="Close">✕</button>
     <div class="se-top">
       <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px">Top 10 Holdings</div>
-      <div class="ho-ticker" style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--gold)"></div>
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <div class="ho-ticker" style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--gold)"></div>
+        <div class="ho-etf-price" style="font-family:var(--mono);font-size:13px;display:none"></div>
+      </div>
       <div class="ho-name" style="font-size:13px;color:var(--text);font-weight:600;margin-top:2px"></div>
       <div class="ho-cat" style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:4px;margin-bottom:16px"></div>
     </div>
@@ -1522,6 +1525,11 @@ async function loadDataJson(){
       return{...cfg,...r,vals:[],cl};
     }).filter(Boolean);
     if(json.data.length<10)return null;
+    // Store ticker_prices globally for instant popup use
+    if(json.ticker_prices && typeof json.ticker_prices==='object'){
+      window.tickerPrices=json.ticker_prices;
+      console.log('tickerPrices loaded:',Object.keys(json.ticker_prices).length,'tickers');
+    }
     return json;
   }catch(e){console.warn('loadDataJson failed:',e);return null;}
 }
@@ -2013,6 +2021,19 @@ function openHoldingsPopup(ticker){
   noteEl.textContent=e.note||'';
   noteEl.style.display=e.note?'block':'none';
 
+  // ── ETF own price/change from cache ──────────────────────────────────────
+  const priceEl=overlay.querySelector('.ho-etf-price');
+  if(priceEl){
+    const tp=window.tickerPrices&&window.tickerPrices[ticker];
+    if(tp){
+      const sign=tp.c>=0?'+':'';
+      const col=tp.c>=0?'var(--green)':'var(--red)';
+      const pStr=`$${tp.p<10?tp.p.toFixed(3):tp.p<100?tp.p.toFixed(2):tp.p.toFixed(1)}`;
+      priceEl.innerHTML=`<span style="color:var(--text-dim)">${pStr}</span>&nbsp;<span style="color:${col};font-weight:700">${sign}${tp.c.toFixed(2)}%</span>`;
+      priceEl.style.display='';
+    }else{priceEl.style.display='none';}
+  }
+
   // Trade Idea — render leveraged ETFs for this theme
   const levs=LEVERAGED_MAP[ticker];
   if(levs&&tradeWrap&&tradeBody){
@@ -2024,24 +2045,16 @@ function openHoldingsPopup(ticker){
     tradeWrap.style.display='block';
   } else if(tradeWrap){tradeWrap.style.display='none';}
 
-  // Show fast movers section with loading spinner
-  moversWrap.style.display='block';
-  moversBody.innerHTML=`<div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div>`;
-
-  overlay.classList.add('open');
-  document.body.style.overflow='hidden';
-
-  // Fetch fast movers async (don't block popup open) — passes ETF ticker for full holdings scan
-  fetchFastMovers(e.h, ticker).then(movers=>{
-    if(!overlay.classList.contains('open')) return;
+  // ── Helper: render movers rows ────────────────────────────────────────────
+  function renderMoversRows(movers,pool){
+    if(!overlay.classList.contains('open'))return;
     if(!movers.length){
-      moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable (market closed or proxy down)</div>`;
+      moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">No data available</div>`;
       return;
     }
-    // Update label to show scan pool size
-    const pool=window._fmPool||movers.length;
     const lbl=moversWrap.querySelector('.ho-movers-label');
-    if(lbl) lbl.innerHTML=`⚡ Top 5 Fast Movers <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· % change today · scanned ${pool} holdings</span>`;
+    const src=pool>movers.length?`· scanned ${pool} holdings`:'';
+    if(lbl) lbl.innerHTML=`⚡ Top 5 Fast Movers <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· % change today ${src}</span>`;
     moversBody.innerHTML=movers.map((m,i)=>{
       const sign=m.chg>=0?'+':'';
       const cls=m.chg>=0?'up':'dn';
@@ -2054,9 +2067,29 @@ function openHoldingsPopup(ticker){
         <span class="ho-mover-chg ${cls}">${sign}${m.chg.toFixed(2)}%</span>
       </div>`;
     }).join('');
-  }).catch(()=>{
-    moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable</div>`;
-  });
+  }
+
+  // ── Fast movers: use data.json cache if available, else fetch live ────────
+  moversWrap.style.display='block';
+  const tp_cache=window.tickerPrices;
+  if(tp_cache && Object.keys(tp_cache).length>10){
+    // Instant — compute from cache, no network call
+    const cached=e.h.map(r=>{
+      const d=tp_cache[r[0]];
+      return d?{t:r[0],n:r[1],chg:d.c,price:d.p}:null;
+    }).filter(Boolean).sort((a,b)=>b.chg-a.chg);
+    const pool=cached.length;
+    renderMoversRows(cached.slice(0,5),pool);
+  } else {
+    // Fallback: live fetch via CORS proxy
+    moversBody.innerHTML=`<div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div>`;
+    fetchFastMovers(e.h, ticker).then(movers=>{
+      const pool=window._fmPool||movers.length;
+      renderMoversRows(movers,pool);
+    }).catch(()=>{
+      moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable</div>`;
+    });
+  }
 }
 
 function closeHoldingsPopup(){

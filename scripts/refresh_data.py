@@ -1,4 +1,4 @@
-import json, time, sys
+import json, time, sys, re
 from datetime import datetime, timezone
 import yfinance as yf
 import pandas as pd
@@ -46,6 +46,71 @@ THEME_R = [
 ALL_R = CORE_R + THEME_R
 SMA_S, SMA_L = 20, 50
 
+# ── All 62 ETFs tracked on the dashboard ─────────────────────────────────────
+ETF_TICKERS = [
+    'XLK','XLF','XLE','XLV','XLI','XLC','XLU','XLY','XLP','XLRE','XLB',
+    'IXN','IXJ','IXC','IXG','MXI','KXI',
+    'SPY','QQQ','IWM','RSP','TLT','LQD','HYG','GLD','IBIT','SMH',
+    'EEM','EFA','SHY','IWF','IWD','IYT',
+    'ITA','XAR','SHLD','NASA','UFO','ARKX','QTUM','AIQ','CHAT','BOTZ',
+    'CIBR','URA','BLOK','ICLN','TAN','LIT','ARKG','ARKK',
+    'SOXX','MAGS','PAVE','XBI','IBB','INDA','COPX','SKYY','FINX','REMX','TUR',
+]
+
+# ── All unique holding stock tickers embedded in the dashboard ────────────────
+# (extracted from the HOLDINGS array in ETF.html — US-listed only)
+HOLDING_TICKERS = [
+    'AAPL','NVDA','MSFT','AVGO','META','AMD','CRM','ADBE','AMAT','QCOM','ORCL',
+    'CSCO','NOW','INTU','PANW','KLAC','LRCX','MU','MRVL','SNPS','CDNS','FTNT',
+    'BRK.B','JPM','V','MA','BAC','WFC','GS','MS','BLK','SPGI','CME','ICE','AXP',
+    'C','USB','PNC','TRV','COF','MET','AON',
+    'XOM','CVX','COP','EOG','SLB','MPC','VLO','PSX','OXY','HAL','BKR','DVN',
+    'FANG','HES','MRO','OKE','WMB','KMI','LNG',
+    'UNH','LLY','JNJ','ABBV','MRK','PFE','TMO','DHR','ABT','ISRG','ELV','CVS',
+    'AMGN','CI','BMY','MDT','BSX','SYK','BDX','GEHC','ZTS','VRTX',
+    'GEV','RTX','CAT','HON','DE','LMT','PH','NOC','ETN','UNP','CTAS','RSG',
+    'FDX','NSC','CSX','ROK','EMR','JCI','AME','PCAR','URI','PWR',
+    'GOOGL','GOOG','NFLX','TMUS','CMCSA','DIS','T','CHTR','EA','VZ','WBD',
+    'OMC','TTWO','LYV','FOXA','PARA','NWSA','IPG','MTCH',
+    'NEE','SO','DUK','SRE','D','AEP','EXC','ED','XEL','WEC','ES','ETR','PPL',
+    'FE','CNP','NI','AES','PNW','LNT','EVRG',
+    'AMZN','TSLA','HD','MCD','LOW','TJX','BKNG','NKE','SBUX','TGT','GM','F',
+    'CMG','YUM','HLT','MAR','GRMN','ORLY','RH','BBY',
+    'PG','COST','WMT','KO','PEP','PM','MDLZ','CL','EL','GIS','STZ','HSY',
+    'MKC','CHD','KHC','SJM','HRL','CAG','CPB','TAP',
+    'AMT','PLD','CCI','EQIX','PSA','O','WELL','SPG','DLR','AVB','EQR','VTR',
+    'ARE','BXP','WY','ESS','MAA','UDR','CPT','ELS',
+    'LIN','APD','SHW','ECL','DD','PPG','NEM','FCX','NUE','DOW','ALB','CF',
+    'MOS','IFF','RPM','EMN','CE','FMC','CTVA','MLM','VMC',
+    'AAON','ACN','ADI','AEIS','AI','ACM','ALB','ALNY','AMBA','AMT','ANSS',
+    'APH','ARKK','AZO','BAH','BLDP','BLNK','BRTX','CACI','CDNS',
+    'ENPH','FSLR','RUN','SEDG','PLUG','BE','ARRY','NOVA','CSIQ','SPWR',
+    'ALB','LTHM','SQM','LAC','PLL','LTUM','NOVL',
+    'REGN','BIIB','ILMN','NTLA','EDIT','CRSP','BEAM','RXRX','PACB','FATE',
+    'MRNA','BNTX','NVAX','SGEN','EXAS','VCYT',
+    'PLTR','COIN','ROKU','TWLO','ZM','DKNG','U','RBLX','OPEN','HOOD',
+    'SNOW','DDOG','NET','ZS','CRWD','OKTA','CYBR','S','TENB','VRNS',
+    'GRAB','SE','MELI','ABNB','DASH','LYFT','UBER','SHOP','SQ','AFRM',
+    'SOFI','UPST','PYPL','WU','MQ','PAYO',
+    'MP','UUUU','DNN','URG','CCJ','NXE','PDN','BOE','YCA',
+    'FREEPORT','FCX','SCCO','IVN','FM','ANTO','TECK',
+    'RELIANCE','HDFCBANK','INFY','ICICIBANK','TCS','BHARTI',
+    'TSM','ASML','SAP','SIEGY','SMSN',
+    'VUZI','MVIS','AEVA','OUST','LAZR','LIDR',
+    'IRDM','MAXR','SPCE','RKLB','PL','ASTS',
+    'GEO','CXW','AXON','CACI','BAH','LDOS','SAIC','KEYW',
+    'WM','RSG','CWST','SRCL',
+    'EQNR','BP','TTE','SHEL','E',
+]
+
+# ── Ticker validation (US-style: 1-6 caps, optional .B/.A) ──────────────────
+_TK_RE = re.compile(r'^[A-Z]{1,6}(\.[AB])?$')
+def valid_tk(t): return bool(_TK_RE.match(t))
+
+ALL_PRICE_TICKERS = sorted(set(
+    t for t in ETF_TICKERS + HOLDING_TICKERS if valid_tk(t)
+))
+
 def classify(curr, s20, s50, inv=False):
     above20 = curr > s20
     s20_above_s50 = s20 > s50
@@ -62,11 +127,12 @@ def sma(series, n):
     s = series[-min(n, len(series)):]
     return sum(s) / len(s)
 
-tickers = list({r["num"] for r in ALL_R} | {r["den"] for r in ALL_R})
-print(f"Fetching {len(tickers)} tickers...")
+# ── Step 1: Download ratio tickers (1y for SMA computation) ──────────────────
+ratio_tickers = list({r["num"] for r in ALL_R} | {r["den"] for r in ALL_R})
+print(f"Fetching {len(ratio_tickers)} ratio tickers (1y)...")
 
 try:
-    raw = yf.download(tickers, period="1y", interval="1d", auto_adjust=True, progress=False, threads=True)
+    raw = yf.download(ratio_tickers, period="1y", interval="1d", auto_adjust=True, progress=False, threads=True)
 except Exception as e:
     print(f"Download failed: {e}", file=sys.stderr)
     sys.exit(1)
@@ -74,19 +140,20 @@ except Exception as e:
 closes = {}
 if isinstance(raw.columns, pd.MultiIndex):
     close_df = raw["Close"]
-    for t in tickers:
+    for t in ratio_tickers:
         if t in close_df.columns:
             s = close_df[t].dropna()
             if len(s) >= SMA_L + 5:
                 closes[t] = s
 else:
-    t = tickers[0]
+    t = ratio_tickers[0]
     s = raw["Close"].dropna()
     if len(s) >= SMA_L + 5:
         closes[t] = s
 
-print(f"Got data for {len(closes)}/{len(tickers)} tickers")
+print(f"Got ratio data for {len(closes)}/{len(ratio_tickers)} tickers")
 
+# ── Step 2: Compute ratio signals ─────────────────────────────────────────────
 results = []
 for r in ALL_R:
     num_t, den_t = r["num"], r["den"]
@@ -107,9 +174,63 @@ for r in ALL_R:
     results.append({**r, "error": False, "curr": round(curr,6), "s20": round(s20,6), "s50": round(s50,6), "prev5": round(prev5,6), "cl": cl})
     print(f"  {r['key']:12s} → {cl}")
 
-output = {"ts": int(time.time()*1000), "data": results, "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+# ── Step 3: Download price tickers (5d, fast) ─────────────────────────────────
+# Skip tickers already fetched above (reuse closes)
+need_price = [t for t in ALL_PRICE_TICKERS if t not in closes]
+price_closes = dict(closes)  # copy existing
+
+if need_price:
+    print(f"\nFetching {len(need_price)} price tickers (5d)...")
+    try:
+        raw2 = yf.download(need_price, period="5d", interval="1d",
+                           auto_adjust=True, progress=False, threads=True)
+        if isinstance(raw2.columns, pd.MultiIndex):
+            close_df2 = raw2["Close"]
+            for t in need_price:
+                if t in close_df2.columns:
+                    s = close_df2[t].dropna()
+                    if len(s) >= 2:
+                        price_closes[t] = s
+        elif len(need_price) == 1:
+            t = need_price[0]
+            s = raw2["Close"].dropna()
+            if len(s) >= 2:
+                price_closes[t] = s
+    except Exception as e:
+        print(f"Price fetch warning: {e}", file=sys.stderr)
+
+# Also make sure 1y-downloaded ratio tickers have at least 2 days of data
+for t, s in closes.items():
+    if t not in price_closes and len(s) >= 2:
+        price_closes[t] = s
+
+# ── Step 4: Compute ticker_prices {ticker: {p, c}} ───────────────────────────
+ticker_prices = {}
+for tk in ALL_PRICE_TICKERS:
+    s = price_closes.get(tk)
+    if s is None or len(s) < 2:
+        continue
+    try:
+        price = float(s.iloc[-1])
+        prev  = float(s.iloc[-2])
+        if prev <= 0 or not all(map(lambda x: x == x, [price, prev])):  # NaN check
+            continue
+        chg = (price / prev - 1) * 100
+        ticker_prices[tk] = {"p": round(price, 2), "c": round(chg, 2)}
+    except Exception:
+        pass
+
+print(f"ticker_prices: {len(ticker_prices)} tickers with price data")
+
+# ── Step 5: Write data.json ───────────────────────────────────────────────────
+output = {
+    "ts": int(time.time()*1000),
+    "data": results,
+    "ticker_prices": ticker_prices,
+    "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+}
 with open("data.json", "w") as f:
     json.dump(output, f, separators=(",",":"))
 
 ok = sum(1 for r in results if not r.get("error"))
-print(f"\n✅ data.json written — {ok}/{len(results)} ratios OK")
+print(f"\n✅ data.json written — {ok}/{len(results)} ratios · {len(ticker_prices)} prices OK")
