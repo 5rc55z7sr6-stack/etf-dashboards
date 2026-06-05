@@ -1525,10 +1525,10 @@ async function loadDataJson(){
       return{...cfg,...r,vals:[],cl};
     }).filter(Boolean);
     if(json.data.length<10)return null;
-    // Store ticker_prices globally for instant popup use
+    // Store ticker_prices + timestamp globally for instant popup use
     if(json.ticker_prices && typeof json.ticker_prices==='object'){
       window.tickerPrices=json.ticker_prices;
-      console.log('tickerPrices loaded:',Object.keys(json.ticker_prices).length,'tickers');
+      window.tickerPricesTs=json.ts||null; // ms timestamp when data was generated
     }
     return json;
   }catch(e){console.warn('loadDataJson failed:',e);return null;}
@@ -2007,29 +2007,48 @@ function openHoldingsPopup(ticker){
     return;
   }
 
-  // Build top 10 holdings table (display only top 10; full e.h used for fast movers scan)
+  // ── Data age label ────────────────────────────────────────────────────────
+  const tp_cache=window.tickerPrices;
+  function fmtAge(ts){
+    if(!ts)return'';
+    const min=Math.round((Date.now()-ts)/60000);
+    if(min<1)return'just now';
+    if(min<60)return`${min} min ago`;
+    const h=Math.floor(min/60);return`${h}h ${min%60}m ago`;
+  }
+  function fmtPrice(p){return`$${p<10?p.toFixed(3):p<100?p.toFixed(2):p.toFixed(1)}`;}
+  function fmtChg(c){
+    const sign=c>=0?'+':'';
+    const col=c>=0?'var(--green)':'var(--red)';
+    return`<span style="color:${col};font-weight:700">${sign}${c.toFixed(2)}%</span>`;
+  }
+
+  // Build top 10 holdings table with live price + % change per row
   const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
   const rows=e.h.slice(0,10).map((r,i)=>{
     const w=parseFloat(r[2]);
-    return `<tr><td class="h-rank">${i+1}</td><td class="h-tk">${r[0]}</td><td class="h-co">${r[1]}</td><td>${holdingsWt(w,maxW)}</td></tr>`;
+    const stp=tp_cache&&tp_cache[r[0]];
+    const priceCell=stp
+      ?`<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${fmtPrice(stp.p)}</span> ${fmtChg(stp.c)}`
+      :`<span style="color:var(--text-faint);font-family:var(--mono);font-size:10px">—</span>`;
+    return `<tr><td class="h-rank">${i+1}</td><td class="h-tk">${r[0]}</td><td class="h-co">${r[1]}</td><td style="text-align:right">${holdingsWt(w,maxW)}</td><td style="text-align:right;white-space:nowrap">${priceCell}</td></tr>`;
   }).join('');
+
   overlay.querySelector('.ho-ticker').textContent=e.t;
   overlay.querySelector('.ho-name').textContent=e.n;
   overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
-  overlay.querySelector('.ho-table-wrap').innerHTML=`<table class="holdings-table"><thead><tr><th>#</th><th>Ticker</th><th>Company / Security</th><th style="text-align:right">Weight</th></tr></thead><tbody>${rows}</tbody></table>`;
+  overlay.querySelector('.ho-table-wrap').innerHTML=`<table class="holdings-table"><thead><tr><th>#</th><th>Ticker</th><th>Company / Security</th><th style="text-align:right">Weight</th><th style="text-align:right">Today</th></tr></thead><tbody>${rows}</tbody></table>`;
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
   noteEl.style.display=e.note?'block':'none';
 
-  // ── ETF own price/change from cache ──────────────────────────────────────
+  // ── ETF own price/change ──────────────────────────────────────────────────
   const priceEl=overlay.querySelector('.ho-etf-price');
   if(priceEl){
-    const tp=window.tickerPrices&&window.tickerPrices[ticker];
+    const tp=tp_cache&&tp_cache[ticker];
     if(tp){
-      const sign=tp.c>=0?'+':'';
-      const col=tp.c>=0?'var(--green)':'var(--red)';
-      const pStr=`$${tp.p<10?tp.p.toFixed(3):tp.p<100?tp.p.toFixed(2):tp.p.toFixed(1)}`;
-      priceEl.innerHTML=`<span style="color:var(--text-dim)">${pStr}</span>&nbsp;<span style="color:${col};font-weight:700">${sign}${tp.c.toFixed(2)}%</span>`;
+      const ageStr=window.tickerPricesTs?`<span style="color:var(--text-faint);font-size:10px;margin-left:8px">updated ${fmtAge(window.tickerPricesTs)}</span>`:'';
+      priceEl.innerHTML=`<span style="color:var(--text-dim)">${fmtPrice(tp.p)}</span>&nbsp;${fmtChg(tp.c)}${ageStr}`;
       priceEl.style.display='';
     }else{priceEl.style.display='none';}
   }
@@ -2057,26 +2076,22 @@ function openHoldingsPopup(ticker){
   } else if(tradeWrap){tradeWrap.style.display='none';}
 
   // ── Helper: render movers rows ────────────────────────────────────────────
-  function renderMoversRows(movers,pool,source){
+  function renderMoversRows(movers,pool,ageLabel){
     if(!movers.length){
       moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">No data available</div>`;
       return;
     }
     const lbl=moversWrap.querySelector('.ho-movers-label');
-    const srcCol=source==='live'?'var(--green)':'var(--text-faint)';
-    const srcTxt=source==='live'?'⬤ live':'⏱ ~30min ago';
     const scanTxt=pool>movers.length?`· scanned ${pool} holdings`:'';
-    if(lbl) lbl.innerHTML=`⚡ Top 5 Fast Movers <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:10px"><span style="color:${srcCol}">${srcTxt}</span><span style="color:var(--text-faint)"> ${scanTxt}</span></span>`;
+    if(lbl) lbl.innerHTML=`⚡ Top 5 Fast Movers <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;color:var(--text-faint)">${scanTxt} · ${ageLabel}</span>`;
     moversBody.innerHTML=movers.map((m,i)=>{
-      const sign=m.chg>=0?'+':'';
       const cls=m.chg>=0?'up':'dn';
-      const priceStr=m.price!=null?`$${m.price<10?m.price.toFixed(3):m.price<100?m.price.toFixed(2):m.price.toFixed(1)}`:'';
       return `<div class="ho-mover-row">
         <span class="ho-mover-rank">${i+1}</span>
         <span class="ho-mover-tk">${m.t}</span>
         <span class="ho-mover-co">${m.n}</span>
-        ${priceStr?`<span class="ho-mover-price">${priceStr}</span>`:''}
-        <span class="ho-mover-chg ${cls}">${sign}${m.chg.toFixed(2)}%</span>
+        ${m.price!=null?`<span class="ho-mover-price">${fmtPrice(m.price)}</span>`:''}
+        <span class="ho-mover-chg ${cls}">${fmtChg(m.chg)}</span>
       </div>`;
     }).join('');
   }
@@ -2085,25 +2100,30 @@ function openHoldingsPopup(ticker){
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
 
-  // ── Fast movers: show cache instantly, then refresh with live data ──────────
+  // ── Fast movers: data.json (GitHub Actions) is primary; CORS proxy is fallback ──
   moversWrap.style.display='block';
-  const tp_cache=window.tickerPrices;
   if(tp_cache && Object.keys(tp_cache).length>10){
-    // Step 1 — show cached data immediately (up to 30 min old) so popup isn't blank
-    const cachedMovers=e.h.map(r=>{
+    // PRIMARY — use pre-fetched data.json prices (refreshed every 30 min by GitHub Actions)
+    const fromCache=e.h.map(r=>{
       const d=tp_cache[r[0]];
       return d?{t:r[0],n:r[1],chg:d.c,price:d.p}:null;
     }).filter(Boolean).sort((a,b)=>b.chg-a.chg);
-    renderMoversRows(cachedMovers.slice(0,5),cachedMovers.length,'~30min ago');
-    // Step 2 — immediately fetch live data in background and replace when ready
-    fetchFastMovers(e.h, ticker).then(liveMovers=>{
-      if(!overlay.classList.contains('open'))return;
-      if(liveMovers.length) renderMoversRows(liveMovers,window._fmPool||liveMovers.length,'live');
-    }).catch(()=>{/* keep cache data on screen */});
+    const ageLabel=window.tickerPricesTs?`data from ${fmtAge(window.tickerPricesTs)}`:'via GitHub Actions';
+    renderMoversRows(fromCache.slice(0,5),fromCache.length,ageLabel);
+    // FALLBACK — for any holding not in cache, try live fetch (adds missing tickers)
+    const missing=e.h.filter(r=>!tp_cache[r[0]]);
+    if(missing.length){
+      fetchFastMovers(missing,ticker).then(extra=>{
+        if(!overlay.classList.contains('open')||!extra.length)return;
+        // Merge cache + live, re-sort, show top 5
+        const merged=[...fromCache,...extra].sort((a,b)=>b.chg-a.chg);
+        renderMoversRows(merged.slice(0,5),merged.length,ageLabel+' + live');
+      }).catch(()=>{});
+    }
   } else {
-    // No cache — show spinner and wait for live fetch
+    // No cache at all — fetch live via CORS proxy
     moversBody.innerHTML=`<div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div>`;
-    fetchFastMovers(e.h, ticker).then(movers=>{
+    fetchFastMovers(e.h,ticker).then(movers=>{
       renderMoversRows(movers,window._fmPool||movers.length,'live');
     }).catch(()=>{
       moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable</div>`;
