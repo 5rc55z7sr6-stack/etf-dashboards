@@ -5,6 +5,10 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false   # never kill a running refresh mid-fetch
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -14,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0          # full history so rebase has context
 
       - name: Set up Python
         uses: actions/setup-python@v5.6.0
@@ -21,15 +27,22 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install yfinance pandas --quiet
+        run: pip install yfinance pandas requests --quiet
 
       - name: Fetch & compute signal data
         run: python scripts/refresh_data.py
 
-      - name: Commit data.json
+      - name: Commit and push data.json
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data.json
-          git diff --staged --quiet || git commit -m "data: refresh ETF signals [skip ci]"
+          # Only commit if something changed
+          if git diff --staged --quiet; then
+            echo "data.json unchanged — nothing to push"
+            exit 0
+          fi
+          git commit -m "data: refresh ETF signals [skip ci]"
+          # Pull latest (other commits may have landed) then push
+          git pull --rebase origin main
           git push
