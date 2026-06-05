@@ -1115,8 +1115,7 @@ const CORE_R=[
   // --- New 2025-26 trending theme core ratios ---
   {key:'COPX/GLD',num:'COPX',den:'GLD', master:false, inv:false, label:'Copper Miners vs Gold (Industrial Intensity)',lens:'macro',theme:false},
   {key:'SKYY/SPY',num:'SKYY',den:'SPY', master:false, inv:false, label:'Cloud/SaaS vs Market (AI Monetisation)',lens:'equity',theme:false},
-  {key:'XBI/SPY', num:'XBI', den:'SPY', master:false, inv:false, label:'Biotech Risk Appetite (GLP-1 · Gene Editing)',lens:'equity',theme:false},
-  {key:'INDA/SPY',num:'INDA',den:'SPY', master:false, inv:false, label:'India vs US (EM Rotation)',     lens:'breadth',theme:false},
+  // XBI/SPY and INDA/SPY live in THEME_R only — removing from CORE_R to avoid duplicates
 ];
 const THEME_R=[
   {key:'SMH/SPY', num:'SMH', den:'SPY', master:false, inv:false, label:'Tech Themes On/Off (Semis)',   lens:'equity', theme:true, themeDesc:'Green → add AIQ, QTUM, BOTZ, CHAT · Red → cut tech themes first'},
@@ -1232,9 +1231,7 @@ function seedData(){
     ['EWJ/SPY',0, 0.108,0.110,0.112,0.109,  'bear',0,0],
     ['COPX/GLD',0,0.285,0.278,0.271,0.282,  'bull',1,1],
     ['SKYY/SPY',0,0.462,0.451,0.441,0.458,  'strong-bull',1,1],
-    ['XBI/SPY',0, 0.148,0.152,0.156,0.150,  'bear',0,0],
-    ['INDA/SPY',0,0.094,0.096,0.098,0.095,  'bear',0,0],
-    // THEMES
+    // THEMES  (XBI/SPY and INDA/SPY are theme-only — no core entry)
     ['SMH/SPY',1, 0.751,0.728,0.712,0.740,  'strong-bull',1,1],
     ['ITA/SPY',1, 0.382,0.371,0.362,0.378,  'strong-bull',1,1],
     ['ARKK/SPY',1,0.072,0.069,0.066,0.071,  'strong-bull',1,1],
