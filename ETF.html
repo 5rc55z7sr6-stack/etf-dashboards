@@ -1789,46 +1789,61 @@ function holdingsWt(w,max){
   </div>`;
 }
 
-// Fetch live % change + price for top holdings
-// Fetches only top 5 equity tickers via v8/chart (proven proxy chain, sequential to avoid rate-limits)
-async function fetchFastMovers(holdings){
+// Fetch fast movers across the ENTIRE ETF (not just top holdings by weight)
+// Step 1: pull live full holdings list from Yahoo Finance quoteSummary
+// Step 2: parallel-fetch % change for ALL of them
+// Step 3: return top 5 by % change — a small cap up +8% beats AAPL at +0.3%
+async function fetchFastMovers(holdings, etfTicker){
   const stockRe=/^[A-Z]{1,6}(\.[A-Z])?$/;
   const nameMap=new Map(holdings.map(r=>[r[0],r[1]]));
-  // Only top 5 (by weight order) valid equity tickers — keeps proxy load low
-  const valid=holdings.map(r=>r[0]).filter(t=>stockRe.test(t)).slice(0,5);
-  if(!valid.length) return [];
 
-  // Fetch tickers sequentially with a tiny stagger — avoids parallel rate-limiting
-  const out=[];
-  for(const tk of valid){
+  // Step 1: get live holdings from Yahoo Finance quoteSummary (more tickers than stored top-10)
+  let tickers=[];
+  if(etfTicker){
+    const qs=`https://query1.finance.yahoo.com/v10/finance/quoteSummary/${etfTicker}?modules=topHoldings`;
+    const qsPx=[
+      {u:`https://corsproxy.io/?url=${encodeURIComponent(qs)}`,          p:r=>r},
+      {u:`https://api.allorigins.win/get?url=${encodeURIComponent(qs)}`, p:r=>JSON.parse(r.contents)},
+    ];
+    for(const px of qsPx){
+      try{
+        const resp=await ftch(px.u,8000);if(!resp.ok)continue;
+        const raw=await resp.json();const json=px.p(raw);
+        const h=json?.quoteSummary?.result?.[0]?.topHoldings?.holdings||[];
+        if(h.length){tickers=h.map(x=>x.symbol).filter(t=>t&&stockRe.test(t));break;}
+      }catch(e){}
+    }
+  }
+  // Fallback to stored holdings if quoteSummary fails
+  if(!tickers.length) tickers=holdings.map(r=>r[0]).filter(t=>stockRe.test(t));
+
+  // Step 2: parallel-fetch % change for ALL tickers in the ETF
+  const fetchOne=async tk=>{
     const q1=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
     const q2=`https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?interval=1d&range=5d`;
-    const proxies=[
+    const pxs=[
       {u:`https://corsproxy.io/?url=${encodeURIComponent(q1)}`,          p:r=>r},
       {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q1)}`, p:r=>JSON.parse(r.contents)},
       {u:`https://corsproxy.io/?url=${encodeURIComponent(q2)}`,          p:r=>r},
-      {u:`https://api.allorigins.win/get?url=${encodeURIComponent(q2)}`, p:r=>JSON.parse(r.contents)},
     ];
-    let got=null;
-    for(const px of proxies){
+    for(const px of pxs){
       try{
-        const resp=await ftch(px.u,8000);
-        if(!resp.ok) continue;
-        const raw=await resp.json();
-        const json=px.p(raw);
-        const res=json?.chart?.result?.[0];
-        if(!res) continue;
+        const resp=await ftch(px.u,7000);if(!resp.ok)continue;
+        const raw=await resp.json();const json=px.p(raw);
+        const res=json?.chart?.result?.[0];if(!res)continue;
         const closes=res.indicators.quote[0].close.filter(c=>c!=null&&isFinite(c));
-        if(closes.length<2) continue;
+        if(closes.length<2)continue;
         const price=closes[closes.length-1];
-        const chg=((price-closes[closes.length-2])/closes[closes.length-2])*100;
-        got={t:tk,n:nameMap.get(tk)||tk,chg,price};
-        break;
+        return {t:tk,n:nameMap.get(tk)||res.meta?.shortName||tk,chg:((price-closes[closes.length-2])/closes[closes.length-2])*100,price};
       }catch(e){}
     }
-    if(got) out.push(got);
-  }
-  return out.sort((a,b)=>b.chg-a.chg).slice(0,5);
+    return null;
+  };
+
+  const results=await Promise.allSettled(tickers.map(tk=>fetchOne(tk)));
+  const valid=results.filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
+  window._fmPool=valid.length; // debug hook
+  return valid.sort((a,b)=>b.chg-a.chg).slice(0,5);
 }
 
 function openHoldingsPopup(ticker){
@@ -1870,13 +1885,17 @@ function openHoldingsPopup(ticker){
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
 
-  // Fetch fast movers async (don't block popup open)
-  fetchFastMovers(e.h).then(movers=>{
-    if(!overlay.classList.contains('open')) return; // popup was closed already
+  // Fetch fast movers async (don't block popup open) — passes ETF ticker for full holdings scan
+  fetchFastMovers(e.h, ticker).then(movers=>{
+    if(!overlay.classList.contains('open')) return;
     if(!movers.length){
       moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable (market closed or proxy down)</div>`;
       return;
     }
+    // Update label to show scan pool size
+    const pool=window._fmPool||movers.length;
+    const lbl=moversWrap.querySelector('.ho-movers-label');
+    if(lbl) lbl.innerHTML=`⚡ Top 5 Fast Movers <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· % change today · scanned ${pool} holdings</span>`;
     moversBody.innerHTML=movers.map((m,i)=>{
       const sign=m.chg>=0?'+':'';
       const cls=m.chg>=0?'up':'dn';
