@@ -283,14 +283,14 @@
   .h-row:hover{background:rgba(232,193,74,.035)}
   .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:18px;flex-shrink:0}
   .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;width:46px;flex-shrink:0}
-  .h-co-wrap{flex:1;min-width:0;padding-right:6px}
+  .h-co-wrap{flex:0 0 auto;max-width:160px;min-width:0;padding-right:10px}
   .h-co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--text);display:block}
   /* bar lives right after ticker; wt% number is a standalone right column */
   .h-wt-group{flex-shrink:0;display:flex;align-items:center;gap:5px;margin-right:16px}
   .h-wt-bar-outer{display:block;width:72px;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;flex-shrink:0}
   .h-wt-bar-fill{display:block;height:100%;background:#e8c14a;border-radius:3px}
   .h-wt-num{flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--text-faint);width:34px;text-align:left}
-  .h-today{flex-shrink:0;text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:80px}
+  .h-today{margin-left:auto;text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:80px}
   .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
   .holdings-search-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
   .h-search{font-family:var(--mono);font-size:12px;background:var(--bg-card);border:1px solid var(--line-bright);color:var(--text);padding:7px 12px;border-radius:3px;width:220px;outline:none}
@@ -2111,7 +2111,7 @@ function openHoldingsPopup(ticker){
   overlay.querySelector('.ho-name').textContent=e.n;
   overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
   overlay.querySelector('.ho-table-wrap').innerHTML=`<div class="h-list">
-    <div class="h-list-hdr"><span style="width:18px;flex-shrink:0">#</span><span style="width:46px;flex-shrink:0">Ticker</span><span style="flex:1">Company</span><span style="flex-shrink:0;margin-right:16px;display:flex;gap:5px;align-items:center"><span style="display:inline-block;width:72px"></span><span style="width:34px;font-size:9px">Wt%</span></span><span style="min-width:80px;text-align:right">Today</span></div>
+    <div class="h-list-hdr"><span style="width:18px;flex-shrink:0">#</span><span style="width:46px;flex-shrink:0">Ticker</span><span style="max-width:160px;flex:0 0 auto;padding-right:10px">Company</span><span style="flex-shrink:0;margin-right:16px;display:flex;gap:5px;align-items:center"><span style="display:inline-block;width:72px"></span><span style="width:34px;font-size:9px">Wt%</span></span><span style="margin-left:auto;min-width:80px;text-align:right">Today</span></div>
     ${rows}</div>`;
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
