@@ -543,11 +543,21 @@
   .se-dismiss:hover{border-color:var(--gold);color:var(--gold)}
   /* Holdings popup — trade idea section */
   .ho-tradeidea{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-  .ho-lev-cards{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-  .ho-lev-card{flex:1;min-width:130px;padding:10px 12px;background:rgba(70,214,210,.06);border:1px solid rgba(70,214,210,.2);border-radius:8px}
-  .ho-lev-tk{font-family:var(--mono);font-size:16px;font-weight:800;color:var(--cyan)}
-  .ho-lev-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;background:rgba(70,214,210,.18);border-radius:3px;color:var(--cyan);margin-left:5px;vertical-align:middle}
-  .ho-lev-name{font-size:10px;color:var(--text-dim);line-height:1.5;margin-top:4px}
+  .ho-lev-sides{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .ho-lev-side-hdr{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .ho-lev-side-hdr.bull{color:#3fd17e}.ho-lev-side-hdr.bear{color:#ff5c61}
+  .ho-lev-col{display:flex;flex-direction:column;gap:7px}
+  .ho-lev-card{padding:9px 11px;border-radius:7px}
+  .ho-lev-card.bull{background:rgba(63,209,126,.06);border:1px solid rgba(63,209,126,.22)}
+  .ho-lev-card.bear{background:rgba(255,92,97,.06);border:1px solid rgba(255,92,97,.22)}
+  .ho-lev-tk{font-family:var(--mono);font-size:15px;font-weight:800}
+  .ho-lev-card.bull .ho-lev-tk{color:#3fd17e}
+  .ho-lev-card.bear .ho-lev-tk{color:#ff5c61}
+  .ho-lev-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;margin-left:5px;vertical-align:middle}
+  .ho-lev-card.bull .ho-lev-badge{background:rgba(63,209,126,.18);color:#3fd17e}
+  .ho-lev-card.bear .ho-lev-badge{background:rgba(255,92,97,.18);color:#ff5c61}
+  .ho-lev-name{font-size:10px;color:var(--text-dim);line-height:1.4;margin-top:3px}
+  .ho-lev-thesis{font-size:10px;color:var(--text-faint);line-height:1.4;margin-top:3px;font-style:italic}
   .ho-lev-warn{font-family:var(--mono);font-size:9px;color:#e06b6b;opacity:.8;margin-top:10px;line-height:1.5}
   /* Holdings popup — fast movers section */
   .ho-movers{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
@@ -852,7 +862,7 @@
         <div id="hoMoversBody"><div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div></div>
       </div>
       <div class="ho-tradeidea" id="hoTradeIdea" style="display:none">
-        <div class="ho-movers-label" style="color:var(--cyan)">💡 Trade Idea <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· leveraged ETFs for this theme</span></div>
+        <div class="ho-movers-label" style="color:var(--cyan)">💡 Trade Ideas <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· 2 bull &amp; 2 bear leveraged plays</span></div>
         <div id="hoTradeIdeaBody"></div>
       </div>
     </div>
@@ -1889,93 +1899,217 @@ const HOLDINGS=[
 const FMP_KEY = '';
 
 // ---- LEVERAGED ETF TRADE IDEAS ----
-// 2 leveraged ETFs per ETF — shown as trade ideas in the popup
-// Format: [{t:ticker, n:name, lev:'3×'}]
+// Bull + Bear leveraged ETFs per ETF — shown as 2 bull / 2 bear trade ideas in the popup
+// Format: {bull:[{t,n,lev,thesis}], bear:[{t,n,lev,thesis}]}
 const LEVERAGED_MAP = {
   // US Sectors
-  XLK: [{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
-  XLF: [{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×'},{t:'DPST',n:'Direxion Daily Regional Banks Bull 3X',lev:'3×'}],
-  XLE: [{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'},{t:'NRGU',n:'MicroSectors Big Oil Index 3X',lev:'3×'}],
-  XLV: [{t:'CURE',n:'Direxion Daily Healthcare Bull 3X',lev:'3×'},{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×'}],
-  XLI: [{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'},{t:'TPOR',n:'Direxion Daily Transportation Bull 3X',lev:'3×'}],
-  XLC: [{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
-  XLU: [{t:'UTSL',n:'Direxion Daily Utilities Bull 3X',lev:'3×'},{t:'TMF',n:'Direxion Daily 20+Yr Treasury Bull 3X',lev:'3×'}],
-  XLY: [{t:'WANT',n:'Direxion Daily Consumer Disc. Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
-  XLP: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×'}],
-  XLRE:[{t:'DRN',n:'Direxion Daily Real Estate Bull 3X',lev:'3×'},{t:'NAIL',n:'Direxion Daily Homebuilders Bull 3X',lev:'3×'}],
-  XLB: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'}],
-  // Global Sectors (US proxy leveraged)
-  IXN: [{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
-  IXJ: [{t:'CURE',n:'Direxion Daily Healthcare Bull 3X',lev:'3×'},{t:'LABU',n:'Direxion Daily Biotech Bull 3X',lev:'3×'}],
-  IXC: [{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'},{t:'NRGU',n:'MicroSectors Big Oil Index 3X',lev:'3×'}],
-  IXG: [{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×'},{t:'DPST',n:'Direxion Daily Regional Banks Bull 3X',lev:'3×'}],
-  MXI: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'}],
-  KXI: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×'}],
+  XLK: {
+    bull:[{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'Tech leadership + strong momentum'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Mega-cap tech / AI tailwind'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Tech rotation out / rates spike'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad Nasdaq breakdown hedge'}]},
+  XLF: {
+    bull:[{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×',thesis:'Rate environment favours banks'},{t:'DPST',n:'Direxion Daily Regional Banks Bull 3X',lev:'3×',thesis:'Regional credit expansion'}],
+    bear:[{t:'FAZ',n:'Direxion Daily Financial Bear 3X',lev:'3×',thesis:'Credit stress / yield curve inversion'},{t:'SKF',n:'ProShares UltraShort Financials 2X',lev:'2×',thesis:'Broad financial sector hedge'}]},
+  XLE: {
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Oil supply squeeze / geopolitical risk'},{t:'NRGU',n:'MicroSectors Big Oil Index 3X',lev:'3×',thesis:'Major integrated oil outperformance'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Demand slowdown / crude weakness'},{t:'DRIP',n:'Direxion Daily S&P Oil & Gas E&P Bear 2X',lev:'2×',thesis:'E&P names rolling over'}]},
+  XLV: {
+    bull:[{t:'CURE',n:'Direxion Daily Healthcare Bull 3X',lev:'3×',thesis:'Defensive rotation into healthcare'},{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×',thesis:'Biotech breakout / FDA catalysts'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Biotech failure / rate pressure'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Broad market selloff hedge'}]},
+  XLI: {
+    bull:[{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'Infrastructure spending / re-shoring'},{t:'TPOR',n:'Direxion Daily Transportation Bull 3X',lev:'3×',thesis:'Freight recovery / Dow Theory confirm'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Cyclical slowdown hedge'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Risk-off rotation out of growth'}]},
+  XLC: {
+    bull:[{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×',thesis:'Ad revenue rebound / streaming growth'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Mega-cap communication leaders'}],
+    bear:[{t:'WEBS',n:'Direxion Daily Dow Jones Internet Bear 3X',lev:'3×',thesis:'Digital ad slowdown / regulation'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad tech / comm breakdown'}]},
+  XLU: {
+    bull:[{t:'UTSL',n:'Direxion Daily Utilities Bull 3X',lev:'3×',thesis:'Rate cut cycle / defensive rotation'},{t:'TMF',n:'Direxion Daily 20+Yr Treasury Bull 3X',lev:'3×',thesis:'Long-duration play on falling rates'}],
+    bear:[{t:'TBT',n:'ProShares UltraShort 20+ Year Treasury 2X',lev:'2×',thesis:'Rates rising / inflation sticky'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-on rotation out of defensives'}]},
+  XLY: {
+    bull:[{t:'WANT',n:'Direxion Daily Consumer Disc. Bull 3X',lev:'3×',thesis:'Consumer spending resilient'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Amazon / Tesla momentum play'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Consumer pullback / recession fears'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Discretionary leading broad weakness'}]},
+  XLP: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Staples outperform in stagflation'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×',thesis:'Broad market + staples leadership'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-on rotation out of defensives'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad market hedge'}]},
+  XLRE:{
+    bull:[{t:'DRN',n:'Direxion Daily Real Estate Bull 3X',lev:'3×',thesis:'Rate cuts boost REIT valuations'},{t:'NAIL',n:'Direxion Daily Homebuilders Bull 3X',lev:'3×',thesis:'Housing supply shortage + rate ease'}],
+    bear:[{t:'DRV',n:'Direxion Daily Real Estate Bear 3X',lev:'3×',thesis:'Rates stay high / office vacancy surge'},{t:'REK',n:'ProShares Short Real Estate',lev:'1×',thesis:'Conservative REIT hedge'}]},
+  XLB: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Commodity boom / infrastructure demand'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Materials + energy joint upswing'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Commodity demand slowdown'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Cyclicals leading broad retreat'}]},
+  // Global Sectors
+  IXN: {
+    bull:[{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'Global tech leadership / AI capex'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'US mega-cap proxy for global tech'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Global tech selloff / China risk'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad tech breakdown hedge'}]},
+  IXJ: {
+    bull:[{t:'CURE',n:'Direxion Daily Healthcare Bull 3X',lev:'3×',thesis:'Global healthcare defensive bid'},{t:'LABU',n:'Direxion Daily Biotech Bull 3X',lev:'3×',thesis:'Biotech / pharma breakout'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Drug pricing pressure / pipeline fails'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Global risk-off hedge'}]},
+  IXC: {
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Global oil supply cuts'},{t:'NRGU',n:'MicroSectors Big Oil Index 3X',lev:'3×',thesis:'Major oil supermajor strength'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Global demand slowdown / green shift'},{t:'DRIP',n:'Direxion Daily S&P Oil & Gas E&P Bear 2X',lev:'2×',thesis:'E&P balance sheet stress'}]},
+  IXG: {
+    bull:[{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×',thesis:'Global rate normalisation boost'},{t:'DPST',n:'Direxion Daily Regional Banks Bull 3X',lev:'3×',thesis:'Regional lending growth'}],
+    bear:[{t:'FAZ',n:'Direxion Daily Financial Bear 3X',lev:'3×',thesis:'Global credit tightening'},{t:'SKF',n:'ProShares UltraShort Financials 2X',lev:'2×',thesis:'Systemic risk hedge'}]},
+  MXI: {
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Materials supercycle demand'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Broad commodity-driven rally'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Global growth scare / China slowdown'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-off materials exit'}]},
+  KXI: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Global staples defensive premium'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×',thesis:'Broad market + staples leadership'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-on rotation out of defensives'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad market hedge'}]},
   // Macro / Asset Class
-  SPY: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×'}],
-  QQQ: [{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'QLD',n:'ProShares Ultra QQQ 2X',lev:'2×'}],
-  IWM: [{t:'TNA',n:'Direxion Daily Small Cap Bull 3X',lev:'3×'},{t:'URTY',n:'ProShares UltraPro Russell 2000 3X',lev:'3×'}],
-  RSP: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'HIBL',n:'Direxion S&P 500 High Beta Bull 3X',lev:'3×'}],
-  TLT: [{t:'TMF',n:'Direxion Daily 20+ Year Treasury Bull 3X',lev:'3×'},{t:'UBT',n:'ProShares Ultra 20+ Year Treasury 2X',lev:'2×'}],
-  LQD: [{t:'TMF',n:'Direxion Daily 20+ Yr Treasury Bull 3X',lev:'3×'},{t:'UBT',n:'ProShares Ultra 20+ Treasury 2X',lev:'2×'}],
-  HYG: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
-  GLD: [{t:'UGL',n:'ProShares Ultra Gold 2X',lev:'2×'},{t:'NUGT',n:'Direxion Daily Gold Miners Bull 2X',lev:'2×'}],
-  IBIT:[{t:'BITX',n:'Volatility Shares 2x Bitcoin ETF',lev:'2×'},{t:'BITU',n:'ProShares Ultra Bitcoin 2X',lev:'2×'}],
-  SMH: [{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'},{t:'USD',n:'ProShares Ultra Semiconductors 2X',lev:'2×'}],
-  EEM: [{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×'},{t:'EET',n:'ProShares Ultra MSCI Emerging Mkts 2X',lev:'2×'}],
-  EFA: [{t:'EFO',n:'ProShares Ultra MSCI EAFE 2X',lev:'2×'},{t:'EURL',n:'Direxion Daily Europe Bull 3X',lev:'3×'}],
-  SHY: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'TNA',n:'Direxion Daily Small Cap Bull 3X',lev:'3×'}],
-  IWF: [{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'}],
-  IWD: [{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'},{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×'}],
-  IYT: [{t:'TPOR',n:'Direxion Daily Transportation Bull 3X',lev:'3×'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'}],
+  SPY: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Strong breadth / macro tailwind'},{t:'UPRO',n:'ProShares UltraPro S&P 500 3X',lev:'3×',thesis:'Momentum continuation play'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Breadth failing / macro deterioration'},{t:'SPXU',n:'ProShares UltraPro Short S&P500 3X',lev:'3×',thesis:'Aggressive broad market hedge'}]},
+  QQQ: {
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Nasdaq momentum / AI leadership'},{t:'QLD',n:'ProShares Ultra QQQ 2X',lev:'2×',thesis:'Moderate leveraged tech exposure'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Tech breakdown / rates spike'},{t:'QID',n:'ProShares UltraShort QQQ 2X',lev:'2×',thesis:'Measured Nasdaq short hedge'}]},
+  IWM: {
+    bull:[{t:'TNA',n:'Direxion Daily Small Cap Bull 3X',lev:'3×',thesis:'Small-cap rate-sensitive rally'},{t:'URTY',n:'ProShares UltraPro Russell 2000 3X',lev:'3×',thesis:'Breadth expansion / risk-on'}],
+    bear:[{t:'TZA',n:'Direxion Daily Small Cap Bear 3X',lev:'3×',thesis:'Credit crunch hits small caps first'},{t:'SRTY',n:'ProShares UltraPro Short Russell2000 3X',lev:'3×',thesis:'Small-cap leverage risk in downturn'}]},
+  RSP: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Breadth expanding / equal-weight leadership'},{t:'HIBL',n:'Direxion S&P 500 High Beta Bull 3X',lev:'3×',thesis:'Risk-on breadth chase'}],
+    bear:[{t:'HIBS',n:'Direxion S&P 500 High Beta Bear 3X',lev:'3×',thesis:'High-beta names selling off hardest'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Broad equal-weight breakdown'}]},
+  TLT: {
+    bull:[{t:'TMF',n:'Direxion Daily 20+ Year Treasury Bull 3X',lev:'3×',thesis:'Rate cut cycle / recession hedge'},{t:'UBT',n:'ProShares Ultra 20+ Year Treasury 2X',lev:'2×',thesis:'Duration extension as yields fall'}],
+    bear:[{t:'TMV',n:'Direxion Daily 20+ Year Treasury Bear 3X',lev:'3×',thesis:'Inflation sticky / rates stay higher'},{t:'TBT',n:'ProShares UltraShort 20+ Year Treasury 2X',lev:'2×',thesis:'Moderate duration short'}]},
+  LQD: {
+    bull:[{t:'TMF',n:'Direxion Daily 20+ Yr Treasury Bull 3X',lev:'3×',thesis:'Credit spreads tightening'},{t:'UBT',n:'ProShares Ultra 20+ Treasury 2X',lev:'2×',thesis:'Rate easing boosts IG credit'}],
+    bear:[{t:'TMV',n:'Direxion Daily 20+ Year Treasury Bear 3X',lev:'3×',thesis:'Credit spreads widening / rate risk'},{t:'TBT',n:'ProShares UltraShort 20+ Year Treasury 2X',lev:'2×',thesis:'Rate spike hurts IG duration'}]},
+  HYG: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Risk-on credit rally'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Equity proxy — HYG follows stocks'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Credit stress / HYG leads equity down'},{t:'TZA',n:'Direxion Daily Small Cap Bear 3X',lev:'3×',thesis:'HYG stress = small-cap pain first'}]},
+  GLD: {
+    bull:[{t:'UGL',n:'ProShares Ultra Gold 2X',lev:'2×',thesis:'Dollar weakness / safe-haven bid'},{t:'NUGT',n:'Direxion Daily Gold Miners Bull 2X',lev:'2×',thesis:'Miners leverage gold upside'}],
+    bear:[{t:'GLL',n:'ProShares UltraShort Gold 2X',lev:'2×',thesis:'Dollar strength / risk-on sells gold'},{t:'DUST',n:'Direxion Daily Gold Miners Bear 2X',lev:'2×',thesis:'Miners collapse on gold breakdown'}]},
+  IBIT:{
+    bull:[{t:'BITX',n:'Volatility Shares 2x Bitcoin ETF',lev:'2×',thesis:'BTC momentum / institutional inflows'},{t:'BITU',n:'ProShares Ultra Bitcoin 2X',lev:'2×',thesis:'Crypto risk-on acceleration'}],
+    bear:[{t:'SBIT',n:'ProShares Short Bitcoin ETF',lev:'1×',thesis:'BTC breakdown / macro risk-off'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Crypto correlates with broad risk-off'}]},
+  SMH: {
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'AI capex + chip cycle upswing'},{t:'USD',n:'ProShares Ultra Semiconductors 2X',lev:'2×',thesis:'Moderate semi exposure on breakout'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'Chip inventory glut / demand miss'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Tech selloff drags semis'}]},
+  EEM: {
+    bull:[{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×',thesis:'EM rally / dollar weakness'},{t:'EET',n:'ProShares Ultra MSCI Emerging Mkts 2X',lev:'2×',thesis:'China/EM reopening play'}],
+    bear:[{t:'EDZ',n:'Direxion Daily Emerging Markets Bear 3X',lev:'3×',thesis:'Dollar surge / EM capital flight'},{t:'EEV',n:'ProShares UltraShort MSCI Emerging Mkts 2X',lev:'2×',thesis:'EM contagion / China slowdown'}]},
+  EFA: {
+    bull:[{t:'EFO',n:'ProShares Ultra MSCI EAFE 2X',lev:'2×',thesis:'Europe/Japan recovery + weak dollar'},{t:'EURL',n:'Direxion Daily Europe Bull 3X',lev:'3×',thesis:'European equity breakout'}],
+    bear:[{t:'EFZ',n:'ProShares Short MSCI EAFE',lev:'1×',thesis:'Europe recession / yen strength headwind'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Global developed market risk-off'}]},
+  SHY: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Short rates falling = risk-on signal'},{t:'TNA',n:'Direxion Daily Small Cap Bull 3X',lev:'3×',thesis:'Rate-sensitive small caps benefit'}],
+    bear:[{t:'TBF',n:'ProShares Short 20+ Year Treasury',lev:'1×',thesis:'Short-end rates rising / hawkish Fed'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Rising short rates = market pressure'}]},
+  IWF: {
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Growth factor outperformance'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'Growth leadership in risk-on'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Growth-to-value rotation'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Growth factor breakdown / rates spike'}]},
+  IWD: {
+    bull:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Value factor + financials/energy bid'},{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×',thesis:'Value = banks + energy outperform'}],
+    bear:[{t:'FAZ',n:'Direxion Daily Financial Bear 3X',lev:'3×',thesis:'Value names underperform in panic'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Broad market hedge'}]},
+  IYT: {
+    bull:[{t:'TPOR',n:'Direxion Daily Transportation Bull 3X',lev:'3×',thesis:'Freight volumes + Dow Theory confirm'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'Economic expansion / re-shoring'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Transport leading recession signal'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Dow Theory non-confirmation hedge'}]},
   // Defense
-  ITA: [{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'}],
-  XAR: [{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'}],
-  SHLD:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  ITA: {
+    bull:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'Defense budget expansion / geopolitical'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'Defense + industrial spending'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Defense budget cuts risk'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Risk-off sells cyclicals'}]},
+  XAR: {
+    bull:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'NATO spending + contract wins'},{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'Aerospace + industrial co-movement'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Geopolitical de-escalation sells defense'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad risk-off hedge'}]},
+  SHLD:{
+    bull:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'Cybersecurity + defense budget surge'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Tech-heavy defense beneficiaries'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Tech budget cuts hit cyber names'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-off hits high-P/E defense tech'}]},
   // Space
-  NASA:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X (closest proxy)',lev:'3×'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'}],
-  UFO: [{t:'TQQQ',n:'ProShares UltraPro QQQ 3X (closest proxy)',lev:'3×'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'}],
-  ARKX:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X (closest proxy)',lev:'3×'},{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×'}],
+  NASA:{
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Space = high-beta tech proxy'},{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'Government space contracts'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Space names trade like speculative tech'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-off crushes thematic names'}]},
+  UFO: {
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Space comm = high-beta tech'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×',thesis:'Satellite internet overlap with web'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Thematic names sold first in risk-off'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Tech selloff = space ETF drag'}]},
+  ARKX:{
+    bull:[{t:'DFEN',n:'Direxion Daily Aerospace & Defense Bull 3X',lev:'3×',thesis:'Space + drone infrastructure build-out'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Innovation = QQQ correlation'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'ARK thematic names high beta to down'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Innovation theme collapses in risk-off'}]},
   // Quantum
-  QTUM:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  QTUM:{
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'Quantum = next-gen chip investment'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Speculative tech leadership'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'Quantum hype fade / semis roll'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Speculative tech gets hit hardest'}]},
   // AI
-  AIQ: [{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'}],
-  CHAT:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'}],
-  BOTZ:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
-  CIBR:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×'}],
+  AIQ: {
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'AI capex supercycle'},{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'AI = chip demand explosion'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'AI bubble concerns / valuation reset'},{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'AI capex pause = chip drawdown'}]},
+  CHAT:{
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Generative AI adoption acceleration'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'LLM demand = tech sector bid'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'AI hype peak / revenue miss fears'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Thematic unwind hits high-beta names'}]},
+  BOTZ:{
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'Robotics = chip + automation demand'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'AI/robotics co-movement with Nasdaq'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'Automation capex cuts in slowdown'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Thematic ETFs bleed in risk-off'}]},
+  CIBR:{
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Cyber budgets grow in every regime'},{t:'TECL',n:'Direxion Daily Technology Bull 3X',lev:'3×',thesis:'Cyber = SaaS premium expansion'}],
+    bear:[{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'IT budget freeze hits cyber first'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Broad tech selloff drags cyber'}]},
   // Nuclear/Energy
-  URA: [{t:'NRGU',n:'MicroSectors Big Oil Index 3X (proxy)',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×'}],
+  URA: {
+    bull:[{t:'NRGU',n:'MicroSectors Big Oil Index 3X (proxy)',lev:'3×',thesis:'Energy supercycle / uranium supply crunch'},{t:'ERX',n:'Direxion Daily Energy Bull 2X',lev:'2×',thesis:'Nuclear revival + AI power demand'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X',lev:'2×',thesis:'Uranium price collapse / oversupply'},{t:'DRIP',n:'Direxion Daily S&P Oil & Gas E&P Bear 2X',lev:'2×',thesis:'Energy complex breakdown hedge'}]},
   // Blockchain/Crypto
-  BLOK:[{t:'BITX',n:'Volatility Shares 2x Bitcoin ETF',lev:'2×'},{t:'BITU',n:'ProShares Ultra Bitcoin 2X',lev:'2×'}],
+  BLOK:{
+    bull:[{t:'BITX',n:'Volatility Shares 2x Bitcoin ETF',lev:'2×',thesis:'Crypto bull market / blockchain adoption'},{t:'BITU',n:'ProShares Ultra Bitcoin 2X',lev:'2×',thesis:'BTC as institutional reserve asset'}],
+    bear:[{t:'SBIT',n:'ProShares Short Bitcoin ETF',lev:'1×',thesis:'Crypto regulation / BTC bear market'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Risk-off wipes crypto equities'}]},
   // Clean Energy
-  ICLN:[{t:'KLNE',n:'Direxion Daily Global Clean Energy Bull 2X',lev:'2×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X (proxy)',lev:'3×'}],
-  TAN: [{t:'KLNE',n:'Direxion Daily Global Clean Energy Bull 2X',lev:'2×'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'}],
+  ICLN:{
+    bull:[{t:'KLNE',n:'Direxion Daily Global Clean Energy Bull 2X',lev:'2×',thesis:'Energy transition / green policy tailwind'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Clean tech = growth factor play'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Policy reversal / subsidy cuts'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Clean energy = high-beta growth names'}]},
+  TAN: {
+    bull:[{t:'KLNE',n:'Direxion Daily Global Clean Energy Bull 2X',lev:'2×',thesis:'Solar installations + IRA incentives'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Broad bull market lifts solar'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Rising rates crush solar DCF valuations'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Solar = high-duration growth proxy'}]},
   // Lithium/Batteries
-  LIT: [{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X (proxy)',lev:'3×'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×'}],
+  LIT: {
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X (proxy)',lev:'3×',thesis:'EV demand + battery storage surge'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X',lev:'3×',thesis:'Broad industrial / EV expansion'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'EV demand miss / lithium oversupply'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Cyclical materials selloff'}]},
   // Genomics/Biotech
-  ARKG:[{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×'},{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×'}],
-  ARKK:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'}],
+  ARKG:{
+    bull:[{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×',thesis:'Genomics / CRISPR clinical catalysts'},{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×',thesis:'Biotech sector breakout'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Trial failures / speculative unwind'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'High-beta names sold hardest in risk-off'}]},
+  ARKK:{
+    bull:[{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Innovation / disruptive tech rerating'},{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×',thesis:'SaaS + internet names rebounding'}],
+    bear:[{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'High-valuation growth corrects sharply'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Innovation ETFs = maximum drawdown in bear'}]},
   // Semiconductors Broad
-  SOXX:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×'},{t:'USD',n:'ProShares Ultra Semiconductors 2X',lev:'2×'}],
+  SOXX:{
+    bull:[{t:'SOXL',n:'Direxion Daily Semiconductor Bull 3X',lev:'3×',thesis:'Chip upcycle / AI demand explosive'},{t:'USD',n:'ProShares Ultra Semiconductors 2X',lev:'2×',thesis:'Moderate semi leverage on breakout'}],
+    bear:[{t:'SOXS',n:'Direxion Daily Semiconductor Bear 3X',lev:'3×',thesis:'Chip inventory cycle turning'},{t:'TECS',n:'Direxion Daily Technology Bear 3X',lev:'3×',thesis:'Semi weakness leads tech lower'}]},
   // Magnificent 7
-  MAGS:[{t:'FNGU',n:'MicroSectors FANG+ Index 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  MAGS:{
+    bull:[{t:'FNGU',n:'MicroSectors FANG+ Index 3X',lev:'3×',thesis:'Mega-cap AI earnings power'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Mega-cap concentration = QQQ rally'}],
+    bear:[{t:'FNGD',n:'MicroSectors FANG+ Index -3X',lev:'3×',thesis:'Mag-7 multiple compression / antitrust'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Mega-cap selloff = Nasdaq collapse'}]},
   // Infrastructure
-  PAVE:[{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×'},{t:'NAIL',n:'Direxion Daily Homebuilders Bull 3X',lev:'3×'}],
+  PAVE:{
+    bull:[{t:'DUSL',n:'Direxion Daily Industrials Bull 3X',lev:'3×',thesis:'IIJA spending + re-shoring wave'},{t:'NAIL',n:'Direxion Daily Homebuilders Bull 3X',lev:'3×',thesis:'Construction + housing infrastructure'}],
+    bear:[{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Fiscal tightening / infrastructure delays'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Cyclical industrials lead broad retreat'}]},
   // Biotech
-  XBI: [{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×'},{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×'}],
-  IBB: [{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×'},{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×'}],
+  XBI: {
+    bull:[{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×',thesis:'Small-cap biotech M&A + FDA approvals'},{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×',thesis:'Biotech sector mean-reversion rally'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Clinical trial failures / FDA rejection'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Speculative biotech down 2-3× in risk-off'}]},
+  IBB: {
+    bull:[{t:'BIB',n:'ProShares Ultra Nasdaq Biotech 2X',lev:'2×',thesis:'Large-cap pharma earnings + pipeline'},{t:'LABU',n:'Direxion Daily S&P Biotech Bull 3X',lev:'3×',thesis:'Broad biotech sector breakout'}],
+    bear:[{t:'LABD',n:'Direxion Daily S&P Biotech Bear 3X',lev:'3×',thesis:'Drug pricing reform / pipeline drying up'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Healthcare spending slowdown hedge'}]},
   // India
-  INDA:[{t:'INDL',n:'Direxion Daily MSCI India Bull 2X',lev:'2×'},{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×'}],
+  INDA:{
+    bull:[{t:'INDL',n:'Direxion Daily MSCI India Bull 2X',lev:'2×',thesis:'India structural growth / FII inflows'},{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×',thesis:'EM risk-on led by India'}],
+    bear:[{t:'EDZ',n:'Direxion Daily Emerging Markets Bear 3X',lev:'3×',thesis:'Dollar surge / EM capital outflow'},{t:'EEV',n:'ProShares UltraShort MSCI Emerging Mkts 2X',lev:'2×',thesis:'India election risk / EM contagion'}]},
   // Copper/Materials
-  COPX:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X (proxy)',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X (proxy)',lev:'2×'}],
+  COPX:{
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X (proxy)',lev:'2×',thesis:'AI data-centre copper demand boom'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X (proxy)',lev:'3×',thesis:'China stimulus = copper supercycle'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X (proxy)',lev:'2×',thesis:'China slowdown / copper demand crash'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Global recession = commodities selloff'}]},
   // Cloud/SaaS
-  SKYY:[{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  SKYY:{
+    bull:[{t:'WEBL',n:'Direxion Daily Internet Bull 3X',lev:'3×',thesis:'Cloud migration + AI workloads'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'SaaS = Nasdaq growth leadership'}],
+    bear:[{t:'WEBS',n:'Direxion Daily Dow Jones Internet Bear 3X',lev:'3×',thesis:'SaaS multiple compression / churn'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'Cloud capex cuts in downturn'}]},
   // FinTech
-  FINX:[{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×'}],
+  FINX:{
+    bull:[{t:'FAS',n:'Direxion Daily Financial Bull 3X',lev:'3×',thesis:'FinTech + payments volume growth'},{t:'TQQQ',n:'ProShares UltraPro QQQ 3X',lev:'3×',thesis:'Digital payments = tech factor'}],
+    bear:[{t:'FAZ',n:'Direxion Daily Financial Bear 3X',lev:'3×',thesis:'Credit cycle turning / FinTech margins'},{t:'SQQQ',n:'ProShares UltraPro Short QQQ 3X',lev:'3×',thesis:'FinTech = leveraged to rate headwinds'}]},
   // Rare earths / Metals
-  REMX:[{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X (proxy)',lev:'3×'},{t:'ERX',n:'Direxion Daily Energy Bull 2X (proxy)',lev:'2×'}],
+  REMX:{
+    bull:[{t:'ERX',n:'Direxion Daily Energy Bull 2X (proxy)',lev:'2×',thesis:'EV + defense rare earth demand'},{t:'SPXL',n:'Direxion Daily S&P 500 Bull 3X (proxy)',lev:'3×',thesis:'China supply chain diversification'}],
+    bear:[{t:'ERY',n:'Direxion Daily Energy Bear 2X (proxy)',lev:'2×',thesis:'China export controls ease / oversupply'},{t:'SPXS',n:'Direxion Daily S&P 500 Bear 3X',lev:'3×',thesis:'Global demand slowdown = metals dump'}]},
   // Turkey / EM
-  TUR: [{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×'},{t:'EET',n:'ProShares Ultra MSCI Emerging Mkts 2X',lev:'2×'}],
+  TUR: {
+    bull:[{t:'EDC',n:'Direxion Daily Emerging Markets Bull 3X',lev:'3×',thesis:'Turkey disinflation + EM carry trade'},{t:'EET',n:'ProShares Ultra MSCI Emerging Mkts 2X',lev:'2×',thesis:'EM risk-on flows into Turkey'}],
+    bear:[{t:'EDZ',n:'Direxion Daily Emerging Markets Bear 3X',lev:'3×',thesis:'Lira collapse / geopolitical risk'},{t:'EEV',n:'ProShares UltraShort MSCI Emerging Mkts 2X',lev:'2×',thesis:'Turkey contagion to broader EM'}]},
 };
 
 // ---- HOLDINGS POPUP ----
@@ -2130,25 +2264,38 @@ function openHoldingsPopup(ticker){
     }else{priceEl.style.display='none';}
   }
 
-  // Trade Idea — render leveraged ETFs for this theme
+  // Trade Idea — render 2 bull + 2 bear leveraged ETF ideas
   const levs=LEVERAGED_MAP[ticker];
   if(levs&&tradeWrap&&tradeBody){
-    tradeBody.innerHTML=`<div class="ho-lev-cards">${levs.map(l=>{
+    function renderLevCard(l,side){
       const ltp=window.tickerPrices&&window.tickerPrices[l.t];
       let priceHtml='';
       if(ltp){
         const sign=ltp.c>=0?'+':'';
         const col=ltp.c>=0?'var(--green)':'var(--red)';
         const pStr=`$${ltp.p<10?ltp.p.toFixed(3):ltp.p<100?ltp.p.toFixed(2):ltp.p.toFixed(1)}`;
-        priceHtml=`<div style="font-family:var(--mono);font-size:11px;margin-top:5px"><span style="color:var(--text-dim)">${pStr}</span> <span style="color:${col};font-weight:700">${sign}${ltp.c.toFixed(2)}%</span></div>`;
+        priceHtml=`<div style="font-family:var(--mono);font-size:11px;margin-top:4px"><span style="color:var(--text-dim)">${pStr}</span> <span style="color:${col};font-weight:700">${sign}${ltp.c.toFixed(2)}%</span></div>`;
       }
-      return `<div class="ho-lev-card">
+      return `<div class="ho-lev-card ${side}">
         <div><span class="ho-lev-tk">${l.t}</span><span class="ho-lev-badge">${l.lev}</span></div>
         <div class="ho-lev-name">${l.n}</div>
+        ${l.thesis?`<div class="ho-lev-thesis">${l.thesis}</div>`:''}
         ${priceHtml}
       </div>`;
-    }).join('')}</div>
-    <div class="ho-lev-warn">⚠ Leveraged ETFs reset daily and decay over time — short-term trades only. High risk.</div>`;
+    }
+    const bullCards=(levs.bull||[]).map(l=>renderLevCard(l,'bull')).join('');
+    const bearCards=(levs.bear||[]).map(l=>renderLevCard(l,'bear')).join('');
+    tradeBody.innerHTML=`<div class="ho-lev-sides">
+      <div>
+        <div class="ho-lev-side-hdr bull">▲ BULL PLAY</div>
+        <div class="ho-lev-col">${bullCards}</div>
+      </div>
+      <div>
+        <div class="ho-lev-side-hdr bear">▼ BEAR PLAY</div>
+        <div class="ho-lev-col">${bearCards}</div>
+      </div>
+    </div>
+    <div class="ho-lev-warn">⚠ Leveraged ETFs reset daily — short-term trades only. High risk.</div>`;
     tradeWrap.style.display='block';
   } else if(tradeWrap){tradeWrap.style.display='none';}
 
