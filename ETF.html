@@ -274,25 +274,20 @@
   details[open] .hac-arrow{transform:rotate(90deg)}
   details[open] .haccard{border-color:var(--gold)}
   .hac-body{padding:0 16px 14px}
-  .holdings-table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
-  .holdings-table th{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);background:var(--bg-elev)}
-  .holdings-table th:last-child,.holdings-table th:nth-last-child(2){text-align:right}
-  .holdings-table td{padding:7px 8px;border-bottom:1px solid var(--line);color:var(--text-dim);overflow:hidden}
-  .holdings-table tr:last-child td{border-bottom:none}
-  .holdings-table tr:hover td{background:rgba(232,193,74,.035)}
-  .holdings-table col.col-rank{width:28px}
-  .holdings-table col.col-tk{width:52px}
-  .holdings-table col.col-co{width:auto}
-  .holdings-table col.col-wt{width:46px}
-  .holdings-table col.col-today{width:100px}
-  .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint)}
-  .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px}
-  .h-co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
-  .h-co{color:var(--text)}
-  .h-wt{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--gold);white-space:nowrap;min-width:46px;flex-shrink:0}
-  .h-wt-wrap{display:flex;align-items:center;gap:10px}
-  .h-wt-bar{display:inline-block;width:90px;height:7px;background:var(--line);border-radius:4px;position:relative;overflow:hidden;flex-shrink:0}
-  .h-wt-fill{position:absolute;left:0;top:0;height:100%;background:var(--gold);border-radius:4px;opacity:.85}
+  /* ── Holdings flex rows (replaces table — never overflows) ── */
+  .h-list{width:100%;border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--bg-card)}
+  .h-list-hdr,.h-row{display:flex;align-items:center;gap:0;width:100%}
+  .h-list-hdr{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);background:var(--bg-elev);border-bottom:1px solid var(--line-bright);padding:6px 10px}
+  .h-row{padding:7px 10px;border-bottom:1px solid var(--line);transition:background .12s}
+  .h-row:last-child{border-bottom:none}
+  .h-row:hover{background:rgba(232,193,74,.035)}
+  .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:22px;flex-shrink:0}
+  .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;width:50px;flex-shrink:0}
+  .h-co-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;padding-right:8px}
+  .h-co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--text)}
+  .h-wt-bar-wrap{width:100%;height:2px;background:var(--line);border-radius:1px;overflow:hidden}
+  .h-wt-bar-fill{height:100%;background:var(--gold);opacity:.6;border-radius:1px}
+  .h-today{flex-shrink:0;text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:90px}
   .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
   .holdings-search-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
   .h-search{font-family:var(--mono);font-size:12px;background:var(--bg-card);border:1px solid var(--line-bright);color:var(--text);padding:7px 12px;border-radius:3px;width:220px;outline:none}
@@ -448,9 +443,7 @@
     .se-explain{font-size:13px}
     .ho-ticker{font-size:21px !important}
     .ho-table-wrap{overflow-x:hidden}
-    .holdings-table{font-size:11px}
-    .holdings-table td,.holdings-table th{padding:5px 6px}
-    .holdings-table col.col-today{width:88px}
+    .h-today{min-width:80px}
     .h-wt-bar{width:55px}
     .h-wt{font-size:12px}
 
@@ -2036,29 +2029,32 @@ function openHoldingsPopup(ticker){
     return`<span style="color:${col};font-weight:700">${sign}${c.toFixed(2)}%</span>`;
   }
 
-  // Build top 10 holdings table with live price + % change per row
+  // Build top 10 holdings as flex rows (no table = no horizontal overflow)
+  const maxW=e.h.reduce((m,r)=>Math.max(m,parseFloat(r[2])||0),0);
   const rows=e.h.slice(0,10).map((r,i)=>{
-    const w=parseFloat(r[2]);
+    const w=parseFloat(r[2])||0;
+    const barPct=maxW>0?Math.min(100,(w/maxW)*100).toFixed(1):0;
     const stp=tp_cache&&tp_cache[r[0]];
-    const priceCell=stp
-      ?`<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${fmtPrice(stp.p)}</span>&nbsp;${fmtChg(stp.c)}`
-      :`<span style="color:var(--text-faint);font-family:var(--mono);font-size:10px">—</span>`;
-    return `<tr>
-      <td class="h-rank">${i+1}</td>
-      <td class="h-tk">${r[0]}</td>
-      <td class="h-co" title="${r[1]}">${r[1]}</td>
-      <td style="text-align:right">${holdingsWt(w)}</td>
-      <td style="text-align:right;white-space:nowrap">${priceCell}</td>
-    </tr>`;
+    const todayHtml=stp
+      ?`<span style="color:var(--text-dim)">${fmtPrice(stp.p)}</span> ${fmtChg(stp.c)}`
+      :`<span style="color:var(--text-faint)">—</span>`;
+    return `<div class="h-row">
+      <span class="h-rank">${i+1}</span>
+      <span class="h-tk">${r[0]}</span>
+      <span class="h-co-wrap">
+        <span class="h-co" title="${r[1]}">${r[1]}</span>
+        <span class="h-wt-bar-wrap" title="${w?w.toFixed(1)+'%':''}"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
+      </span>
+      <span class="h-today">${todayHtml}</span>
+    </div>`;
   }).join('');
 
   overlay.querySelector('.ho-ticker').textContent=e.t;
   overlay.querySelector('.ho-name').textContent=e.n;
   overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
-  overlay.querySelector('.ho-table-wrap').innerHTML=`<table class="holdings-table">
-    <colgroup><col class="col-rank"><col class="col-tk"><col class="col-co"><col class="col-wt"><col class="col-today"></colgroup>
-    <thead><tr><th>#</th><th>Ticker</th><th>Company</th><th style="text-align:right">Wt%</th><th style="text-align:right">Today</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+  overlay.querySelector('.ho-table-wrap').innerHTML=`<div class="h-list">
+    <div class="h-list-hdr"><span style="width:22px;flex-shrink:0">#</span><span style="width:50px;flex-shrink:0">Ticker</span><span style="flex:1">Company · weight ▬</span><span style="min-width:90px;text-align:right">Today</span></div>
+    ${rows}</div>`;
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
   noteEl.style.display=e.note?'block':'none';
