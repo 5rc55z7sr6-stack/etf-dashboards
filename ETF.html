@@ -285,11 +285,10 @@
   .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;width:46px;flex-shrink:0}
   .h-co-wrap{flex:1;min-width:0;padding-right:6px}
   .h-co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--text);display:block}
-  /* inline wt cell: mini-bar + number side-by-side */
-  .h-wt-cell{flex-shrink:0;display:flex;align-items:center;gap:4px;width:76px;justify-content:flex-end}
-  .h-wt-bar-outer{width:32px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;flex-shrink:0}
-  .h-wt-bar-fill{height:100%;background:var(--gold);opacity:.65;border-radius:2px}
-  .h-wt-num{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:32px;text-align:right;flex-shrink:0}
+  /* bar lives right after ticker; wt% number is a standalone right column */
+  .h-wt-bar-outer{width:44px;height:5px;background:var(--line);border-radius:2px;overflow:hidden;flex-shrink:0;margin-right:6px;align-self:center}
+  .h-wt-bar-fill{height:100%;background:var(--gold);opacity:.7;border-radius:2px}
+  .h-wt-num{flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--text-faint);width:34px;text-align:right}
   .h-today{flex-shrink:0;text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:80px}
   .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
   .holdings-search-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
@@ -458,8 +457,7 @@
     /* Holdings table rows — tighter on mobile */
     .h-rank{width:14px;font-size:9px}
     .h-tk{width:38px;font-size:11px}
-    .h-wt-cell{width:64px}
-    .h-wt-bar-outer{width:24px}
+    .h-wt-bar-outer{width:30px}
     .h-wt-num{width:28px;font-size:9px}
     .h-today{min-width:68px;font-size:10px}
     .h-list-hdr{font-size:8px !important;padding:5px 8px !important}
@@ -2097,11 +2095,9 @@ function openHoldingsPopup(ticker){
     return `<div class="h-row">
       <span class="h-rank">${i+1}</span>
       <span class="h-tk">${r[0]}</span>
+      <span class="h-wt-bar-outer"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
       <span class="h-co-wrap"><span class="h-co" title="${r[1]}">${r[1]}</span></span>
-      <span class="h-wt-cell">
-        <span class="h-wt-bar-outer"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
-        <span class="h-wt-num">${wtTxt}</span>
-      </span>
+      <span class="h-wt-num">${wtTxt}</span>
       <span class="h-today">${todayHtml}</span>
     </div>`;
   }).join('');
@@ -2110,7 +2106,7 @@ function openHoldingsPopup(ticker){
   overlay.querySelector('.ho-name').textContent=e.n;
   overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
   overlay.querySelector('.ho-table-wrap').innerHTML=`<div class="h-list">
-    <div class="h-list-hdr"><span style="width:18px;flex-shrink:0">#</span><span style="width:46px;flex-shrink:0">Ticker</span><span style="flex:1">Company</span><span style="flex-shrink:0;width:76px;text-align:right">Wt %</span><span style="min-width:80px;text-align:right">Today</span></div>
+    <div class="h-list-hdr"><span style="width:18px;flex-shrink:0">#</span><span style="width:46px;flex-shrink:0">Ticker</span><span style="width:50px;flex-shrink:0"></span><span style="flex:1">Company</span><span style="width:34px;flex-shrink:0;text-align:right">Wt%</span><span style="min-width:80px;text-align:right">Today</span></div>
     ${rows}</div>`;
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
