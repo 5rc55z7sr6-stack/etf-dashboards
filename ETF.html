@@ -188,8 +188,8 @@
   .sma-pill{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 8px;border-radius:8px;text-transform:uppercase}
   .sma-pill.above{background:rgba(63,209,126,.06);color:#7aaa90;border:1px solid rgba(63,209,126,.14)}
   .sma-pill.below{background:rgba(255,92,97,.06);color:#9e7070;border:1px solid rgba(255,92,97,.14)}
-  .pulse-card.strong-bull .sma-pill.above{background:rgba(63,209,126,.14);color:#3fd17e;border-color:rgba(63,209,126,.28)}
-  .pulse-card.strong-bear .sma-pill.below{background:rgba(255,92,97,.14);color:#ff5c61;border-color:rgba(255,92,97,.28)}
+  .pulse-card.strong-bull .sma-pill.above,.bp-card.strong-bull .sma-pill.above{background:rgba(63,209,126,.14);color:#3fd17e;border-color:rgba(63,209,126,.28)}
+  .pulse-card.strong-bear .sma-pill.below,.bp-card.strong-bear .sma-pill.below{background:rgba(255,92,97,.14);color:#ff5c61;border-color:rgba(255,92,97,.28)}
   .sma50-txt{font-family:var(--mono);font-size:9.5px;color:var(--text-faint)}
   .pc-spark{height:28px;display:flex;align-items:flex-end;opacity:.85}.pc-spark svg{display:block}
   .pc-master-badge{position:absolute;bottom:10px;left:12px;font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:2px 6px;border-radius:2px;background:rgba(160,175,175,.08);color:rgba(160,175,175,.45);font-weight:600;text-transform:uppercase;border:1px solid rgba(160,175,175,.15)}
@@ -1377,7 +1377,11 @@ function buildBPCard(e,rank){
     <div class="bp-ticker" style="color:${col}">${e.ticker}</div>
     <div class="bp-name">${BP_NAMES[e.ticker]||''}</div>
     <div class="bp-pct" style="color:${col}">${pctStr} <span style="font-size:9px;opacity:.6">vs SPY SMA20</span></div>
-    <div class="bp-meta">ratio momentum ${chg5Str} (5d) &nbsp;·&nbsp; ${e.bullish?'SMA20▲SMA50':'SMA20▼SMA50'}</div>
+    <div class="pc-sma-row" style="margin-top:5px">
+      <span class="sma-pill ${e.bullish?'above':'below'}">${e.bullish?'▲ ABOVE':'▼ BELOW'} SMA20</span>
+      <span class="sma50-txt">SMA20 ${e.s20>e.s50?'▲':'▼'} SMA50</span>
+    </div>
+    <div class="bp-meta" style="margin-top:3px">5d momentum ${chg5Str}</div>
     <div class="bp-spark">${bpSpark(e.closes,e.bullish)}</div>
   </div>`;
 }
@@ -2038,13 +2042,15 @@ function openHoldingsPopup(ticker){
     const todayHtml=stp
       ?`<span style="color:var(--text-dim)">${fmtPrice(stp.p)}</span> ${fmtChg(stp.c)}`
       :`<span style="color:var(--text-faint)">—</span>`;
+    const wtTxt=w?w.toFixed(1)+'%':'—';
     return `<div class="h-row">
       <span class="h-rank">${i+1}</span>
       <span class="h-tk">${r[0]}</span>
       <span class="h-co-wrap">
         <span class="h-co" title="${r[1]}">${r[1]}</span>
-        <span class="h-wt-bar-wrap" title="${w?w.toFixed(1)+'%':''}"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
+        <span class="h-wt-bar-wrap"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
       </span>
+      <span style="flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--text-faint);width:38px;text-align:right;padding-right:6px">${wtTxt}</span>
       <span class="h-today">${todayHtml}</span>
     </div>`;
   }).join('');
@@ -2053,7 +2059,7 @@ function openHoldingsPopup(ticker){
   overlay.querySelector('.ho-name').textContent=e.n;
   overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
   overlay.querySelector('.ho-table-wrap').innerHTML=`<div class="h-list">
-    <div class="h-list-hdr"><span style="width:22px;flex-shrink:0">#</span><span style="width:50px;flex-shrink:0">Ticker</span><span style="flex:1">Company · weight ▬</span><span style="min-width:90px;text-align:right">Today</span></div>
+    <div class="h-list-hdr"><span style="width:22px;flex-shrink:0">#</span><span style="width:50px;flex-shrink:0">Ticker</span><span style="flex:1">Company · wt ▬</span><span style="flex-shrink:0;width:38px;text-align:right;padding-right:6px">Wt%</span><span style="min-width:90px;text-align:right">Today</span></div>
     ${rows}</div>`;
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
