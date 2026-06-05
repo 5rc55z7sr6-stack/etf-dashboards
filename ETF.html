@@ -1525,10 +1525,13 @@ async function loadDataJson(){
       return{...cfg,...r,vals:[],cl};
     }).filter(Boolean);
     if(json.data.length<10)return null;
-    // Store ticker_prices + timestamp globally for instant popup use
+    // Store ticker_prices, etf_holdings + timestamp globally for instant popup use
     if(json.ticker_prices && typeof json.ticker_prices==='object'){
       window.tickerPrices=json.ticker_prices;
-      window.tickerPricesTs=json.ts||null; // ms timestamp when data was generated
+      window.tickerPricesTs=json.ts||null;
+    }
+    if(json.etf_holdings && typeof json.etf_holdings==='object'){
+      window.etfHoldings=json.etf_holdings; // real full ETF holdings from Yahoo Finance
     }
     return json;
   }catch(e){console.warn('loadDataJson failed:',e);return null;}
@@ -2100,31 +2103,35 @@ function openHoldingsPopup(ticker){
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
 
-  // ── Fast movers: data.json (GitHub Actions) is primary; CORS proxy is fallback ──
+  // ── Fast movers — priority order: ───────────────────────────────────────────
+  //   1. Real full ETF holdings (Yahoo Finance via workflow) × cached prices
+  //   2. Hardcoded 22 holdings × cached prices  (if no live holdings in cache)
+  //   3. Live CORS proxy fetch                  (if no price cache at all)
   moversWrap.style.display='block';
+  const ageLabel=window.tickerPricesTs?`data from ${fmtAge(window.tickerPricesTs)}`:'via GitHub Actions';
+
   if(tp_cache && Object.keys(tp_cache).length>10){
-    // PRIMARY — use pre-fetched data.json prices (refreshed every 30 min by GitHub Actions)
-    const fromCache=e.h.map(r=>{
-      const d=tp_cache[r[0]];
-      return d?{t:r[0],n:r[1],chg:d.c,price:d.p}:null;
+    // Decide which holding list to scan:
+    //   - window.etfHoldings[ticker] = real holdings pulled from Yahoo Finance by workflow
+    //   - e.h = hardcoded 22 stocks (fallback)
+    const liveHoldings=window.etfHoldings&&window.etfHoldings[ticker];
+    const scanList = liveHoldings && liveHoldings.length
+      ? liveHoldings                                // [{t,n,w}, ...] from Yahoo
+      : e.h.map(r=>({t:r[0],n:r[1],w:r[2]}));     // hardcoded [{t,n,w}]
+
+    const movers=scanList.map(h=>{
+      const d=tp_cache[h.t];
+      return d?{t:h.t,n:h.n,chg:d.c,price:d.p}:null;
     }).filter(Boolean).sort((a,b)=>b.chg-a.chg);
-    const ageLabel=window.tickerPricesTs?`data from ${fmtAge(window.tickerPricesTs)}`:'via GitHub Actions';
-    renderMoversRows(fromCache.slice(0,5),fromCache.length,ageLabel);
-    // FALLBACK — for any holding not in cache, try live fetch (adds missing tickers)
-    const missing=e.h.filter(r=>!tp_cache[r[0]]);
-    if(missing.length){
-      fetchFastMovers(missing,ticker).then(extra=>{
-        if(!overlay.classList.contains('open')||!extra.length)return;
-        // Merge cache + live, re-sort, show top 5
-        const merged=[...fromCache,...extra].sort((a,b)=>b.chg-a.chg);
-        renderMoversRows(merged.slice(0,5),merged.length,ageLabel+' + live');
-      }).catch(()=>{});
-    }
+
+    const src=liveHoldings?'full ETF scan':'22 holdings';
+    renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · ${src}`);
+
   } else {
-    // No cache at all — fetch live via CORS proxy
+    // No price cache — fall back to live CORS proxy fetch using hardcoded 22
     moversBody.innerHTML=`<div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div>`;
     fetchFastMovers(e.h,ticker).then(movers=>{
-      renderMoversRows(movers,window._fmPool||movers.length,'live');
+      renderMoversRows(movers,window._fmPool||movers.length,'live · 22 holdings fallback');
     }).catch(()=>{
       moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable</div>`;
     });
