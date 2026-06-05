@@ -625,7 +625,7 @@
       <div>
         <div class="num">SECTION 00 / LIVE SIGNAL ENGINE</div>
         <h3>Green light / Red light — now</h3>
-        <p>15 intermarket ratios + 3 theme signal lights vs. SMA20 &amp; SMA50. Masters ×2 in score. Theme row shows which categories have a green light right now.</p>
+        <p>15 intermarket ratios + 9 theme signals vs. SMA20 &amp; SMA50. <b>Weighted scoring</b> — masters ×3, yen carry ×2.5, credit/breadth ×2, directional ×1.5, rotational ×1, phase signals ×0.5. Strong signals count double. Theme row shows which categories have a green light right now.</p>
       </div>
       <button class="refresh-btn" id="refreshBtn" onclick="loadLiveData()"><span class="spinner-sm"></span>↺ Refresh</button>
     </div>
@@ -1116,45 +1116,49 @@ document.querySelectorAll('section,.master,.rcard,.reg,.step').forEach(el=>{el.c
 
 /* LIVE ENGINE */
 const SMA_S=20,SMA_L=50;
+// w = signal weight (macro importance). Scoring: strong-bull=+2w, bull=+w, bear=-w, strong-bear=-2w
+// Weights reflect how much each ratio actually moves markets, not just correlation.
 const CORE_R=[
-  {key:'XLY/XLP', num:'XLY', den:'XLP', master:true,  inv:false, label:'Consumer Risk Appetite',       lens:'equity', theme:false},
-  {key:'HYG/LQD', num:'HYG', den:'LQD', master:true,  inv:false, label:'Credit Risk Appetite',         lens:'credit', theme:false},
-  {key:'SPY/TLT', num:'SPY', den:'TLT', master:true,  inv:false, label:'Stocks vs Long Bonds',         lens:'macro',  theme:false},
-  {key:'CPER/GLD',num:'CPER',den:'GLD', master:true,  inv:false, label:'Copper/Gold (Growth vs Fear)', lens:'macro',  theme:false},
-  {key:'QQQ/SPY', num:'QQQ', den:'SPY', master:false, inv:false, label:'Tech / Growth Leadership',     lens:'equity', theme:false},
-  // SMH/SPY lives in THEME_R only — removing from CORE_R to avoid duplicate in Live Signal Cards
-  {key:'IWM/SPY', num:'IWM', den:'SPY', master:false, inv:false, label:'Small vs Large Caps',          lens:'equity', theme:false},
-  {key:'RSP/SPY', num:'RSP', den:'SPY', master:false, inv:false, label:'Breadth (Equal vs Cap Wt)',     lens:'breadth',theme:false},
-  {key:'GLD/SPY', num:'GLD', den:'SPY', master:false, inv:true,  label:'Gold vs Stocks (Fear)',        lens:'macro',  theme:false},
-  {key:'IWF/IWD', num:'IWF', den:'IWD', master:false, inv:false, label:'Growth vs Value',              lens:'equity', theme:false},
-  {key:'EEM/EFA', num:'EEM', den:'EFA', master:false, inv:false, label:'EM vs Developed Mkts',         lens:'breadth',theme:false},
-  {key:'IYT/XLU', num:'IYT', den:'XLU', master:false, inv:false, label:'Transports vs Utilities',      lens:'breadth',theme:false},
-  {key:'XLK/SHY', num:'XLK', den:'SHY', master:false, inv:false, label:'Risk vs Cash',                 lens:'macro',  theme:false},
-  {key:'IBIT/GLD',num:'IBIT',den:'GLD', master:false, inv:false, label:'Bitcoin vs Gold',              lens:'macro',  theme:false},
-  {key:'XLK/XLU', num:'XLK', den:'XLU', master:false, inv:false, label:'Offense vs Defense',           lens:'equity', theme:false},
-  // --- Added: trader-edge ratios from TradingView analysis ---
-  {key:'KRE/SPY', num:'KRE', den:'SPY', master:false, inv:false, label:'Regional Banks vs Market',     lens:'credit', theme:false},
-  {key:'SPHB/SPLV',num:'SPHB',den:'SPLV',master:false,inv:false, label:'High Beta vs Low Volatility',  lens:'equity', theme:false},
-  {key:'HYG/TLT', num:'HYG', den:'TLT', master:false, inv:false, label:'Credit Risk vs Duration',      lens:'credit', theme:false},
-  {key:'GLD/TLT', num:'GLD', den:'TLT', master:false, inv:false, label:'Gold vs Bonds (Inflation Regime)',lens:'macro',theme:false},
-  {key:'SMH/IGV', num:'SMH', den:'IGV', master:false, inv:false, label:'Semis vs Software (AI Hardware→Monetization)',lens:'equity',theme:false},
-  {key:'EWJ/SPY', num:'EWJ', den:'SPY', master:false, inv:false, label:'Japan vs US (Rotation)',       lens:'breadth',theme:false},
-  // --- New 2025-26 trending theme core ratios ---
-  {key:'COPX/GLD',num:'COPX',den:'GLD', master:false, inv:false, label:'Copper Miners vs Gold (Industrial Intensity)',lens:'macro',theme:false},
-  {key:'SKYY/SPY',num:'SKYY',den:'SPY', master:false, inv:false, label:'Cloud/SaaS vs Market (AI Monetisation)',lens:'equity',theme:false},
+  // ── MASTER GAUGES (w:3) — regime on/off switches ──────────────────────────
+  {key:'XLY/XLP', num:'XLY', den:'XLP', master:true,  inv:false, w:3,   label:'Consumer Risk Appetite',       lens:'equity', theme:false},
+  {key:'HYG/LQD', num:'HYG', den:'LQD', master:true,  inv:false, w:3,   label:'Credit Risk Appetite',         lens:'credit', theme:false},
+  {key:'SPY/TLT', num:'SPY', den:'TLT', master:true,  inv:false, w:3,   label:'Stocks vs Long Bonds',         lens:'macro',  theme:false},
+  {key:'CPER/GLD',num:'CPER',den:'GLD', master:true,  inv:false, w:3,   label:'Copper/Gold (Growth vs Fear)', lens:'macro',  theme:false},
+  // ── HIGH IMPORTANCE (w:2.5) — systemic tail risk ──────────────────────────
+  {key:'EWJ/SPY', num:'EWJ', den:'SPY', master:false, inv:false, w:2.5, label:'Japan vs US (Yen Carry Risk)', lens:'breadth',theme:false},
+  // ── HIGH IMPORTANCE (w:2) — credit, breadth, economic health ──────────────
+  {key:'IWM/SPY', num:'IWM', den:'SPY', master:false, inv:false, w:2,   label:'Small vs Large Caps',          lens:'equity', theme:false},
+  {key:'RSP/SPY', num:'RSP', den:'SPY', master:false, inv:false, w:2,   label:'Breadth (Equal vs Cap Wt)',     lens:'breadth',theme:false},
+  {key:'KRE/SPY', num:'KRE', den:'SPY', master:false, inv:false, w:2,   label:'Regional Banks vs Market',     lens:'credit', theme:false},
+  {key:'HYG/TLT', num:'HYG', den:'TLT', master:false, inv:false, w:2,   label:'Credit Risk vs Duration',      lens:'credit', theme:false},
+  {key:'SPHB/SPLV',num:'SPHB',den:'SPLV',master:false,inv:false, w:2,   label:'High Beta vs Low Volatility',  lens:'equity', theme:false},
+  // ── STANDARD (w:1.5) — important directional signals ─────────────────────
+  {key:'QQQ/SPY', num:'QQQ', den:'SPY', master:false, inv:false, w:1.5, label:'Tech / Growth Leadership',     lens:'equity', theme:false},
+  {key:'GLD/SPY', num:'GLD', den:'SPY', master:false, inv:true,  w:1.5, label:'Gold vs Stocks (Fear)',        lens:'macro',  theme:false},
+  {key:'IWF/IWD', num:'IWF', den:'IWD', master:false, inv:false, w:1.5, label:'Growth vs Value',              lens:'equity', theme:false},
+  {key:'IBIT/GLD',num:'IBIT',den:'GLD', master:false, inv:false, w:1.5, label:'Bitcoin vs Gold (Spec Risk)',  lens:'macro',  theme:false},
+  {key:'IYT/XLU', num:'IYT', den:'XLU', master:false, inv:false, w:1.5, label:'Transports vs Utilities',      lens:'breadth',theme:false},
+  {key:'EEM/EFA', num:'EEM', den:'EFA', master:false, inv:false, w:1.5, label:'EM vs Developed Mkts',         lens:'breadth',theme:false},
+  // ── STANDARD (w:1) — directional but lower uniqueness ────────────────────
+  {key:'XLK/SHY', num:'XLK', den:'SHY', master:false, inv:false, w:1,   label:'Risk vs Cash',                 lens:'macro',  theme:false},
+  {key:'XLK/XLU', num:'XLK', den:'XLU', master:false, inv:false, w:1,   label:'Offense vs Defense',           lens:'equity', theme:false},
+  {key:'COPX/GLD',num:'COPX',den:'GLD', master:false, inv:false, w:1,   label:'Copper Miners vs Gold',        lens:'macro',  theme:false},
+  {key:'SKYY/SPY',num:'SKYY',den:'SPY', master:false, inv:false, w:1,   label:'Cloud/SaaS (AI Monetisation)', lens:'equity', theme:false},
+  // ── LOW WEIGHT (w:0.5) — rotational / ambiguous for bull-bear direction ───
+  {key:'GLD/TLT', num:'GLD', den:'TLT', master:false, inv:false, w:0.5, label:'Gold vs Bonds (Inflation)',    lens:'macro',  theme:false},
+  {key:'SMH/IGV', num:'SMH', den:'IGV', master:false, inv:false, w:0.5, label:'Semis vs Software (AI Phase)', lens:'equity', theme:false},
   // XBI/SPY and INDA/SPY live in THEME_R only — removing from CORE_R to avoid duplicates
 ];
 const THEME_R=[
-  {key:'SMH/SPY', num:'SMH', den:'SPY', master:false, inv:false, label:'Tech Themes On/Off (Semis)',   lens:'equity', theme:true, themeDesc:'Green → add AIQ, QTUM, BOTZ, CHAT · Red → cut tech themes first'},
-  {key:'ITA/SPY', num:'ITA', den:'SPY', master:false, inv:false, label:'Defense Bid (ITA vs Market)',  lens:'equity', theme:true, themeDesc:'Green → overweight ITA, XAR, SHLD · Can stay green even in risk-off'},
-  {key:'ARKK/SPY',num:'ARKK',den:'SPY', master:false, inv:false, label:'Speculative Pulse (ARKK)',     lens:'breadth',theme:true, themeDesc:'Green → add NASA, ARKG, space/genomics · Red → cut speculative sleeve first'},
-  {key:'QTUM/SMH',num:'QTUM',den:'SMH', master:false, inv:false, label:'Quantum Heat vs Semis',        lens:'equity', theme:true, themeDesc:'Green → quantum thematic money flowing in · Red → risk staying in core semis, skip QTUM'},
-  // ---- New trending theme signals ----
-  {key:'SOXX/SMH',num:'SOXX',den:'SMH', master:false, inv:false, label:'Semis Breadth (SOXX vs SMH)',   lens:'equity', theme:true, themeDesc:'Green → semis rally broadening beyond NVDA/TSM concentration · Red → only mega-cap semis working, stay in SMH'},
-  {key:'XBI/SPY', num:'XBI', den:'SPY', master:false, inv:false, label:'Biotech On/Off (GLP-1 · Gene Therapy)',lens:'equity',theme:true, themeDesc:'Green → add XBI, IBB, ARKG · GLP-1 + gene editing catching bids · Red → cut speculative biotech, keep large pharma only'},
-  {key:'INDA/SPY',num:'INDA',den:'SPY', master:false, inv:false, label:'India Rotation',                lens:'breadth',theme:true, themeDesc:'Green → add INDA — India growth + manufacturing shift active · Red → capital returning to US; avoid EM'},
-  {key:'PAVE/SPY',num:'PAVE',den:'SPY', master:false, inv:false, label:'AI Infrastructure / Grid',      lens:'equity', theme:true, themeDesc:'Green → AI power + data center buildout cycle active; add PAVE, utilities · Red → capex cycle cooling'},
-  {key:'MAGS/SPY',num:'MAGS',den:'SPY', master:false, inv:false, label:'Mag-7 Concentration',           lens:'equity', theme:true, themeDesc:'Green → Magnificent 7 leading; concentrated AI bet is working · Red → broadening out of mega-cap; go equal-weight (RSP)'},
+  {key:'SMH/SPY', num:'SMH', den:'SPY', master:false, inv:false, w:1,   label:'Tech Themes On/Off (Semis)',   lens:'equity', theme:true, themeDesc:'Green → add AIQ, QTUM, BOTZ, CHAT · Red → cut tech themes first'},
+  {key:'ITA/SPY', num:'ITA', den:'SPY', master:false, inv:false, w:1,   label:'Defense Bid (ITA vs Market)',  lens:'equity', theme:true, themeDesc:'Green → overweight ITA, XAR, SHLD · Can stay green even in risk-off'},
+  {key:'ARKK/SPY',num:'ARKK',den:'SPY', master:false, inv:false, w:1,   label:'Speculative Pulse (ARKK)',     lens:'breadth',theme:true, themeDesc:'Green → add NASA, ARKG, space/genomics · Red → cut speculative sleeve first'},
+  {key:'QTUM/SMH',num:'QTUM',den:'SMH', master:false, inv:false, w:0.5, label:'Quantum Heat vs Semis',        lens:'equity', theme:true, themeDesc:'Green → quantum thematic money flowing in · Red → risk staying in core semis, skip QTUM'},
+  {key:'SOXX/SMH',num:'SOXX',den:'SMH', master:false, inv:false, w:0.5, label:'Semis Breadth (SOXX vs SMH)',  lens:'equity', theme:true, themeDesc:'Green → semis rally broadening beyond NVDA/TSM · Red → only mega-cap semis working, stay in SMH'},
+  {key:'XBI/SPY', num:'XBI', den:'SPY', master:false, inv:false, w:1,   label:'Biotech On/Off (GLP-1 · Gene Therapy)',lens:'equity',theme:true, themeDesc:'Green → add XBI, IBB, ARKG · Red → cut speculative biotech'},
+  {key:'INDA/SPY',num:'INDA',den:'SPY', master:false, inv:false, w:0.5, label:'India Rotation',               lens:'breadth',theme:true, themeDesc:'Green → add INDA · Red → capital returning to US; avoid EM'},
+  {key:'PAVE/SPY',num:'PAVE',den:'SPY', master:false, inv:false, w:1,   label:'AI Infrastructure / Grid',     lens:'equity', theme:true, themeDesc:'Green → AI power + data center buildout active · Red → capex cycle cooling'},
+  {key:'MAGS/SPY',num:'MAGS',den:'SPY', master:false, inv:false, w:1,   label:'Mag-7 Concentration',          lens:'equity', theme:true, themeDesc:'Green → Magnificent 7 leading; concentrated AI bet working · Red → broadening out, go equal-weight (RSP)'},
 ];
 const ALL_R=[...CORE_R,...THEME_R];
 const LENS_C={equity:'var(--amber)',credit:'var(--green)',macro:'var(--cyan)',breadth:'var(--violet)'};
@@ -1523,18 +1527,65 @@ async function loadBestPerformers(){
 function renderBanner(data){
   const valid=data.filter(r=>!r.error);
   if(!valid.length){document.getElementById('liveRegimeBanner').innerHTML='<div class="live-error-msg">Could not load live data.</div>';return;}
-  let score=0,max=0,bullN=0,strongN=0;
-  valid.forEach(r=>{const w=r.master?2:1;if(r.cl.bullish){score+=w;bullN++;if(r.cl.sig==='strong-bull')strongN++;}else score-=w;max+=w;});
+
+  // ── Weighted scoring: strong-bull=+2w, bull=+1w, bear=-1w, strong-bear=-2w ──
+  // Each ratio carries a weight (w) reflecting its macro importance.
+  // Masters=3, carry risk=2.5, credit/breadth=2, directional=1.5, rotational=1, ambiguous=0.5
+  let score=0,max=0,bullN=0,strongBullN=0,strongBearN=0;
+  valid.forEach(r=>{
+    const w=r.w||1;
+    const mult=r.cl.sig==='strong-bull'||r.cl.sig==='strong-bear'?2:1;
+    const pts=mult*w;
+    max+=2*w; // max possible is always 2×w (strong-bull)
+    if(r.cl.bullish){score+=pts;bullN++;if(r.cl.sig==='strong-bull')strongBullN++;}
+    else{score-=pts;if(r.cl.sig==='strong-bear')strongBearN++;}
+  });
+
   const masters=valid.filter(r=>r.master),mBull=masters.filter(r=>r.cl.bullish).length;
   const pctBar=(score+max)/(2*max)*100;
-  const smhBull=data.find(r=>r.key==='SMH/SPY'&&r.theme)?.cl?.bullish;
-  const itaBull=data.find(r=>r.key==='ITA/SPY')?.cl?.bullish;
-  const arkkBull=data.find(r=>r.key==='ARKK/SPY')?.cl?.bullish;
+  const scorePct=Math.round(score/max*100);
+
+  // ── Key signals for nuanced advice ────────────────────────────────────────
+  const get=(key,theme)=>data.find(r=>r.key===key&&(theme===undefined||r.theme===theme));
+  const smhBull   =get('SMH/SPY',true)?.cl?.bullish;
+  const itaBull   =get('ITA/SPY')?.cl?.bullish;
+  const arkkBull  =get('ARKK/SPY')?.cl?.bullish;
+  const ewjSig    =get('EWJ/SPY')?.cl?.sig;          // yen carry risk
+  const iwmSig    =get('IWM/SPY')?.cl?.sig;           // small cap / economic breadth
+  const ibitBull  =get('IBIT/GLD')?.cl?.bullish;     // speculative appetite
+  const kreBull   =get('KRE/SPY')?.cl?.bullish;      // credit health
+  const skyBull   =get('SKYY/SPY')?.cl?.bullish;     // AI monetisation
+  const carryWarn =ewjSig==='strong-bear'||ewjSig==='bear';
+  const creditOk  =kreBull;
+
   let call,cls,rbCol,advice;
-  if(score>=max*0.35){call='RISK-ON ▲';cls='bull';rbCol='#3fd17e';advice=`<b>Go long cyclicals + themes:</b> XLK, SMH, IWM, XLY${smhBull?' + AIQ, QTUM, BOTZ':''}.${itaBull?' ITA/defense green.':''}${arkkBull?' Speculative sleeve green.':''} <b>${mBull}/4 masters bullish.</b>`;}
-  else if(score<=-max*0.35){call='RISK-OFF ▼';cls='bear';rbCol='#ff5c61';advice=`<b>Defensives only:</b> XLP, XLU, XLV, TLT, GLD, cash. <b>Cut ALL themes immediately.${itaBull?' Exception: ITA defense may hold on geopolitical bid.':''}</b> <b>${4-mBull}/4 masters bearish.</b>`;}
-  else{call='MIXED — WATCH';cls='mix';rbCol='#f5a623';advice=`<b>Hold leaders, tighten stops.</b> No new beta or themes until ≥2 masters agree. ${smhBull?'SMH green — tech themes on watchlist.':'SMH red — avoid all tech themes.'} <b>${mBull}/4 masters bullish.</b>`;}
-  const ss=(score>=0?'+':'')+score;
+
+  if(scorePct>=30){
+    call='RISK-ON ▲';cls='bull';rbCol='#3fd17e';
+    advice=`<b>Go long cyclicals + quality growth:</b> XLK, SMH, IWM, XLY${smhBull?' + AIQ, QTUM, BOTZ':''}.${itaBull?' ITA/defense green.':''}${arkkBull?' Speculative sleeve open.':''} <b>${mBull}/4 masters bullish.</b>${carryWarn?' <span style="color:var(--amber)">⚠ Watch EWJ/SPY — yen carry risk remains.</span>':''}`;
+  } else if(scorePct<=-30){
+    call='RISK-OFF ▼';cls='bear';rbCol='#ff5c61';
+    advice=`<b>Defensives only:</b> XLP, XLU, XLV, TLT, GLD, cash. <b>Cut ALL themes immediately.</b>${itaBull?' Exception: ITA defense may hold on geopolitical bid.':''} <b>${4-mBull}/4 masters bearish.</b>${carryWarn?' <span style="color:var(--red)">🔴 EWJ/SPY bear — yen carry unwind risk is high. Reduce ALL beta now.</span>':''}`;
+  } else {
+    call='MIXED — WATCH';cls='mix';rbCol='#f5a623';
+    // Build nuanced mixed advice based on what's actually working
+    const leaders=[];const avoid=[];
+    if(smhBull)leaders.push('SMH (semis)');
+    if(skyBull)leaders.push('SKYY (AI cloud)');
+    if(itaBull)leaders.push('ITA (defense)');
+    if(!smhBull)avoid.push('tech themes (AIQ/QTUM/BOTZ)');
+    if(iwmSig==='strong-bear'||iwmSig==='bear')avoid.push('IWM/small caps');
+    if(!ibitBull)avoid.push('crypto/IBIT');
+    if(!arkkBull)avoid.push('ARKK/speculative');
+    const leadStr=leaders.length?` Leaders: <b>${leaders.join(', ')}</b>.`:'';
+    const avoidStr=avoid.length?` Avoid: ${avoid.join(', ')}.`:'';
+    const carryStr=carryWarn?` <span style="color:var(--amber)">⚠ EWJ/SPY bear — yen carry risk. Tail risk active.</span>`:'';
+    const creditStr=creditOk?' KRE healthy — no credit crisis yet.':' KRE weak — watch credit.';
+    advice=`<b>Hold leaders, tighten stops.</b> No new broad beta until ≥2 masters agree.${leadStr}${avoidStr}${creditStr}${carryStr} <b>${mBull}/4 masters bullish.</b>`;
+  }
+
+  const ss=(score>=0?'+':'')+Math.round(score);
+  const maxR=Math.round(max);
   const lc=cls==='bull'?'green':cls==='bear'?'red':'amber';
   document.getElementById('bigLight').className=`rl-light ${lc}`;
   document.getElementById('bigCall').textContent=call.replace(' ▲','').replace(' ▼','');
@@ -1542,8 +1593,8 @@ function renderBanner(data){
   document.getElementById('bigScore').textContent=`${bullN}/${valid.length} bullish`;
   document.getElementById('rbCallText').textContent=call;document.getElementById('rbCallText').style.color=rbCol;
   document.getElementById('rbAdvice').innerHTML=advice;
-  document.getElementById('rbStats').innerHTML=`<span class="rb-stat"><b>${bullN}</b>/${valid.length} bullish</span><span class="rb-stat"><b>${mBull}</b>/4 masters bullish</span><span class="rb-stat"><b>${strongN}</b> strong-bull</span><span class="rb-stat">Score <b>${ss}</b>/${max}</span>`;
-  document.getElementById('rbScoreBig').innerHTML=`${ss}<span class="rb-score-denom">/${max}</span>`;
+  document.getElementById('rbStats').innerHTML=`<span class="rb-stat"><b>${bullN}</b>/${valid.length} bullish</span><span class="rb-stat"><b>${mBull}</b>/4 masters bullish</span><span class="rb-stat"><b>${strongBullN}</b> strong-bull · <b>${strongBearN}</b> strong-bear</span><span class="rb-stat">Wtd Score <b>${ss}</b>/${maxR}</span>`;
+  document.getElementById('rbScoreBig').innerHTML=`${ss}<span class="rb-score-denom">/${maxR}</span>`;
   document.getElementById('rbScoreBig').style.color=rbCol;
   document.getElementById('rbMeterFill').style.cssText=`width:${pctBar.toFixed(1)}%;background:${rbCol}`;
   document.getElementById('rbTime').textContent='Updated '+new Date().toLocaleTimeString();
