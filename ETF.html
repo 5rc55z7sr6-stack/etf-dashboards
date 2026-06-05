@@ -281,13 +281,16 @@
   .h-row{padding:7px 10px;border-bottom:1px solid var(--line);transition:background .12s}
   .h-row:last-child{border-bottom:none}
   .h-row:hover{background:rgba(232,193,74,.035)}
-  .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:22px;flex-shrink:0}
-  .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;width:50px;flex-shrink:0}
-  .h-co-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;padding-right:8px}
-  .h-co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--text)}
-  .h-wt-bar-wrap{width:100%;height:2px;background:var(--line);border-radius:1px;overflow:hidden}
-  .h-wt-bar-fill{height:100%;background:var(--gold);opacity:.6;border-radius:1px}
-  .h-today{flex-shrink:0;text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:90px}
+  .h-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:18px;flex-shrink:0}
+  .h-tk{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:12px;width:46px;flex-shrink:0}
+  .h-co-wrap{flex:1;min-width:0;padding-right:6px}
+  .h-co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--text);display:block}
+  /* inline wt cell: mini-bar + number side-by-side */
+  .h-wt-cell{flex-shrink:0;display:flex;align-items:center;gap:4px;width:76px;justify-content:flex-end}
+  .h-wt-bar-outer{width:32px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;flex-shrink:0}
+  .h-wt-bar-fill{height:100%;background:var(--gold);opacity:.65;border-radius:2px}
+  .h-wt-num{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:32px;text-align:right;flex-shrink:0}
+  .h-today{flex-shrink:0;text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:80px}
   .hac-note{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:10px;line-height:1.6;border-left:2px solid var(--line-bright);padding-left:10px}
   .holdings-search-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
   .h-search{font-family:var(--mono);font-size:12px;background:var(--bg-card);border:1px solid var(--line-bright);color:var(--text);padding:7px 12px;border-radius:3px;width:220px;outline:none}
@@ -453,9 +456,12 @@
     .ho-ticker{font-size:20px !important}
     .ho-etf-price{font-size:11px !important}
     /* Holdings table rows — tighter on mobile */
-    .h-rank{width:18px;font-size:9px}
-    .h-tk{width:42px;font-size:11px}
-    .h-today{min-width:72px;font-size:10px}
+    .h-rank{width:14px;font-size:9px}
+    .h-tk{width:38px;font-size:11px}
+    .h-wt-cell{width:64px}
+    .h-wt-bar-outer{width:24px}
+    .h-wt-num{width:28px;font-size:9px}
+    .h-today{min-width:68px;font-size:10px}
     .h-list-hdr{font-size:8px !important;padding:5px 8px !important}
     .h-row{padding:6px 8px}
     /* Fast movers + trade idea */
@@ -838,7 +844,7 @@
     </div>
     <div class="se-divider"></div>
     <div class="se-body ho-scroll-body" style="padding:16px 24px">
-      <div class="ho-table-wrap" style="overflow-x:auto"></div>
+      <div class="ho-table-wrap"></div>
       <div class="ho-note hac-note" style="margin-top:12px;display:none"></div>
       <div class="ho-movers" id="hoMovers" style="display:none">
         <div class="ho-movers-label">⚡ Top 5 Fast Movers <span style="color:var(--text-faint);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px">· live % change today</span></div>
@@ -2091,11 +2097,11 @@ function openHoldingsPopup(ticker){
     return `<div class="h-row">
       <span class="h-rank">${i+1}</span>
       <span class="h-tk">${r[0]}</span>
-      <span class="h-co-wrap">
-        <span class="h-co" title="${r[1]}">${r[1]}</span>
-        <span class="h-wt-bar-wrap"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
+      <span class="h-co-wrap"><span class="h-co" title="${r[1]}">${r[1]}</span></span>
+      <span class="h-wt-cell">
+        <span class="h-wt-bar-outer"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
+        <span class="h-wt-num">${wtTxt}</span>
       </span>
-      <span style="flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--text-faint);width:38px;text-align:right;padding-right:6px">${wtTxt}</span>
       <span class="h-today">${todayHtml}</span>
     </div>`;
   }).join('');
@@ -2104,7 +2110,7 @@ function openHoldingsPopup(ticker){
   overlay.querySelector('.ho-name').textContent=e.n;
   overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
   overlay.querySelector('.ho-table-wrap').innerHTML=`<div class="h-list">
-    <div class="h-list-hdr"><span style="width:22px;flex-shrink:0">#</span><span style="width:50px;flex-shrink:0">Ticker</span><span style="flex:1">Company · wt ▬</span><span style="flex-shrink:0;width:38px;text-align:right;padding-right:6px">Wt%</span><span style="min-width:90px;text-align:right">Today</span></div>
+    <div class="h-list-hdr"><span style="width:18px;flex-shrink:0">#</span><span style="width:46px;flex-shrink:0">Ticker</span><span style="flex:1">Company</span><span style="flex-shrink:0;width:76px;text-align:right">Wt %</span><span style="min-width:80px;text-align:right">Today</span></div>
     ${rows}</div>`;
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
