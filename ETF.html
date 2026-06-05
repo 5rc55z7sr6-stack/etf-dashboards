@@ -1501,7 +1501,14 @@ function renderBanner(data){
   document.getElementById('rbTime').textContent='Updated '+new Date().toLocaleTimeString();
   const b=document.querySelector('.regime-banner');if(b){b.className=`regime-banner ${cls}`;b.style.setProperty('--rb-col',rbCol);}
   document.getElementById('liveBreakdown').style.display='block';
-  document.getElementById('bdGrid').innerHTML=valid.map(r=>{const c=r.cl.bullish?'green':'red';const col=r.cl.bullish?'#3fd17e':'#ff5c61';const pct=((r.curr-r.s20)/r.s20*100);return `<div class="bd-row" data-ratio="${r.key}" data-sig="${r.cl.sig}" style="cursor:pointer" title="Click to understand this signal"><div class="bd-light ${r.theme?'gold':c}"></div><div class="bd-pair" style="color:${col}">${r.key}</div><div class="bd-label">${r.label}</div><div class="bd-pct" style="color:${col}">${(pct>=0?'+':'')+pct.toFixed(2)}%</div></div>`;}).join('');
+  const bdOrder=['strong-bull','bull','bear','strong-bear'];
+  const bdSorted=[...valid].sort((a,b)=>{
+    const td=bdOrder.indexOf(a.cl.sig)-bdOrder.indexOf(b.cl.sig);
+    if(td!==0)return td;
+    const pa=((a.curr-a.s20)/a.s20*100),pb=((b.curr-b.s20)/b.s20*100);
+    return a.cl.bullish?pb-pa:pa-pb; // bull: highest pct first; bear: lowest (most negative) first
+  });
+  document.getElementById('bdGrid').innerHTML=bdSorted.map(r=>{const c=r.cl.bullish?'green':'red';const col=r.cl.bullish?'#3fd17e':'#ff5c61';const pct=((r.curr-r.s20)/r.s20*100);return `<div class="bd-row" data-ratio="${r.key}" data-sig="${r.cl.sig}" style="cursor:pointer" title="Click to understand this signal"><div class="bd-light ${r.theme?'gold':c}"></div><div class="bd-pair" style="color:${col}">${r.key}</div><div class="bd-label">${r.label}</div><div class="bd-pct" style="color:${col}">${(pct>=0?'+':'')+pct.toFixed(2)}%</div></div>`;}).join('');
 }
 
 let loading=false;
