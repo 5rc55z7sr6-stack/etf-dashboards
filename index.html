@@ -137,30 +137,39 @@
   .signal-light.red{background:#ff5c61;box-shadow:0 0 10px rgba(255,92,97,.6),0 0 20px rgba(255,92,97,.3)}
   .signal-light.amber{background:#f5a623;box-shadow:0 0 10px rgba(245,166,35,.6)}
   .signal-light.dim{background:var(--line-bright);box-shadow:none}
-  .regime-light-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 22px;background:var(--bg-card);border:1px solid var(--line);border-radius:12px;position:relative;overflow:hidden;min-width:150px}
-  .regime-light-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.08;border-radius:12px;background:radial-gradient(circle at 50% 0%,var(--rl-color,#3fd17e),transparent 65%)}
-  .rl-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase}
-  .rl-light{width:52px;height:52px;border-radius:50%;transition:background .5s,box-shadow .5s}
-  .rl-light.green{background:#3fd17e;box-shadow:0 0 22px rgba(63,209,126,.7),0 0 45px rgba(63,209,126,.35)}
-  .rl-light.red{background:#ff5c61;box-shadow:0 0 22px rgba(255,92,97,.7),0 0 45px rgba(255,92,97,.35)}
-  .rl-light.amber{background:#f5a623;box-shadow:0 0 22px rgba(245,166,35,.7),0 0 45px rgba(245,166,35,.35)}
+  /* ── Regime Banner — 3-column: Signal | Opportunities | Risks ── */
+  .regime-banner{display:grid;grid-template-columns:160px 1fr 1fr;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);overflow:hidden;transition:border-color .4s;margin-bottom:20px}
+  .regime-banner.bull{border-color:rgba(63,209,126,.35)}.regime-banner.bear{border-color:rgba(255,92,97,.35)}.regime-banner.mix{border-color:rgba(245,166,35,.3)}
+  /* Signal column */
+  .rb-sig-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:18px 14px;background:var(--bg-elev);border-right:1px solid var(--line);text-align:center;position:relative;overflow:hidden}
+  .rb-sig-col::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.1;background:radial-gradient(circle at 50% 0%,var(--rb-col,#f5a623),transparent 65%)}
+  .rl-light{width:46px;height:46px;border-radius:50%;transition:background .5s,box-shadow .5s;flex-shrink:0}
+  .rl-light.green{background:#3fd17e;box-shadow:0 0 20px rgba(63,209,126,.7),0 0 40px rgba(63,209,126,.3)}
+  .rl-light.red{background:#ff5c61;box-shadow:0 0 20px rgba(255,92,97,.7),0 0 40px rgba(255,92,97,.3)}
+  .rl-light.amber{background:#f5a623;box-shadow:0 0 20px rgba(245,166,35,.7),0 0 40px rgba(245,166,35,.3)}
   .rl-light.dim{background:var(--line-bright);box-shadow:none}
-  .rl-call{font-size:14px;font-weight:800;text-align:center;transition:color .4s}.rl-score{font-family:var(--mono);font-size:11px;color:var(--text-faint);text-align:center}
-  .regime-banner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);padding:20px 24px;margin-bottom:20px;position:relative;overflow:hidden;transition:border-color .4s}
-  .regime-banner.bull{border-color:rgba(63,209,126,.3)}.regime-banner.bear{border-color:rgba(255,92,97,.3)}.regime-banner.mix{border-color:rgba(245,166,35,.25)}
-  .regime-banner::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.055;border-radius:10px;background:radial-gradient(ellipse at 8% 50%,var(--rb-col,#3fd17e),transparent 50%)}
-  .rb-kicker{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px}
-  .rb-call{font-size:clamp(20px,3vw,30px);font-weight:800;letter-spacing:-.8px;line-height:1;color:var(--rb-col,#3fd17e)}
-  .rb-advice{font-size:13px;color:var(--text-dim);margin-top:7px;max-width:54ch;line-height:1.55}.rb-advice b{color:var(--text)}
-  .rb-meter-track{height:10px;background:var(--line);border-radius:5px;overflow:hidden;width:100%;min-width:180px}
-  .rb-meter-fill{height:100%;border-radius:5px;transition:width .8s cubic-bezier(.4,0,.2,1)}
-  .rb-meter-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.5px;color:var(--text-faint);margin-top:5px}
-  .rb-stats{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
-  .rb-stat{font-family:var(--mono);font-size:11px;color:var(--text-dim)}.rb-stat b{color:var(--text)}
-  .rb-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-  .rb-score-big{font-family:var(--mono);font-size:34px;font-weight:800;line-height:1;color:var(--rb-col,#3fd17e)}
-  .rb-score-denom{font-size:15px;opacity:.5}.rb-score-lbl{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint)}
-  .rb-time{font-family:var(--mono);font-size:10px;color:var(--text-faint)}
+  .rb-verdict{font-size:12px;font-weight:800;letter-spacing:-.2px;line-height:1.2;margin-top:2px}
+  .rb-score-big{font-family:var(--mono);font-size:26px;font-weight:800;line-height:1}
+  .rb-score-denom{font-size:12px;opacity:.45}
+  .rb-score-lbl{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin-top:1px}
+  .rb-mini-stats{font-family:var(--mono);font-size:9px;color:var(--text-faint);line-height:1.6}
+  .rb-meter-track{height:4px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;width:100%}
+  .rb-meter-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+  .rb-meter-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;letter-spacing:.5px;color:var(--text-faint);margin-top:3px}
+  .rb-time{font-family:var(--mono);font-size:8px;color:var(--line-bright);margin-top:4px}
+  /* Opportunity & Risk columns */
+  .rb-opp-col{padding:16px 16px;border-right:1px solid var(--line)}
+  .rb-risk-col{padding:16px 16px}
+  .rb-col-hdr{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:5px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .rb-col-hdr.opp{color:#3fd17e}.rb-col-hdr.risk{color:#ff5c61}.rb-col-hdr.watch{color:var(--amber)}
+  .rb-items{display:flex;flex-direction:column;gap:6px}
+  .rb-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.4}
+  .rb-item-icon{font-size:10px;flex-shrink:0;margin-top:1px;width:14px;text-align:center}
+  .rb-item-body{flex:1;min-width:0}
+  .rb-item-tk{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--text)}
+  .rb-item-desc{color:var(--text-dim);font-size:11px;line-height:1.35}
+  .rb-tail-hdr{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);font-weight:700;margin:10px 0 6px;display:flex;align-items:center;gap:5px}
+  .rb-no-data{font-family:var(--mono);font-size:11px;color:var(--text-faint);font-style:italic}
   .master-live-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
   .theme-live-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:20px}
   .row-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:8px;padding-left:2px}
@@ -298,7 +307,7 @@
   .h-search:focus{border-color:var(--gold)}.h-search::placeholder{color:var(--text-faint)}
   .h-filter-chips{display:flex;gap:6px;flex-wrap:wrap}
 
-  @media(max-width:980px){.masters,.master-live-row{grid-template-columns:repeat(2,1fr)}.theme-live-row{grid-template-columns:repeat(2,1fr)}.regimes,.play{grid-template-columns:1fr}.caveats{grid-template-columns:1fr}.regime-banner{grid-template-columns:1fr}.rb-right{align-items:flex-start}}
+  @media(max-width:980px){.masters,.master-live-row{grid-template-columns:repeat(2,1fr)}.theme-live-row{grid-template-columns:repeat(2,1fr)}.regimes,.play{grid-template-columns:1fr}.caveats{grid-template-columns:1fr}.regime-banner{grid-template-columns:1fr}.rb-opp-col{border-right:none;border-bottom:1px solid var(--line)}.rb-sig-col{flex-direction:row;justify-content:flex-start;gap:14px;border-right:none;border-bottom:1px solid var(--line);padding:14px 16px}}
   @media(max-width:860px){.hero-inner{grid-template-columns:1fr}}
   @media(max-width:560px){.wrap{padding:0 14px}.head-inner{padding:12px 14px}.masters,.master-live-row,.pulse-grid{grid-template-columns:1fr}.signals{grid-template-columns:1fr}}
 
@@ -347,19 +356,13 @@
     .filters::-webkit-scrollbar{display:none}
     .chip{flex-shrink:0;font-size:10px;padding:5px 10px}
 
-    /* ── Regime banner — full-width stacked layout ── */
-    .regime-banner{grid-template-columns:1fr;gap:10px;padding:14px 14px}
-    .regime-light-wrap{flex-direction:row;padding:10px 12px;gap:10px;min-width:0;width:100%}
-    .rl-light{width:30px;height:30px;flex-shrink:0}
-    .rl-call{font-size:13px;text-align:left}
-    .rl-score{text-align:left}
-    .rb-kicker{font-size:8.5px;letter-spacing:.5px;white-space:normal;line-height:1.4} /* allow wrap */
-    .rb-call{font-size:19px;letter-spacing:-.3px}
-    .rb-advice{font-size:12px;max-width:100%;line-height:1.45}
-    .rb-score-big{font-size:24px}
-    .rb-right{align-items:flex-start;width:100%}
-    .rb-meter-track{min-width:0;width:100%}
-    .rb-stats{gap:6px;flex-wrap:wrap}.rb-stat{font-size:9.5px}
+    /* ── Regime banner — mobile stacked ── */
+    .regime-banner{grid-template-columns:1fr}
+    .rb-sig-col{flex-direction:row;justify-content:flex-start;gap:14px;border-right:none;border-bottom:1px solid var(--line);padding:12px 14px}
+    .rl-light{width:32px;height:32px;flex-shrink:0}
+    .rb-score-big{font-size:20px}
+    .rb-opp-col{border-right:none;border-bottom:1px solid var(--line)}
+    .rb-item-desc{font-size:10.5px}
 
     /* ── Core master + theme rows — 2 cols ── */
     .master-live-row{grid-template-columns:1fr 1fr;gap:7px}
@@ -639,27 +642,30 @@
 
     <div id="liveRegimeBanner">
       <div class="regime-banner mix" style="--rb-col:var(--gold)">
-        <div style="display:flex;align-items:center;gap:16px">
-          <div class="regime-light-wrap" style="--rl-color:var(--gold)">
-            <div class="rl-label">Signal</div>
-            <div class="rl-light dim" id="bigLight"></div>
-            <div class="rl-call" id="bigCall" style="color:var(--text-faint)">Loading</div>
-            <div class="rl-score" id="bigScore">—</div>
-          </div>
-        </div>
-        <div>
-          <div class="rb-kicker">Live Regime Score — 15 Core Ratios + 3 Theme Signals · Masters ×2</div>
-          <div class="rb-call" id="rbCallText" style="color:var(--gold)">Fetching live data…</div>
-          <div class="rb-advice" id="rbAdvice">Connecting to market data feeds.</div>
-          <div class="rb-stats" id="rbStats"></div>
-        </div>
-        <div class="rb-right">
-          <div><div class="rb-score-big" id="rbScoreBig" style="color:var(--gold)">—</div><div class="rb-score-lbl">REGIME SCORE</div></div>
+        <!-- Col 1: Signal light + score -->
+        <div class="rb-sig-col">
+          <div class="rl-light dim" id="bigLight"></div>
+          <div class="rb-verdict" id="bigCall" style="color:var(--text-faint)">Loading…</div>
           <div>
+            <div class="rb-score-big" id="rbScoreBig" style="color:var(--gold)">—</div>
+            <div class="rb-score-lbl">Wtd Score</div>
+          </div>
+          <div class="rb-mini-stats" id="bigScore">—</div>
+          <div style="width:100%;margin-top:2px">
             <div class="rb-meter-track"><div class="rb-meter-fill" id="rbMeterFill" style="width:50%;background:var(--gold)"></div></div>
-            <div class="rb-meter-labels"><span>BEAR</span><span>NEUTRAL</span><span>BULL</span></div>
+            <div class="rb-meter-labels"><span>BEAR</span><span>BULL</span></div>
           </div>
           <div class="rb-time" id="rbTime">—</div>
+        </div>
+        <!-- Col 2: Opportunities -->
+        <div class="rb-opp-col">
+          <div class="rb-col-hdr opp">▲ Opportunities</div>
+          <div class="rb-items" id="rbOpps"><span class="rb-no-data">Loading…</span></div>
+        </div>
+        <!-- Col 3: Risks & Watch -->
+        <div class="rb-risk-col">
+          <div class="rb-col-hdr risk">▼ Risks &amp; Watch</div>
+          <div class="rb-items" id="rbRisks"><span class="rb-no-data">Loading…</span></div>
         </div>
       </div>
     </div>
@@ -1612,17 +1618,68 @@ function renderBanner(data){
   const ss=(score>=0?'+':'')+Math.round(score);
   const maxR=Math.round(max);
   const lc=cls==='bull'?'green':cls==='bear'?'red':'amber';
+  // ── Build structured Opportunities & Risks lists ─────────────────────────
+  function oppItem(icon, tk, desc){ return `<div class="rb-item"><span class="rb-item-icon">${icon}</span><div class="rb-item-body"><span class="rb-item-tk">${tk}</span> <span class="rb-item-desc">${desc}</span></div></div>`; }
+  function riskItem(icon, tk, desc){ return oppItem(icon, tk, desc); }
+
+  const opps=[], risks=[], tails=[];
+
+  // ── Opportunities (what's working) ──
+  if(smhBull)          opps.push(oppItem('🟢','SMH','Semis leading — AI capex cycle intact'));
+  if(skyBull)          opps.push(oppItem('🟢','SKYY','Cloud/SaaS — AI monetisation active'));
+  if(itaBull)          opps.push(oppItem('🟢','ITA','Defense bid — geopolitical premium active'));
+  const iytBull=get('IYT/XLU')?.cl?.bullish;
+  if(iytBull)          opps.push(oppItem('🟢','IYT/XLU','Transports leading utilities — Dow Theory ✓'));
+  const cperBull=get('CPER/GLD')?.cl?.bullish;
+  if(cperBull)         opps.push(oppItem('🟢','CPER/GLD','Copper > Gold — real industrial demand'));
+  if(creditOk)         opps.push(oppItem('🟢','KRE','Regional banks healthy — no credit crisis'));
+  const rspBull=get('RSP/SPY')?.cl?.bullish;
+  if(rspBull)          opps.push(oppItem('🟢','RSP/SPY','Equal-weight leading — broad participation'));
+  const paveBull=get('PAVE/SPY')?.cl?.bullish;
+  if(paveBull)         opps.push(oppItem('🟢','PAVE','AI power infrastructure cycle active'));
+  if(arkkBull)         opps.push(oppItem('🟢','ARKK','Speculative pulse — frontier risk-on'));
+  if(!opps.length)     opps.push(oppItem('⬜','—','No clear opportunities — stay in cash/defensives'));
+
+  // ── Risks (what to avoid) ──
+  const qqqBull=get('QQQ/SPY')?.cl?.bullish;
+  if(!smhBull)         risks.push(riskItem('🔴','SMH','Semis red — cut AIQ, QTUM, BOTZ, CHAT'));
+  if(!qqqBull)         risks.push(riskItem('🔴','QQQ/SPY','Tech leadership fading — reduce Nasdaq beta'));
+  if(iwmSig==='strong-bear'||iwmSig==='bear') risks.push(riskItem('🔴','IWM','Small caps weak — growth/credit stress'));
+  if(!ibitBull)        risks.push(riskItem('🔴','IBIT','Crypto risk-off — speculative appetite gone'));
+  if(!arkkBull)        risks.push(riskItem('🔴','ARKK','Innovation theme bleeding — cut frontier names'));
+  const xbiBull=get('XBI/SPY')?.cl?.bullish;
+  if(!xbiBull)         risks.push(riskItem('🔴','XBI','Biotech off — avoid speculative biotech'));
+  const sphbBull=get('SPHB/SPLV')?.cl?.bullish;
+  if(!sphbBull)        risks.push(riskItem('🔴','SPHB/SPLV','High-beta underperforming — de-risk high-beta names'));
+  if(mBull===0)        risks.push(riskItem('🔴','Masters','All 4 masters bearish — no new positions'));
+
+  // ── Tail risks (warning — amber) ──
+  if(carryWarn)        tails.push(riskItem('⚠️','EWJ/SPY','Yen carry unwind risk — reduce ALL beta if accelerates'));
+  const ewjStr = get('EWJ/SPY')?.cl?.sig==='strong-bear';
+  const hygtBull=get('HYG/TLT')?.cl?.bullish;
+  if(!hygtBull&&!creditOk) tails.push(riskItem('⚠️','Credit','HYG/TLT + KRE both weak — watch for spread widening'));
+  const indaBull=get('INDA/SPY')?.cl?.bullish;
+  if(!indaBull)        tails.push(riskItem('⚠️','EM/INDA','Capital returning to US — avoid EM exposure'));
+
+  // Build HTML
+  const oppHtml = opps.slice(0,5).join('');
+  let riskHtml = risks.slice(0,4).join('');
+  if(tails.length){
+    riskHtml += `<div class="rb-tail-hdr">⚠ Tail Risks</div>` + tails.slice(0,2).join('');
+  }
+  if(!risks.length&&!tails.length) riskHtml='<span class="rb-no-data">No major risks flagged</span>';
+
+  // ── Update DOM ────────────────────────────────────────────────────────────
   document.getElementById('bigLight').className=`rl-light ${lc}`;
   document.getElementById('bigCall').textContent=call.replace(' ▲','').replace(' ▼','');
   document.getElementById('bigCall').style.color=rbCol;
-  document.getElementById('bigScore').textContent=`${bullN}/${valid.length} bullish`;
-  document.getElementById('rbCallText').textContent=call;document.getElementById('rbCallText').style.color=rbCol;
-  document.getElementById('rbAdvice').innerHTML=advice;
-  document.getElementById('rbStats').innerHTML=`<span class="rb-stat"><b>${bullN}</b>/${valid.length} bullish</span><span class="rb-stat"><b>${mBull}</b>/4 masters bullish</span><span class="rb-stat"><b>${strongBullN}</b> strong-bull · <b>${strongBearN}</b> strong-bear</span><span class="rb-stat">Wtd Score <b>${ss}</b>/${maxR}</span>`;
+  document.getElementById('bigScore').innerHTML=`<span style="color:var(--text)">${mBull}/4</span> masters · <span style="color:var(--text)">${bullN}/${valid.length}</span> bullish`;
   document.getElementById('rbScoreBig').innerHTML=`${ss}<span class="rb-score-denom">/${maxR}</span>`;
   document.getElementById('rbScoreBig').style.color=rbCol;
   document.getElementById('rbMeterFill').style.cssText=`width:${pctBar.toFixed(1)}%;background:${rbCol}`;
   document.getElementById('rbTime').textContent='Updated '+new Date().toLocaleTimeString();
+  document.getElementById('rbOpps').innerHTML=oppHtml;
+  document.getElementById('rbRisks').innerHTML=riskHtml;
   const b=document.querySelector('.regime-banner');if(b){b.className=`regime-banner ${cls}`;b.style.setProperty('--rb-col',rbCol);}
   document.getElementById('liveBreakdown').style.display='block';
   const bdOrder=['strong-bull','bull','bear','strong-bear'];
