@@ -56,13 +56,17 @@ ETF_TICKERS = [
     'SOXX','MAGS','PAVE','XBI','IBB','INDA','COPX','SKYY','FINX','REMX','TUR',
 ]
 
-# ── Leveraged ETFs (trade ideas in popup) ─────────────────────────────────────
+# ── Leveraged ETFs (trade ideas in popup) — BULL + BEAR ───────────────────────
 LEVERAGED_TICKERS = [
+    # Bull leveraged
     'TECL','TQQQ','FAS','DPST','ERX','NRGU','CURE','LABU','DUSL','TPOR',
     'MIDU','TNA','URTY','SPXL','UPRO','UDOW','SOXL','USD','FNGU','DFEN',
-    'WANT','AMZU','INDL','EDC','TMF','UBT','BIB','BITX','BITU',
-    'NAIL','DRN','ROM','RETL','BULZ','HIBL','WEBL',
-    'NUGT','DUST','UCO','GUSH','DRIP','JNUG','JDST',
+    'WANT','INDL','EDC','TMF','UBT','BIB','BITX','BITU',
+    'NAIL','DRN','HIBL','WEBL','UGL','NUGT','KLNE','EURL','EFO','EET',
+    # Bear / inverse leveraged
+    'TECS','SQQQ','FAZ','SKF','ERY','DRIP','LABD','SPXS','SPXU',
+    'TZA','SRTY','TMV','TBT','TBF','GLL','DUST','SOXS','DRV','REK',
+    'EDZ','EEV','HIBS','WEBS','FNGD','SBIT','QID',
 ]
 
 # ── Hardcoded fallback holdings (used when Yahoo Finance returns no data) ──────
@@ -158,7 +162,9 @@ for etf in ETF_TICKERS:
                     if not valid_tk(sym) or sym == etf:
                         continue
                     name = str(row.get('holdingName', sym))
-                    pct  = float(row.get('holdingPercent', 0)) * 100  # Yahoo gives 0-1 fraction
+                    raw_pct = float(row.get('holdingPercent', 0) or 0)
+                    # Yahoo sometimes returns 0-1 fraction, sometimes 0-100 percentage
+                    pct = raw_pct if raw_pct > 1 else raw_pct * 100
                     rows.append({'t': sym, 'n': name, 'w': round(pct, 2)})
                     all_holding_tks.add(sym)
                 if rows:
