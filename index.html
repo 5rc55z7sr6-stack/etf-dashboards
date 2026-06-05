@@ -543,11 +543,11 @@
   .se-dismiss:hover{border-color:var(--gold);color:var(--gold)}
   /* Holdings popup — trade idea section */
   .ho-tradeidea{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-  .ho-lev-sides{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .ho-lev-sides{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;align-items:stretch}
   .ho-lev-side-hdr{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
   .ho-lev-side-hdr.bull{color:#3fd17e}.ho-lev-side-hdr.bear{color:#ff5c61}
   .ho-lev-col{display:flex;flex-direction:column;gap:7px}
-  .ho-lev-card{padding:9px 11px;border-radius:7px}
+  .ho-lev-card{padding:9px 11px;border-radius:7px;height:100%;box-sizing:border-box}
   .ho-lev-card.bull{background:rgba(63,209,126,.06);border:1px solid rgba(63,209,126,.22)}
   .ho-lev-card.bear{background:rgba(255,92,97,.06);border:1px solid rgba(255,92,97,.22)}
   .ho-lev-tk{font-family:var(--mono);font-size:15px;font-weight:800}
@@ -2283,17 +2283,18 @@ function openHoldingsPopup(ticker){
         ${priceHtml}
       </div>`;
     }
-    const bullCards=(levs.bull||[]).map(l=>renderLevCard(l,'bull')).join('');
-    const bearCards=(levs.bear||[]).map(l=>renderLevCard(l,'bear')).join('');
+    // Interleave bull/bear cards directly in the grid so each row auto-equalises height
+    const bulls=levs.bull||[], bears=levs.bear||[];
+    const maxLen=Math.max(bulls.length,bears.length);
+    let rows='';
+    for(let i=0;i<maxLen;i++){
+      rows+=(bulls[i]?renderLevCard(bulls[i],'bull'):'<div></div>');
+      rows+=(bears[i]?renderLevCard(bears[i],'bear'):'<div></div>');
+    }
     tradeBody.innerHTML=`<div class="ho-lev-sides">
-      <div>
-        <div class="ho-lev-side-hdr bull">▲ BULL PLAY</div>
-        <div class="ho-lev-col">${bullCards}</div>
-      </div>
-      <div>
-        <div class="ho-lev-side-hdr bear">▼ BEAR PLAY</div>
-        <div class="ho-lev-col">${bearCards}</div>
-      </div>
+      <div class="ho-lev-side-hdr bull">▲ BULL PLAY</div>
+      <div class="ho-lev-side-hdr bear">▼ BEAR PLAY</div>
+      ${rows}
     </div>
     <div class="ho-lev-warn">⚠ Leveraged ETFs reset daily — short-term trades only. High risk.</div>`;
     tradeWrap.style.display='block';
