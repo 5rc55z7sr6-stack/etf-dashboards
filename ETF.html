@@ -2097,8 +2097,8 @@ function openHoldingsPopup(ticker){
     return `<div class="h-row">
       <span class="h-rank">${i+1}</span>
       <span class="h-tk">${r[0]}</span>
-      <span class="h-wt-bar-outer"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
       <span class="h-co-wrap"><span class="h-co" title="${r[1]}">${r[1]}</span></span>
+      <span class="h-wt-bar-outer"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
       <span class="h-wt-num">${wtTxt}</span>
       <span class="h-today">${todayHtml}</span>
     </div>`;
@@ -2108,7 +2108,7 @@ function openHoldingsPopup(ticker){
   overlay.querySelector('.ho-name').textContent=e.n;
   overlay.querySelector('.ho-cat').textContent=e.cat+' · '+e.group;
   overlay.querySelector('.ho-table-wrap').innerHTML=`<div class="h-list">
-    <div class="h-list-hdr"><span style="width:18px;flex-shrink:0">#</span><span style="width:46px;flex-shrink:0">Ticker</span><span style="width:50px;flex-shrink:0"></span><span style="flex:1">Company</span><span style="width:34px;flex-shrink:0;text-align:right">Wt%</span><span style="min-width:80px;text-align:right">Today</span></div>
+    <div class="h-list-hdr"><span style="width:18px;flex-shrink:0">#</span><span style="width:46px;flex-shrink:0">Ticker</span><span style="flex:1">Company</span><span style="width:80px;flex-shrink:0"></span><span style="width:36px;flex-shrink:0;text-align:right">Wt%</span><span style="min-width:80px;text-align:right">Today</span></div>
     ${rows}</div>`;
   const noteEl=overlay.querySelector('.ho-note');
   noteEl.textContent=e.note||'';
