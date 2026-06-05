@@ -2037,10 +2037,21 @@ function openHoldingsPopup(ticker){
   // Trade Idea — render leveraged ETFs for this theme
   const levs=LEVERAGED_MAP[ticker];
   if(levs&&tradeWrap&&tradeBody){
-    tradeBody.innerHTML=`<div class="ho-lev-cards">${levs.map(l=>`<div class="ho-lev-card">
-      <div><span class="ho-lev-tk">${l.t}</span><span class="ho-lev-badge">${l.lev}</span></div>
-      <div class="ho-lev-name">${l.n}</div>
-    </div>`).join('')}</div>
+    tradeBody.innerHTML=`<div class="ho-lev-cards">${levs.map(l=>{
+      const ltp=window.tickerPrices&&window.tickerPrices[l.t];
+      let priceHtml='';
+      if(ltp){
+        const sign=ltp.c>=0?'+':'';
+        const col=ltp.c>=0?'var(--green)':'var(--red)';
+        const pStr=`$${ltp.p<10?ltp.p.toFixed(3):ltp.p<100?ltp.p.toFixed(2):ltp.p.toFixed(1)}`;
+        priceHtml=`<div style="font-family:var(--mono);font-size:11px;margin-top:5px"><span style="color:var(--text-dim)">${pStr}</span> <span style="color:${col};font-weight:700">${sign}${ltp.c.toFixed(2)}%</span></div>`;
+      }
+      return `<div class="ho-lev-card">
+        <div><span class="ho-lev-tk">${l.t}</span><span class="ho-lev-badge">${l.lev}</span></div>
+        <div class="ho-lev-name">${l.n}</div>
+        ${priceHtml}
+      </div>`;
+    }).join('')}</div>
     <div class="ho-lev-warn">⚠ Leveraged ETFs reset daily and decay over time — short-term trades only. High risk.</div>`;
     tradeWrap.style.display='block';
   } else if(tradeWrap){tradeWrap.style.display='none';}

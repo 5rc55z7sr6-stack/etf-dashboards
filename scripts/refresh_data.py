@@ -57,6 +57,16 @@ ETF_TICKERS = [
     'SOXX','MAGS','PAVE','XBI','IBB','INDA','COPX','SKYY','FINX','REMX','TUR',
 ]
 
+# ── All leveraged ETFs listed in LEVERAGED_MAP (trade ideas in popup) ────────
+LEVERAGED_TICKERS = [
+    'TECL','TQQQ','FAS','DPST','ERX','NRGU','CURE','LABU','DUSL','TPOR',
+    'MIDU','TNA','URTY','SPXL','UPRO','UDOW','SOXL','USD','FNGU','DFEN',
+    'WANT','AMZU','FNGD','INDL','EDC','TMF','UBT','BIB','BITX','BITU',
+    'NAIL','DRN','ROM','RETL','BULZ','HIBL','HIBS','WEBL','SQQQ','SPXS',
+    'UVXY','SVXY','BOIL','KOLD','UCO','SCO','GUSH','DRIP','JNUG','JDST',
+    'NUGT','DUST','AGQ','ZSL','UGL','GLL','EWJ','EWZ','EWY','EWG',
+]
+
 # ── All unique holding stock tickers embedded in the dashboard ────────────────
 # (extracted from the HOLDINGS array in ETF.html — US-listed only)
 HOLDING_TICKERS = [
@@ -108,7 +118,7 @@ _TK_RE = re.compile(r'^[A-Z]{1,6}(\.[AB])?$')
 def valid_tk(t): return bool(_TK_RE.match(t))
 
 ALL_PRICE_TICKERS = sorted(set(
-    t for t in ETF_TICKERS + HOLDING_TICKERS if valid_tk(t)
+    t for t in ETF_TICKERS + LEVERAGED_TICKERS + HOLDING_TICKERS if valid_tk(t)
 ))
 
 def classify(curr, s20, s50, inv=False):
