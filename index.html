@@ -1618,56 +1618,112 @@ function renderBanner(data){
   const ss=(score>=0?'+':'')+Math.round(score);
   const maxR=Math.round(max);
   const lc=cls==='bull'?'green':cls==='bear'?'red':'amber';
-  // ── Build structured Opportunities & Risks lists ─────────────────────────
-  function oppItem(icon, tk, desc){ return `<div class="rb-item"><span class="rb-item-icon">${icon}</span><div class="rb-item-body"><span class="rb-item-tk">${tk}</span> <span class="rb-item-desc">${desc}</span></div></div>`; }
-  function riskItem(icon, tk, desc){ return oppItem(icon, tk, desc); }
+  // ── Regime-aware Opportunities & Risks ──────────────────────────────────
+  // The same bullish signal means different things in different regimes.
+  // A signal that's "bullish" in a correcting market is a HOLD or HEDGE, not a buy.
+  function mkItem(icon,tk,desc){return `<div class="rb-item"><span class="rb-item-icon">${icon}</span><div class="rb-item-body"><span class="rb-item-tk">${tk}</span> <span class="rb-item-desc">${desc}</span></div></div>`;}
+  function noteItem(col,txt){return `<div style="font-family:var(--mono);font-size:9px;color:${col};margin-bottom:8px;line-height:1.4;padding:5px 7px;border-left:2px solid ${col};background:${col}18">${txt}</div>`;}
 
   const opps=[], risks=[], tails=[];
 
-  // ── Opportunities (what's working) ──
-  if(smhBull)          opps.push(oppItem('🟢','SMH','Semis leading — AI capex cycle intact'));
-  if(skyBull)          opps.push(oppItem('🟢','SKYY','Cloud/SaaS — AI monetisation active'));
-  if(itaBull)          opps.push(oppItem('🟢','ITA','Defense bid — geopolitical premium active'));
-  const iytBull=get('IYT/XLU')?.cl?.bullish;
-  if(iytBull)          opps.push(oppItem('🟢','IYT/XLU','Transports leading utilities — Dow Theory ✓'));
+  // Fetch key signals once
+  const iytBull =get('IYT/XLU')?.cl?.bullish;
   const cperBull=get('CPER/GLD')?.cl?.bullish;
-  if(cperBull)         opps.push(oppItem('🟢','CPER/GLD','Copper > Gold — real industrial demand'));
-  if(creditOk)         opps.push(oppItem('🟢','KRE','Regional banks healthy — no credit crisis'));
-  const rspBull=get('RSP/SPY')?.cl?.bullish;
-  if(rspBull)          opps.push(oppItem('🟢','RSP/SPY','Equal-weight leading — broad participation'));
+  const rspBull =get('RSP/SPY')?.cl?.bullish;
   const paveBull=get('PAVE/SPY')?.cl?.bullish;
-  if(paveBull)         opps.push(oppItem('🟢','PAVE','AI power infrastructure cycle active'));
-  if(arkkBull)         opps.push(oppItem('🟢','ARKK','Speculative pulse — frontier risk-on'));
-  if(!opps.length)     opps.push(oppItem('⬜','—','No clear opportunities — stay in cash/defensives'));
-
-  // ── Risks (what to avoid) ──
-  const qqqBull=get('QQQ/SPY')?.cl?.bullish;
-  if(!smhBull)         risks.push(riskItem('🔴','SMH','Semis red — cut AIQ, QTUM, BOTZ, CHAT'));
-  if(!qqqBull)         risks.push(riskItem('🔴','QQQ/SPY','Tech leadership fading — reduce Nasdaq beta'));
-  if(iwmSig==='strong-bear'||iwmSig==='bear') risks.push(riskItem('🔴','IWM','Small caps weak — growth/credit stress'));
-  if(!ibitBull)        risks.push(riskItem('🔴','IBIT','Crypto risk-off — speculative appetite gone'));
-  if(!arkkBull)        risks.push(riskItem('🔴','ARKK','Innovation theme bleeding — cut frontier names'));
-  const xbiBull=get('XBI/SPY')?.cl?.bullish;
-  if(!xbiBull)         risks.push(riskItem('🔴','XBI','Biotech off — avoid speculative biotech'));
+  const qqqBull =get('QQQ/SPY')?.cl?.bullish;
+  const xbiBull =get('XBI/SPY')?.cl?.bullish;
   const sphbBull=get('SPHB/SPLV')?.cl?.bullish;
-  if(!sphbBull)        risks.push(riskItem('🔴','SPHB/SPLV','High-beta underperforming — de-risk high-beta names'));
-  if(mBull===0)        risks.push(riskItem('🔴','Masters','All 4 masters bearish — no new positions'));
-
-  // ── Tail risks (warning — amber) ──
-  if(carryWarn)        tails.push(riskItem('⚠️','EWJ/SPY','Yen carry unwind risk — reduce ALL beta if accelerates'));
-  const ewjStr = get('EWJ/SPY')?.cl?.sig==='strong-bear';
   const hygtBull=get('HYG/TLT')?.cl?.bullish;
-  if(!hygtBull&&!creditOk) tails.push(riskItem('⚠️','Credit','HYG/TLT + KRE both weak — watch for spread widening'));
   const indaBull=get('INDA/SPY')?.cl?.bullish;
-  if(!indaBull)        tails.push(riskItem('⚠️','EM/INDA','Capital returning to US — avoid EM exposure'));
+  const gldSig  =get('GLD/SPY')?.cl?.sig;  // inv=true: strong-bull = gold NOT outperforming = risk-on
+  const gldTltBull=get('GLD/TLT')?.cl?.bullish; // bull = inflation; bear = disinflation/rate-cut
+
+  // ── Column header label changes by regime ──────────────────────────────
+  let oppColHdr, oppColNote;
+  if(scorePct>=30){
+    // RISK-ON: genuine buy opportunities
+    oppColHdr='▲ OPPORTUNITIES';
+    oppColNote='';
+  } else if(scorePct>0){
+    // MIXED-BULL: selective, only strong signals
+    oppColHdr='▲ SELECTIVE LONGS';
+    oppColNote=noteItem('var(--amber)','Mixed regime — only add on dips in strong-bull leaders. Tighten stops on the rest.');
+  } else if(scorePct>=-30){
+    // MIXED-BEAR (current market correcting): relative leaders ≠ buy signals
+    oppColHdr='▲ RELATIVE LEADERS';
+    oppColNote=noteItem('var(--amber)','Market correcting — these hold up relatively. <b>Not new buy signals.</b> Hold if you own them; raise cash on bounces.');
+  } else {
+    // RISK-OFF: defensives are the actual plays
+    oppColHdr='▲ DEFENSIVE PLAYS';
+    oppColNote=noteItem('#ff5c61','Bear regime — offense is off. These are safe havens + hedges only. No new longs in risk assets.');
+  }
+
+  // ── Build opportunity list ─────────────────────────────────────────────
+  if(scorePct>=30){
+    // RISK-ON: all bullish signals are buys
+    if(smhBull)  opps.push(mkItem('🟢','SMH','Semis leading — AI capex cycle strong. Add SOXL on dips.'));
+    if(skyBull)  opps.push(mkItem('🟢','SKYY','AI monetisation phase active — cloud/SaaS catching bids.'));
+    if(itaBull)  opps.push(mkItem('🟢','ITA','Defense outperforming — NATO spend + geopolitical bid.'));
+    if(iytBull)  opps.push(mkItem('🟢','IYT/XLU','Dow Theory confirmed — transports leading defensives.'));
+    if(cperBull) opps.push(mkItem('🟢','CPER/GLD','Copper winning vs gold — real industrial demand.'));
+    if(rspBull)  opps.push(mkItem('🟢','RSP','Broad participation — equal-weight leading cap-weight.'));
+    if(arkkBull) opps.push(mkItem('🟢','ARKK','Speculative pulse on — frontier themes catching bids.'));
+    if(paveBull) opps.push(mkItem('🟢','PAVE','AI infrastructure build cycle active — data centres, grid.'));
+    if(!opps.length) opps.push(mkItem('⬜','—','No clear buys — wait for confirmation.'));
+  } else if(scorePct>0){
+    // MIXED-BULL: only STRONG-BULL signals qualify
+    const strongBullSig=r=>r?.cl?.sig==='strong-bull';
+    if(smhBull&&strongBullSig(get('SMH/SPY',true))) opps.push(mkItem('🟢','SMH','Strong-bull — only momentum-confirmed semis hold here.'));
+    if(skyBull) opps.push(mkItem('🟢','SKYY','AI cloud holding — tightest stop here.'));
+    if(itaBull) opps.push(mkItem('🟢','ITA','Defense — often holds even when broad market slips.'));
+    if(iytBull&&strongBullSig(get('IYT/XLU'))) opps.push(mkItem('🟢','IYT/XLU','Dow Theory holding — economy not breaking yet.'));
+    if(cperBull) opps.push(mkItem('🟢','CPER/GLD','Industrial demand intact — watch for confirmation from IYT.'));
+    if(!opps.length) opps.push(mkItem('🟡','Cash','No strong-bull signals — raise cash, wait for regime clarity.'));
+  } else if(scorePct>=-30){
+    // MIXED-BEAR: relative leaders in a correcting market — NOT buys
+    if(itaBull)  opps.push(mkItem('🟡','ITA','Relative hold — defense outperforms in corrections. Hold only.'));
+    if(iytBull)  opps.push(mkItem('🟡','IYT/XLU','Economy not collapsing — transports still leading utilities.'));
+    if(cperBull) opps.push(mkItem('🟡','CPER/GLD','Industrial demand floor — copper holding vs gold.'));
+    if(creditOk) opps.push(mkItem('🟡','KRE','No credit crisis — regional banks not in distress.'));
+    if(skyBull)  opps.push(mkItem('🟡','SKYY','AI cloud relatively resilient — but trim on bounces.'));
+    // Also show what to do with cash
+    opps.push(mkItem('💵','Cash','Best position in a correction. Dry powder for lower prices.'));
+    if(!gldTltBull) opps.push(mkItem('🟡','TLT/GLD','Bonds winning over gold — rate cut expectations building. Duration bid.'));
+  } else {
+    // RISK-OFF: defensives are the plays
+    opps.push(mkItem('🟢','Cash','Highest conviction position. Capital preservation first.'));
+    opps.push(mkItem('🟢','XLP/XLU','Defensive sectors leading — staples + utilities outperform in bear.'));
+    opps.push(mkItem('🟢','TLT','Flight to duration — bonds catching safe-haven bid.'));
+    opps.push(mkItem('🟢','GLD','Gold safe-haven bid — add on dips in risk-off regimes.'));
+    if(itaBull) opps.push(mkItem('🟢','ITA','Defense holds in bear — geopolitical premium is sticky.'));
+    opps.push(mkItem('🔴','Hedge','Consider SPXS/SQQQ to hedge remaining equity exposure.'));
+  }
+
+  // ── Risks (what to avoid/cut) — same across all regimes ───────────────
+  if(!qqqBull)  risks.push(mkItem('🔴','QQQ/SPY','Tech leadership gone — reduce Nasdaq beta.'));
+  if(!smhBull)  risks.push(mkItem('🔴','SMH','Semis red — cut AIQ, QTUM, BOTZ, CHAT immediately.'));
+  if(iwmSig==='strong-bear'||iwmSig==='bear') risks.push(mkItem('🔴','IWM','Small caps weak — credit + growth stress. Avoid.'));
+  if(!ibitBull) risks.push(mkItem('🔴','IBIT','Crypto off — speculative appetite gone. No new crypto.'));
+  if(!arkkBull) risks.push(mkItem('🔴','ARKK','Innovation bleeding — cut all frontier/speculative names.'));
+  if(!xbiBull)  risks.push(mkItem('🔴','XBI','Biotech off — avoid speculative biotech, keep large pharma.'));
+  if(!sphbBull) risks.push(mkItem('🔴','High-β','High-beta underperforming — de-risk leveraged names.'));
+  if(mBull===0) risks.push(mkItem('🔴','Masters','All 4 masters bearish — zero new risk positions.'));
+
+  // ── Tail risks ────────────────────────────────────────────────────────
+  if(carryWarn)           tails.push(mkItem('⚠️','EWJ/SPY','Yen carry unwind — if this accelerates, reduce ALL beta immediately.'));
+  if(!hygtBull&&!creditOk)tails.push(mkItem('⚠️','Credit','HYG/TLT + KRE both weak — credit stress building. Watch spreads.'));
+  if(!indaBull)           tails.push(mkItem('⚠️','EM/INDA','Dollar strength pulling capital back to US. Avoid EM.'));
 
   // Build HTML
-  const oppHtml = opps.slice(0,5).join('');
+  const oppHtml = oppColNote + opps.slice(0,5).join('');
   let riskHtml = risks.slice(0,4).join('');
-  if(tails.length){
-    riskHtml += `<div class="rb-tail-hdr">⚠ Tail Risks</div>` + tails.slice(0,2).join('');
-  }
+  if(tails.length) riskHtml+=`<div class="rb-tail-hdr">⚠ Tail Risks</div>`+tails.slice(0,2).join('');
   if(!risks.length&&!tails.length) riskHtml='<span class="rb-no-data">No major risks flagged</span>';
+
+  // Update opportunity column header dynamically
+  const oppHdrEl=document.querySelector('.rb-opp-col .rb-col-hdr');
+  if(oppHdrEl) oppHdrEl.textContent=oppColHdr;
 
   // ── Update DOM ────────────────────────────────────────────────────────────
   document.getElementById('bigLight').className=`rl-light ${lc}`;
