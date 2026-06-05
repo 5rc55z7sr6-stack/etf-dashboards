@@ -1271,8 +1271,6 @@ function buildCard(r,isThemeBig){
   const arr=r.curr>r.prev5?'↗':'↘';
   const tExtra=r.themeDesc?`<div style="font-family:var(--mono);font-size:9.5px;color:${col};margin-top:-4px;line-height:1.5;border-left:2px solid ${col};padding-left:8px">${r.themeDesc}</div>`:'';
   return `<div class="pulse-card ${sig}${isThemeBig?' theme-card':''}">
-    ${r.master?'<div class="pc-master-badge">MASTER</div>':''}
-    ${r.theme&&!r.master?'<div class="pc-theme-badge">THEME</div>':''}
     <div class="pc-header"><div class="signal-light ${slc(sig)}"></div><div class="pc-pair">${r.key}</div><div class="pc-verdict-chip ${sig}">${SIG_LABEL[sig]}</div></div>
     <div class="pc-label">${r.label}</div>${tExtra}
     <div class="pc-vals">
