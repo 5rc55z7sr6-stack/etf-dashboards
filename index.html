@@ -566,8 +566,9 @@
   .ho-mover-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
   .ho-mover-row:last-child{border-bottom:none}
   .ho-mover-rank{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:14px;flex-shrink:0;text-align:center}
-  .ho-mover-tk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);min-width:52px;flex-shrink:0}
-  .ho-mover-co{font-size:11px;color:var(--text-dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ho-mover-tk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);min-width:44px;flex-shrink:0}
+  .ho-mover-co{font-size:11px;color:var(--text-dim);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ho-mover-wt{display:flex;align-items:center;gap:4px;flex-shrink:0}
   .ho-mover-price{font-family:var(--mono);font-size:11px;color:var(--text-faint);min-width:52px;text-align:right;flex-shrink:0}
   .ho-mover-chg{font-family:var(--mono);font-size:13px;font-weight:700;min-width:62px;text-align:right;flex-shrink:0}
   .ho-mover-chg.up{color:#4ec994}.ho-mover-chg.dn{color:#e06b6b}
@@ -2409,12 +2410,24 @@ function openHoldingsPopup(ticker){
     const lbl=moversWrap.querySelector('.ho-movers-label');
     const scanTxt=pool>movers.length?`· scanned ${pool} holdings`:'';
     if(lbl) lbl.innerHTML=`⚡ Top 5 Fast Movers <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;color:var(--text-faint)">${scanTxt} · ${ageLabel}</span>`;
+    // Weight bar scale — same logic as holdings table
+    const maxWt=movers.reduce((m,r)=>Math.max(m,r.w||0),0);
+    const barScale=Math.max(maxWt,30);
     moversBody.innerHTML=movers.map((m,i)=>{
       const cls=m.chg>=0?'up':'dn';
+      const w=m.w||0;
+      const barPct=w&&barScale>0?Math.min(100,(w/barScale)*100).toFixed(1):0;
+      const wtHtml=w>0
+        ?`<span class="ho-mover-wt">
+            <span class="h-wt-bar-outer" style="width:44px"><span class="h-wt-bar-fill" style="width:${barPct}%"></span></span>
+            <span class="h-wt-num">${w.toFixed(1)}%</span>
+          </span>`
+        :`<span class="ho-mover-wt"><span class="h-wt-num" style="color:var(--line-bright)">—</span></span>`;
       return `<div class="ho-mover-row">
         <span class="ho-mover-rank">${i+1}</span>
         <span class="ho-mover-tk">${m.t}</span>
         <span class="ho-mover-co">${m.n}</span>
+        ${wtHtml}
         ${m.price!=null?`<span class="ho-mover-price">${fmtPrice(m.price)}</span>`:''}
         <span class="ho-mover-chg ${cls}">${fmtChg(m.chg)}</span>
       </div>`;
@@ -2438,10 +2451,15 @@ function openHoldingsPopup(ticker){
   (async()=>{
     const tp_c=window.tickerPrices;
 
+    // Build weight lookup from all available sources (stored holdings first, then live)
+    const wtMap=new Map();
+    e.h.forEach(r=>wtMap.set(r[0],parseFloat(r[2])||0));
+    const liveH=window.etfHoldings&&window.etfHoldings[ticker];
+    if(liveH) liveH.forEach(h=>{if(h.w>0)wtMap.set(h.t,h.w);});
+
     // PATH 1: workflow-supplied full holdings × cached prices
-    const liveHoldings=window.etfHoldings&&window.etfHoldings[ticker];
-    if(liveHoldings&&liveHoldings.length&&tp_c&&Object.keys(tp_c).length>10){
-      const movers=liveHoldings.map(h=>{const d=tp_c[h.t];return d?{t:h.t,n:h.n,chg:d.c,price:d.p}:null;})
+    if(liveH&&liveH.length&&tp_c&&Object.keys(tp_c).length>10){
+      const movers=liveH.map(h=>{const d=tp_c[h.t];return d?{t:h.t,n:h.n,w:wtMap.get(h.t)||h.w||0,chg:d.c,price:d.p}:null;})
         .filter(Boolean).sort((a,b)=>b.chg-a.chg);
       renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · full ETF scan`);
       return;
@@ -2468,20 +2486,22 @@ function openHoldingsPopup(ticker){
         if(yhHoldings.length)break;
       }catch(ex){}
     }
+    // Enrich wtMap with Yahoo weights
+    yhHoldings.forEach(h=>{if(h.w>0)wtMap.set(h.t,h.w);});
 
-    // Merge Yahoo holdings with stored holdings (Yahoo first, then any stored not already included)
+    // Merge Yahoo holdings with stored holdings
     const seen=new Set(yhHoldings.map(h=>h.t));
     const merged=[...yhHoldings,...e.h.map(r=>({t:r[0],n:r[1],w:r[2]})).filter(r=>!seen.has(r.t))];
 
     if(tp_c&&Object.keys(tp_c).length>10){
-      // Cross-ref live price cache for instant results
-      const movers=merged.map(h=>{const d=tp_c[h.t];return d?{t:h.t,n:h.n,chg:d.c,price:d.p}:null;})
+      const movers=merged.map(h=>{const d=tp_c[h.t];return d?{t:h.t,n:h.n,w:wtMap.get(h.t)||h.w||0,chg:d.c,price:d.p}:null;})
         .filter(Boolean).sort((a,b)=>b.chg-a.chg);
       const src=yhHoldings.length?`${merged.length} holdings scanned`:'stored holdings';
       renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · ${src}`);
     } else {
-      // No price cache — fetch prices live for the merged list
       fetchFastMovers(merged.map(h=>[h.t,h.n,h.w]),ticker).then(movers=>{
+        // Attach weights from wtMap
+        movers.forEach(m=>{m.w=wtMap.get(m.t)||m.w||0;});
         const src=yhHoldings.length?`${merged.length} holdings scanned`:'stored holdings';
         renderMoversRows(movers,window._fmPool||movers.length,`live · ${src}`);
       }).catch(()=>{
