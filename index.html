@@ -2150,7 +2150,29 @@ async function fetchFastMovers(holdings, etfTicker){
     }
   }
 
-  // OPTION B — expanded stored holdings (~20 per ETF, always available)
+  // OPTION B — Yahoo Finance topHoldings (free, no key, ~25 holdings live)
+  if(!tickers.length && etfTicker){
+    const yhUrl=`https://query2.finance.yahoo.com/v1/finance/quoteSummary/${etfTicker}?modules=topHoldings`;
+    const yhPx=[
+      `https://corsproxy.io/?url=${encodeURIComponent(yhUrl)}`,
+      `https://api.allorigins.win/get?url=${encodeURIComponent(yhUrl)}`,
+      `https://corsproxy.io/?url=${encodeURIComponent(yhUrl.replace('query2','query1'))}`,
+    ];
+    for(const pu of yhPx){
+      try{
+        const resp=await ftch(pu,9000);if(!resp.ok)continue;
+        const raw=await resp.json();
+        const json=pu.includes('allorigins')?JSON.parse(raw.contents):raw;
+        const hs=json?.quoteSummary?.result?.[0]?.topHoldings?.holdings;
+        if(!Array.isArray(hs)||!hs.length)continue;
+        tickers=hs.map(h=>h.symbol).filter(t=>t&&stockRe.test(t));
+        hs.forEach(h=>{if(h.symbol&&h.holdingName)nameMap.set(h.symbol,h.holdingName);});
+        if(tickers.length)break;
+      }catch(e){}
+    }
+  }
+
+  // OPTION C — stored holdings (fallback, always available)
   if(!tickers.length) tickers=holdings.map(r=>r[0]).filter(t=>stockRe.test(t));
 
   // Parallel-fetch % change + price for every ticker in the list
@@ -2326,38 +2348,69 @@ function openHoldingsPopup(ticker){
   document.body.style.overflow='hidden';
 
   // ── Fast movers — priority order: ───────────────────────────────────────────
-  //   1. Real full ETF holdings (Yahoo Finance via workflow) × cached prices
-  //   2. Hardcoded 22 holdings × cached prices  (if no live holdings in cache)
-  //   3. Live CORS proxy fetch                  (if no price cache at all)
+  //   1. window.etfHoldings[ticker]  (full list from GitHub Actions workflow)
+  //   2. Yahoo Finance topHoldings   (live fetch, ~25 holdings, no key needed)
+  //   3. Live CORS fetch × stored 10 (ultimate fallback)
   moversWrap.style.display='block';
   const ageLabel=window.tickerPricesTs?`data from ${fmtAge(window.tickerPricesTs)}`:'via GitHub Actions';
 
-  if(tp_cache && Object.keys(tp_cache).length>10){
-    // Decide which holding list to scan:
-    //   - window.etfHoldings[ticker] = real holdings pulled from Yahoo Finance by workflow
-    //   - e.h = hardcoded 22 stocks (fallback)
+  // Always show loading state first
+  moversBody.innerHTML=`<div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Scanning ETF holdings…</div>`;
+
+  (async()=>{
+    const tp_c=window.tickerPrices;
+
+    // PATH 1: workflow-supplied full holdings × cached prices
     const liveHoldings=window.etfHoldings&&window.etfHoldings[ticker];
-    const scanList = liveHoldings && liveHoldings.length
-      ? liveHoldings                                // [{t,n,w}, ...] from Yahoo
-      : e.h.map(r=>({t:r[0],n:r[1],w:r[2]}));     // hardcoded [{t,n,w}]
+    if(liveHoldings&&liveHoldings.length&&tp_c&&Object.keys(tp_c).length>10){
+      const movers=liveHoldings.map(h=>{const d=tp_c[h.t];return d?{t:h.t,n:h.n,chg:d.c,price:d.p}:null;})
+        .filter(Boolean).sort((a,b)=>b.chg-a.chg);
+      renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · full ETF scan`);
+      return;
+    }
 
-    const movers=scanList.map(h=>{
-      const d=tp_cache[h.t];
-      return d?{t:h.t,n:h.n,chg:d.c,price:d.p}:null;
-    }).filter(Boolean).sort((a,b)=>b.chg-a.chg);
+    // PATH 2: fetch Yahoo Finance topHoldings live, then cross-ref tp_cache or fetch prices
+    const stockRe=/^[A-Z]{1,6}(\.[A-Z])?$/;
+    const yhUrl=`https://query2.finance.yahoo.com/v1/finance/quoteSummary/${ticker}?modules=topHoldings`;
+    const yhPx=[
+      `https://corsproxy.io/?url=${encodeURIComponent(yhUrl)}`,
+      `https://api.allorigins.win/get?url=${encodeURIComponent(yhUrl)}`,
+      `https://corsproxy.io/?url=${encodeURIComponent(yhUrl.replace('query2','query1'))}`,
+    ];
+    let yhHoldings=[];
+    for(const pu of yhPx){
+      try{
+        const resp=await ftch(pu,9000);if(!resp.ok)continue;
+        const raw=await resp.json();
+        const json=pu.includes('allorigins')?JSON.parse(raw.contents):raw;
+        const hs=json?.quoteSummary?.result?.[0]?.topHoldings?.holdings;
+        if(!Array.isArray(hs)||!hs.length)continue;
+        yhHoldings=hs.filter(h=>h.symbol&&stockRe.test(h.symbol))
+          .map(h=>({t:h.symbol,n:h.holdingName||h.symbol,w:h.holdingPercent||0}));
+        if(yhHoldings.length)break;
+      }catch(ex){}
+    }
 
-    const src=liveHoldings?'full ETF scan':'22 holdings';
-    renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · ${src}`);
+    // Merge Yahoo holdings with stored holdings (Yahoo first, then any stored not already included)
+    const seen=new Set(yhHoldings.map(h=>h.t));
+    const merged=[...yhHoldings,...e.h.map(r=>({t:r[0],n:r[1],w:r[2]})).filter(r=>!seen.has(r.t))];
 
-  } else {
-    // No price cache — fall back to live CORS proxy fetch using hardcoded 22
-    moversBody.innerHTML=`<div class="ho-movers-loading"><span class="spinner-sm" style="border-top-color:#4ec994"></span> Fetching live prices…</div>`;
-    fetchFastMovers(e.h,ticker).then(movers=>{
-      renderMoversRows(movers,window._fmPool||movers.length,'live · 22 holdings fallback');
-    }).catch(()=>{
-      moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable</div>`;
-    });
-  }
+    if(tp_c&&Object.keys(tp_c).length>10){
+      // Cross-ref live price cache for instant results
+      const movers=merged.map(h=>{const d=tp_c[h.t];return d?{t:h.t,n:h.n,chg:d.c,price:d.p}:null;})
+        .filter(Boolean).sort((a,b)=>b.chg-a.chg);
+      const src=yhHoldings.length?`${merged.length} holdings scanned`:'stored holdings';
+      renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · ${src}`);
+    } else {
+      // No price cache — fetch prices live for the merged list
+      fetchFastMovers(merged.map(h=>[h.t,h.n,h.w]),ticker).then(movers=>{
+        const src=yhHoldings.length?`${merged.length} holdings scanned`:'stored holdings';
+        renderMoversRows(movers,window._fmPool||movers.length,`live · ${src}`);
+      }).catch(()=>{
+        moversBody.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:4px 0">Live data unavailable</div>`;
+      });
+    }
+  })();
 }
 
 function closeHoldingsPopup(){
