@@ -529,6 +529,8 @@
   .se-box{background:#10191c;border:1px solid #2a3d44;border-radius:14px;max-width:480px;width:100%;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.6);transform:translateY(10px) scale(.98);transition:transform .22s cubic-bezier(.4,0,.2,1)}
   .se-overlay.open .se-box{transform:none}
   .se-top{padding:22px 24px 0}
+  .se-etf-link{cursor:pointer;color:var(--gold);border-bottom:1px dashed rgba(232,193,74,.45);transition:color .15s,border-color .15s;padding:0 1px}
+  .se-etf-link:hover{color:#fff;border-bottom-color:#fff}
   .se-verdict{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
   .se-verdict .se-dot{width:10px;height:10px;border-radius:50%}
   .se-pair{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
@@ -2927,7 +2929,17 @@ function openSignalPopup(key, label, sig) {
   const tierEl = overlay.querySelector('.se-tier');
   if(tierEl) { tierEl.textContent = info.tier||''; tierEl.style.display = info.tier ? 'inline-block' : 'none'; }
   overlay.querySelector('.se-verdict').innerHTML = `<span class="se-dot" style="background:${vt.color};box-shadow:0 0 8px ${vt.color}66"></span><span style="color:${vt.color}">${vt.label}</span>`;
-  overlay.querySelector('.se-pair').textContent = key;
+  // Clickable ETF tickers → open holdings popup
+  const pairEl = overlay.querySelector('.se-pair');
+  const parts = String(key).split('/');
+  if (parts.length === 2 && parts.every(t => /^[A-Z]{1,6}$/.test(t.trim()))) {
+    pairEl.innerHTML = parts.map(t => {
+      const tk = t.trim();
+      return `<span class="se-etf-link" onclick="seJumpToETF('${tk}')" title="View ${tk} top holdings">${tk}</span>`;
+    }).join('<span style="color:var(--text-faint)">/</span>');
+  } else {
+    pairEl.textContent = key;
+  }
   overlay.querySelector('.se-label').textContent = label;
   overlay.querySelector('.se-verdict-summary').textContent = vt.summary;
   overlay.querySelector('.se-headline').textContent = info.headline;
@@ -2935,6 +2947,11 @@ function openSignalPopup(key, label, sig) {
   overlay.querySelector('.se-what').innerHTML = info.what;
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function seJumpToETF(ticker) {
+  closeSignalPopup();
+  openHoldingsPopup(ticker);
 }
 
 function closeSignalPopup() {
