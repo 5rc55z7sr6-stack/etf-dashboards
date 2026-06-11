@@ -1,5 +1,5 @@
 import json, time, sys, re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import yfinance as yf
 import pandas as pd
 
@@ -582,8 +582,45 @@ try:
         if loose: s -= 1.5
         return round(s, 2)
 
-    def emit(m, typ, loose):
+    def trade_plan(m, typ):
+        """Entry/stop/T1/T2 computed server-side so the tracker scores exactly
+        what was published. Entry is a resting limit at a level, never market.
+        Stop = 2×ATR from entry (house rule). T1 = 1.5R (sell half, stop→BE).
+        T2 = 3-mo extreme if it pays ≥2R, else a synthetic 2.5R extension."""
+        p, s20 = m["p"], m["s20"]
+        atr_abs = (m["atr"] or 2.0) / 100.0 * p
+        long_side = typ in ('pullback_long', 'rs_leader')
+        if typ == 'pullback_long':
+            if p > s20 * 1.002: entry, trig = s20, 'limit at SMA20 support — wait for the dip'
+            else: entry, trig = p - 0.3 * atr_abs, 'limit 0.3×ATR under the print — let the wick fill you'
+        elif typ == 'rip_short':
+            if p < s20 * 0.998: entry, trig = s20, 'limit on spike into falling SMA20'
+            else: entry, trig = p + 0.3 * atr_abs, 'limit 0.3×ATR above the print — sell the wick'
+        elif typ == 'rs_leader':
+            entry, trig = max(s20, p - 0.5 * atr_abs), 'limit on 0.5×ATR intraday dip'
+        else:  # rs_laggard
+            entry, trig = min(s20, p + 0.5 * atr_abs), 'limit on 0.5×ATR bounce'
+        risk = 2 * atr_abs
+        stop = entry - risk if long_side else entry + risk
+        t1 = entry + 1.5 * risk if long_side else entry - 1.5 * risk
+        if long_side:
+            structural = m["hi3m"] >= entry + 2 * risk
+            t2 = m["hi3m"] if structural else entry + 2.5 * risk
+            t2b = '3-mo high' if structural else '2.5R ext'
+        else:
+            structural = m["lo3m"] <= entry - 2 * risk
+            t2 = m["lo3m"] if structural else entry - 2.5 * risk
+            t2b = '3-mo low' if structural else '2.5R ext'
         return {
+            "side": "long" if long_side else "short",
+            "entry": round(entry, 2), "stop": round(stop, 2),
+            "t1": round(t1, 2), "t2": round(t2, 2), "risk": round(risk, 4),
+            "t2b": t2b, "trig": trig,
+            "expires": (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d"),
+        }
+
+    def emit(m, typ, loose):
+        rec = {
             "t": m["t"], "etf": m["etf"], "type": typ,
             "p": round(m["p"], 2), "c": m["c"],
             "s20": round(m["s20"], 2), "s50": round(m["s50"], 2),
@@ -592,6 +629,8 @@ try:
             "hi3m": round(m["hi3m"], 2), "lo3m": round(m["lo3m"], 2),
             "score": score_of(m, typ, loose), "nm": 1 if loose else 0,
         }
+        rec.update(trade_plan(m, typ))
+        return rec
 
     PER_TYPE_TARGET = 4
     strict = []
@@ -617,6 +656,107 @@ try:
         per_type[cnd["type"]] = per_type.get(cnd["type"], 0) + 1
         final.append(cnd); taken.add(cnd["t"])
 
+    # ── Setup tracker: every published setup is logged and scored on later
+    # refreshes. History persists INSIDE data.json (read old → advance → write).
+    def advance_setup(s, price, today_str):
+        """Advance one tracked setup's lifecycle. Mutates and returns s.
+        pending → triggered (limit touched, not gapped through stop)
+                → expired (untriggered past expiry) | cancelled_gap
+        triggered → stopped (-1R) | t1 (half off at 1.5R, stop→breakeven)
+        t1 → t2 (full win, r=(1.5+rr2)/2) | be (rest flat, r=+0.75)
+        triggered older than 21 days → timeout at market R."""
+        long_side = s["side"] == "long"
+        if s["status"] == "pending":
+            if today_str > s["expires"]:
+                s["status"] = "expired"; s["closed"] = today_str; return s
+            hit = price <= s["entry"] if long_side else price >= s["entry"]
+            blown = price <= s["stop"] if long_side else price >= s["stop"]
+            if hit:
+                if blown:
+                    s["status"] = "cancelled_gap"; s["closed"] = today_str; return s
+                s["status"] = "triggered"; s["trigDate"] = today_str
+        if s["status"] == "triggered":
+            try:
+                age = (datetime.strptime(today_str, "%Y-%m-%d")
+                       - datetime.strptime(s.get("trigDate", today_str), "%Y-%m-%d")).days
+            except Exception:
+                age = 0
+            if (price <= s["stop"]) if long_side else (price >= s["stop"]):
+                s["status"] = "stopped"; s["r"] = -1.0; s["closed"] = today_str; return s
+            if (price >= s["t1"]) if long_side else (price <= s["t1"]):
+                s["status"] = "t1"
+            elif age > 21:
+                mr = (price - s["entry"]) / s["risk"] * (1 if long_side else -1)
+                s["status"] = "timeout"; s["r"] = round(mr, 2); s["closed"] = today_str; return s
+        if s["status"] == "t1":
+            if (price >= s["t2"]) if long_side else (price <= s["t2"]):
+                rr2 = abs(s["t2"] - s["entry"]) / s["risk"]
+                s["status"] = "t2"; s["r"] = round((1.5 + rr2) / 2, 2); s["closed"] = today_str
+            elif (price <= s["entry"]) if long_side else (price >= s["entry"]):
+                # half banked at +1.5R, rest scratched at breakeven
+                s["status"] = "be"; s["r"] = 0.75; s["closed"] = today_str
+        return s
+
+    prev_hist = []
+    try:
+        with open("data.json") as _pf:
+            prev_hist = (json.load(_pf).get("setups") or {}).get("hist") or []
+    except Exception:
+        pass
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    OPEN_STATES = ("pending", "triggered", "t1")
+    for s in prev_hist:
+        if s.get("status") in OPEN_STATES and all(k in s for k in ("side","entry","stop","t1","t2","risk","expires")):
+            tp = ticker_prices.get(s.get("t"))
+            if tp: advance_setup(s, tp["p"], today_str)
+    open_keys = {(s.get("t"), s.get("type")) for s in prev_hist if s.get("status") in OPEN_STATES}
+    for cnd in final[:16]:
+        if (cnd["t"], cnd["type"]) in open_keys: continue
+        rec = {k: cnd[k] for k in ("t","etf","type","nm","side","entry","stop","t1","t2","risk","expires")}
+        rec.update({"created": today_str, "status": "pending"})
+        prev_hist.append(rec); open_keys.add((cnd["t"], cnd["type"]))
+    cutoff35 = (datetime.now(timezone.utc) - timedelta(days=35)).strftime("%Y-%m-%d")
+    cutoff30 = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
+    hist = [s for s in prev_hist if s.get("status") in OPEN_STATES
+            or (s.get("closed") or s.get("created") or "") >= cutoff35]
+
+    recent = [s for s in hist if (s.get("created") or "") >= cutoff30]
+    CLOSED_STATES = ("stopped", "t2", "be", "timeout")
+    closed = [s for s in recent if s.get("status") in CLOSED_STATES]
+    trig_n = sum(1 for s in recent if s.get("status") not in ("pending", "expired", "cancelled_gap"))
+    wins   = [s for s in closed if (s.get("r") or 0) > 0]
+    losses = [s for s in closed if (s.get("r") or 0) <= 0]
+    by_type = {}
+    for s in recent:
+        bt = by_type.setdefault(s["type"], {"n": 0, "w": 0, "l": 0})
+        bt["n"] += 1
+        if s.get("status") in CLOSED_STATES:
+            if (s.get("r") or 0) > 0: bt["w"] += 1
+            else: bt["l"] += 1
+    stats = {
+        "generated": len(recent),
+        "trigRate": round(trig_n / len(recent) * 100, 1) if recent else None,
+        "closed": len(closed), "wins": len(wins), "losses": len(losses),
+        "hitRate": round(len(wins) / len(closed) * 100, 1) if closed else None,
+        "avgWinR": round(sum(s["r"] for s in wins) / len(wins), 2) if wins else None,
+        "avgLossR": round(sum(s["r"] for s in losses) / len(losses), 2) if losses else None,
+        "expR": round(sum(s["r"] for s in closed) / len(closed), 2) if closed else None,
+        "byType": by_type,
+    }
+    open_view = []
+    for s in hist:
+        if s.get("status") not in OPEN_STATES: continue
+        tp = ticker_prices.get(s.get("t")) or {}
+        ov = dict(s)
+        if tp.get("p") is not None:
+            ov["px"] = tp["p"]
+            if s["status"] in ("triggered", "t1") and s.get("risk"):
+                dirn = 1 if s["side"] == "long" else -1
+                ov["uR"] = round((tp["p"] - s["entry"]) / s["risk"] * dirn, 2)
+        open_view.append(ov)
+    print(f"Tracker: {len(hist)} in history, {len(open_view)} open, "
+          f"{len(closed)} closed in 30d (hit {stats['hitRate']}%, exp {stats['expR']}R)")
+
     sec_bull_n = sum(1 for e in SECTOR_ETFS if (bp_scores.get(e) or {}).get('bullish'))
     rsp = bp_scores.get('RSP') or {}
     setups_out = {
@@ -628,6 +768,9 @@ try:
         },
         "list": final[:16],
         "scanned": stocks_total,
+        "stats": stats,
+        "open": open_view,
+        "hist": hist,
     }
     print(f"Setups: {len(final[:16])} candidates from {stocks_total} stocks "
           f"({', '.join(f'{k}:{v}' for k,v in per_type.items())})")

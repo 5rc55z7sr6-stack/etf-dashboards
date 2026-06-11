@@ -560,6 +560,23 @@
   .su-card .su-plan{font-family:var(--mono);font-size:10.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;color:var(--text-dim)}
   .su-card .su-plan .pl{color:var(--green)} .su-card .su-plan .st{color:var(--red)}
   .su-vr-hot{color:var(--gold);font-weight:700}
+  .su-stats{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;background:var(--card)}
+  .su-stats-hdr{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px}
+  .su-stats-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+  .su-stat{flex:1;min-width:100px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:center}
+  .su-stat .v{font-family:var(--mono);font-size:16px;font-weight:700}
+  .su-stat .l{font-family:var(--mono);font-size:8.5px;color:var(--text-faint);letter-spacing:.8px;margin-top:2px}
+  .su-stats table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;color:var(--text-dim)}
+  .su-stats th{text-align:left;color:var(--text-faint);font-weight:400;letter-spacing:.8px;padding:3px 8px;border-bottom:1px solid var(--line);font-size:8.5px}
+  .su-stats td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.03)}
+  .su-track{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;background:var(--card)}
+  .su-track-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;color:var(--text-dim);padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .su-track-row:last-child{border-bottom:none}
+  .su-track-row b{color:var(--text)}
+  .su-st-badge{font-size:8.5px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:8px;white-space:nowrap}
+  .su-st-badge.wait{background:rgba(255,255,255,.05);color:var(--text-dim);border:1px solid var(--line)}
+  .su-st-badge.live{background:rgba(63,209,126,.13);color:var(--green);border:1px solid rgba(63,209,126,.3)}
+  .su-st-badge.t1{background:rgba(232,193,74,.13);color:var(--gold);border:1px solid rgba(232,193,74,.3)}
   .su-grade{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:8px;white-space:nowrap}
   .su-grade.a{background:rgba(63,209,126,.15);color:var(--green);border:1px solid rgba(63,209,126,.35)}
   .su-grade.b{background:rgba(232,193,74,.12);color:var(--gold);border:1px solid rgba(232,193,74,.3)}
@@ -878,6 +895,12 @@
 
     <!-- 2. INTERNALS STRIP -->
     <div id="suInternals" class="su-internals"></div>
+
+    <!-- 2b. TRACK RECORD (backtest of our own published setups) -->
+    <div id="suStats"></div>
+
+    <!-- 2c. OPEN POSITIONS TRACKER -->
+    <div id="suTracking"></div>
 
     <!-- 3. EVENT RISK -->
     <div id="suEvents" class="su-events"></div>
@@ -1851,8 +1874,76 @@ function renderAll(aD){
    Renders the trade sheet from window._setups (server-side scan) + regime score.
    EVENTS: edit this list manually — known macro/event risk for the week.     */
 const EVENTS = [
-  // {d:'2026-06-17', txt:'FOMC rate decision 20:00 CET'},
+  // manual extras, e.g. {d:'2026-06-25', txt:'NVDA earnings AMC'},
 ];
+// Recurring macro calendar — FOMC decision days + triple witching are official;
+// CPI dates are approximate (BLS publishes ~mid-month) and marked ≈.
+const AUTO_EVENTS = [
+  {d:'2026-06-17',txt:'FOMC rate decision'},{d:'2026-07-29',txt:'FOMC rate decision'},
+  {d:'2026-09-16',txt:'FOMC rate decision'},{d:'2026-10-28',txt:'FOMC rate decision'},
+  {d:'2026-12-09',txt:'FOMC rate decision'},
+  {d:'2026-06-19',txt:'Triple witching (quad expiry)'},{d:'2026-09-18',txt:'Triple witching'},
+  {d:'2026-12-18',txt:'Triple witching'},
+  {d:'2026-06-10',txt:'≈ CPI release'},{d:'2026-07-14',txt:'≈ CPI release'},
+  {d:'2026-08-12',txt:'≈ CPI release'},{d:'2026-09-11',txt:'≈ CPI release'},
+  {d:'2026-10-13',txt:'≈ CPI release'},{d:'2026-11-12',txt:'≈ CPI release'},
+  {d:'2026-12-10',txt:'≈ CPI release'},
+];
+
+const SU_STATUS = {
+  pending:{lbl:'WAITING TRIGGER',cls:'wait'}, triggered:{lbl:'● LIVE',cls:'live'},
+  t1:{lbl:'T1 HIT · stop@BE',cls:'t1'},
+};
+
+function renderSetupStats(stats){
+  const el=document.getElementById('suStats');
+  if(!el) return;
+  if(!stats||!stats.generated){
+    el.innerHTML='<div class="su-stats"><div class="su-stats-hdr">📊 TRACK RECORD — 30 DAYS</div><div style="font-family:var(--mono);font-size:10.5px;color:var(--text-faint)">Tracking just started — every published setup is now logged and scored automatically. First statistics appear when trades resolve.</div></div>';
+    return;
+  }
+  const cl=v=>v==null?'var(--text-dim)':v>0?'var(--green)':v<0?'var(--red)':'var(--text-dim)';
+  const fm=(v,suf)=>v==null?'–':((v>0&&suf==='R'?'+':'')+v+(suf||''));
+  const types={pullback_long:'Pullback L',rip_short:'Rip Short',rs_leader:'RS Leader',rs_laggard:'RS Laggard'};
+  let tt='';
+  for(const [k,v] of Object.entries(stats.byType||{})){
+    const closed=v.w+v.l;
+    tt+=`<tr><td>${types[k]||k}</td><td>${v.n}</td><td style="color:var(--green)">${v.w}</td><td style="color:var(--red)">${v.l}</td><td>${closed?Math.round(v.w/closed*100)+'%':'–'}</td></tr>`;
+  }
+  el.innerHTML=`<div class="su-stats">
+    <div class="su-stats-hdr">📊 TRACK RECORD — our own setups, scored automatically (30 days)</div>
+    <div class="su-stats-row">
+      <span class="su-stat"><span class="v">${stats.generated}</span><span class="l">SETUPS ISSUED</span></span>
+      <span class="su-stat"><span class="v">${fm(stats.trigRate,'%')}</span><span class="l">TRIGGERED</span></span>
+      <span class="su-stat"><span class="v" style="color:${(stats.hitRate||0)>=50?'var(--green)':'var(--red)'}">${fm(stats.hitRate,'%')}</span><span class="l">HIT RATE (${stats.wins||0}W/${stats.losses||0}L)</span></span>
+      <span class="su-stat"><span class="v" style="color:var(--green)">${fm(stats.avgWinR,'R')}</span><span class="l">AVG WIN</span></span>
+      <span class="su-stat"><span class="v" style="color:var(--red)">${fm(stats.avgLossR,'R')}</span><span class="l">AVG LOSS</span></span>
+      <span class="su-stat"><span class="v" style="color:${cl(stats.expR)}">${fm(stats.expR,'R')}</span><span class="l">EXPECTANCY / TRADE</span></span>
+    </div>
+    ${tt?`<table><tr><th>TYPE</th><th>ISSUED</th><th>W</th><th>L</th><th>HIT</th></tr>${tt}</table>`:''}
+    <div style="font-family:var(--mono);font-size:8.5px;color:var(--text-faint);margin-top:8px">Win = any closed trade with positive R (T2 full win, BE after T1 = +0.75R). Loss = stop −1R. Expectancy in R per closed trade — positive means the system pays.</div>
+  </div>`;
+}
+
+function renderSetupTracking(open){
+  const el=document.getElementById('suTracking');
+  if(!el) return;
+  if(!open||!open.length){ el.innerHTML=''; return; }
+  const rank={t1:0,triggered:1,pending:2};
+  const rows=[...open].sort((a,b)=>(rank[a.status]??3)-(rank[b.status]??3)).map(s=>{
+    const st=SU_STATUS[s.status]||{lbl:s.status,cls:'wait'};
+    const isL=s.side==='long';
+    const uR=s.uR!=null?`<span style="color:${s.uR>=0?'var(--green)':'var(--red)'};font-weight:700">${s.uR>=0?'+':''}${s.uR}R</span>`:'';
+    return `<div class="su-track-row">
+      <span class="su-st-badge ${st.cls}">${st.lbl}</span>
+      <b>${s.t}</b><span style="color:var(--text-faint)">${isL?'LONG':'SHORT'}${s.nm?' · near-miss':''}</span>
+      <span>entry <b>$${s.entry}</b></span><span>stop <b>$${s.status==='t1'?s.entry+' (BE)':s.stop}</b></span>
+      <span>T1 $${s.t1} · T2 $${s.t2}</span>
+      ${s.px!=null?`<span style="margin-left:auto">now $${s.px} ${uR}</span>`:''}
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="su-track"><div class="su-stats-hdr">🎫 TRACKING — published setups being scored live</div>${rows}</div>`;
+}
 
 const SU_TYPES = {
   pullback_long: {hdr:'PULLBACK LONGS — leaders dipping to support', col:'var(--green)', side:'long',
@@ -1918,12 +2009,24 @@ function renderSetups(){
     `<span class="su-int-chip mid">UNIVERSE <b>${su.scanned||0}</b> stocks scanned</span>`,
   ].join('');
 
-  // 3. Events
+  // 2b/2c. Track record + live tracking
+  renderSetupStats(su.stats);
+  renderSetupTracking(su.open);
+
+  // 3. Events — auto macro calendar (FOMC / triple witching / ≈CPI) + manual extras
   const evEl=document.getElementById('suEvents');
-  const todo=EVENTS.filter(e=>new Date(e.d+'T23:59')>=new Date()).slice(0,4);
+  const now=new Date();
+  const todo=[...AUTO_EVENTS,...EVENTS]
+    .filter(e=>new Date(e.d+'T23:59')>=now)
+    .sort((a,b)=>a.d<b.d?-1:1).slice(0,3)
+    .map(e=>{
+      const days=Math.ceil((new Date(e.d+'T16:00')-now)/86400000);
+      const urgent=days<=3;
+      return `<span style="${urgent?'color:var(--red);font-weight:700':''}">${new Date(e.d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} — ${e.txt} <span style="opacity:.7">(T-${days})</span></span>`;
+    });
   evEl.innerHTML=`<span class="su-ev-lbl">⚠ EVENT RISK</span>`+(todo.length
-    ? todo.map(e=>`${new Date(e.d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} — ${e.txt}`).join(' &nbsp;·&nbsp; ')
-    : 'No events listed. Check the macro calendar before holding through CPI / FOMC / earnings. (Edit the EVENTS list in this file to track your own.)');
+    ? todo.join(' &nbsp;·&nbsp; ')+' <span style="opacity:.55">· no new swings into T-1; size down through the window</span>'
+    : 'No upcoming events on the calendar.');
 
   // 4+5. Setup cards with levels + sizing
   const book=parseFloat(document.getElementById('suBook')?.value)||100000;
@@ -1946,42 +2049,34 @@ function renderSetups(){
     for(const x of rows){
       const isLong=t.side==='long';
       const atrAbs=((x.atr||2)/100)*x.p;
-      // ── ENTRY: a LEVEL, not the last print. You don't chase — you place a
-      // limit where the spike/wick exhausts into the key level (SMA20).
-      let entry, entryBasis;
-      if(typ==='pullback_long'){
-        // wait for the dip to touch SMA20 support; if already there/below,
-        // still rest a limit UNDER the print — let the wick fill you
-        if(x.p>x.s20*1.002){ entry=x.s20; entryBasis='limit at SMA20 support — wait for the dip'; }
-        else { entry=x.p-0.3*atrAbs; entryBasis='limit 0.3×ATR under the print — let the wick fill you'; }
-      } else if(typ==='rip_short'){
-        // short the SPIKE into the falling SMA20, not the current print
-        if(x.p<x.s20*0.998){ entry=x.s20; entryBasis='limit on spike into falling SMA20'; }
-        else { entry=x.p+0.3*atrAbs; entryBasis='limit 0.3×ATR above the print — sell the wick'; }
-      } else if(typ==='rs_leader'){
-        // even leaders get bought on an intraday dip, floor at SMA20
-        entry=Math.max(x.s20, x.p-0.5*atrAbs); entryBasis='limit on 0.5×ATR intraday dip';
-      } else { // rs_laggard
-        // short the bounce/wick, cap at SMA20 overhead resistance
-        entry=Math.min(x.s20, x.p+0.5*atrAbs); entryBasis='limit on 0.5×ATR bounce';
+      // ── Levels come from the server (so the tracker scores exactly what is
+      // published). Legacy fallback only for an old data.json without them.
+      let entry, entryBasis, stop, t1, t2, t2Basis, stopDist;
+      if(x.entry!=null){
+        entry=x.entry; entryBasis=x.trig||'limit at level';
+        stop=x.stop; t1=x.t1; t2=x.t2; t2Basis=x.t2b||'target';
+        stopDist=x.risk||Math.abs(entry-stop);
+      } else {
+        if(typ==='pullback_long'){ entry=x.p>x.s20*1.002?x.s20:x.p-0.3*atrAbs; entryBasis='limit at SMA20 / under print'; }
+        else if(typ==='rip_short'){ entry=x.p<x.s20*0.998?x.s20:x.p+0.3*atrAbs; entryBasis='limit on spike into SMA20'; }
+        else if(typ==='rs_leader'){ entry=Math.max(x.s20,x.p-0.5*atrAbs); entryBasis='limit on 0.5×ATR dip'; }
+        else { entry=Math.min(x.s20,x.p+0.5*atrAbs); entryBasis='limit on 0.5×ATR bounce'; }
+        stopDist=2*atrAbs;
+        stop=isLong?entry-stopDist:entry+stopDist;
+        t1=isLong?entry+1.5*stopDist:entry-1.5*stopDist;
+        t2=isLong?Math.max(x.hi3m,entry+2.5*stopDist):Math.min(x.lo3m,entry-2.5*stopDist);
+        t2Basis=isLong?'3-mo high':'3-mo low';
       }
-      // ── STOP: always 2×ATR from ENTRY (house rule) ──
-      const stop=isLong ? entry-2*atrAbs : entry+2*atrAbs;
-      const stopBasis='2×ATR';
-      const stopDist=2*atrAbs;
       const shares=stopDist>0?Math.floor(riskDollar/stopDist):0;
       const notional=shares*entry;
-      // ── TARGET: 3-mo extreme, measured from ENTRY; extend by ATR at extremes ──
-      let tgt=isLong?x.hi3m:x.lo3m;
-      let tgtBasis=isLong?'3-mo high':'3-mo low';
-      if(isLong && tgt<entry+atrAbs){ tgt=entry+3*atrAbs; tgtBasis='3×ATR ext'; }
-      if(!isLong && tgt>entry-atrAbs){ tgt=entry-3*atrAbs; tgtBasis='3×ATR ext'; }
-      const rr=stopDist>0?Math.abs(tgt-entry)/stopDist:0;
+      const rr2=stopDist>0?Math.abs(t2-entry)/stopDist:0;
+      const rr=(1.5+rr2)/2;   // weighted: half the book exits at T1 (1.5R), half at T2
       const vrHot=(x.vr||0)>=1.5;
-      // Trade grade: a desk doesn't take sub-1.5R swings, however pretty the chart.
+      // Grade: A needs a STRUCTURAL target (a real 3-mo level, not a synthetic
+      // extension), regime alignment, and the strict screen. Everything else B.
       const isAligned=aligned?aligned.includes(typ):true;
-      // near-miss (relaxed screen) candidates cap at B — they fill the line, not the book
-      const grade = rr>=2&&isAligned&&!x.nm ? 'A' : rr>=1.5 ? 'B' : 'PASS';
+      const structural=/3-mo/.test(t2Basis);
+      const grade = structural&&isAligned&&!x.nm ? 'A' : rr>=1.5 ? 'B' : 'PASS';
       const gradeBadge = grade==='A' ? '<span class="su-grade a">A · take it</span>'
         : grade==='B' ? '<span class="su-grade b">B · half size</span>'
         : '<span class="su-grade p">PASS · &lt;1.5R</span>';
@@ -1998,9 +2093,10 @@ function renderSetups(){
         </div>
         <div class="su-plan">
           ${isLong?'ENTRY':'ENTRY (short)'} <b>$${entry.toFixed(2)}</b> <span style="color:var(--text-faint)">(${entryBasis}${Math.abs(entry-x.p)/x.p>0.001?' · now $'+x.p.toFixed(2):''})</span><br>
-          <span class="st">STOP $${stop.toFixed(2)}</span> (${stopBasis}, ${(stopDist/entry*100).toFixed(1)}% risk)
-          · <span class="pl">TARGET $${tgt.toFixed(2)}</span> (${tgtBasis}, ${rr.toFixed(1)}R)<br>
-          SIZE ${shares.toLocaleString()} sh ≈ $${Math.round(notional).toLocaleString()} (risk $${Math.round(riskDollar).toLocaleString()} = ${riskPct}% of book)
+          <span class="st">STOP $${stop.toFixed(2)}</span> (2×ATR, ${(stopDist/entry*100).toFixed(1)}% risk)
+          · <span class="pl">T1 $${t1.toFixed(2)}</span> (1.5R — sell ½, stop→BE)
+          · <span class="pl">T2 $${t2.toFixed(2)}</span> (${t2Basis}, ${rr2.toFixed(1)}R · wtd ${rr.toFixed(1)}R)<br>
+          SIZE ${shares.toLocaleString()} sh ≈ $${Math.round(notional).toLocaleString()} (risk $${Math.round(riskDollar).toLocaleString()} = ${riskPct}% of book)${x.expires?` · <span style="color:var(--text-faint)">auto-cancels ${x.expires} if untriggered</span>`:''}
         </div>
       </div>`;
     }
