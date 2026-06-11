@@ -530,17 +530,39 @@ try:
 
         sec_bull = bool(bp.get('bullish'))
         up = sma20 > sma50; down = sma20 < sma50
+
+        # ── Tradeability guards (win-rate filters) ────────────────────────────
+        # price < $5: spread/manipulation risk. ATR > 8%: stop too wide to swing.
+        # |day move| > 5%: event-driven (earnings/news) — no edge in the setup.
+        if price < 5: continue
+        if atr_pct is None or atr_pct > 8: continue
+        if abs(chg) > 5: continue
+
         typ = None
-        if sec_bull and up and rs_sector > 0 and -4 <= d20 <= 1 and price > sma50:
+        # Pullback long: orderly dip to a rising SMA20 (NOT a knife — d20 ≥ -2.5)
+        if sec_bull and up and rs_sector > 0 and -2.5 <= d20 <= 1 and price > sma50:
             typ = 'pullback_long'
-        elif (not sec_bull) and down and rs_sector < 0 and -1 <= d20 <= 4 and price < sma50:
+        # Rip short: orderly bounce into a falling SMA20 (d20 ≤ +2.5)
+        elif (not sec_bull) and down and rs_sector < 0 and -1 <= d20 <= 2.5 and price < sma50:
             typ = 'rip_short'
-        elif sec_bull and rs_sector > 3 and near_high and up:
+        # RS leader: at highs but NOT extended (≤ 8% above SMA20) — no chasing
+        elif sec_bull and rs_sector > 3 and near_high and up and 0 <= d20 <= 8:
             typ = 'rs_leader'
-        elif (not sec_bull) and rs_sector < -3 and near_low and down:
+        # RS laggard: at lows but NOT capitulated (≥ -8% below SMA20) — don't short the hole
+        elif (not sec_bull) and rs_sector < -3 and near_low and down and -8 <= d20 <= 0:
             typ = 'rs_laggard'
         if not typ: continue
-        score = abs(rs_sector) + abs(sector_rs) * 0.5 + (1.5 if (vol_ratio or 0) >= 1.5 else 0)
+
+        # Score: mean-reversion-to-trend entries carry the higher win rate → priority.
+        # Volume must CONFIRM the setup: quiet pullback/rip (≤1.1×) is healthy;
+        # loud breakout/breakdown (≥1.5×) is conviction. The reverse is a penalty.
+        vr = vol_ratio or 1.0
+        score = abs(rs_sector) + abs(sector_rs) * 0.5
+        if typ in ('pullback_long', 'rip_short'):
+            score += 2.0
+            score += 1.5 if vr <= 1.1 else (-1.0 if vr >= 1.8 else 0)
+        else:
+            score += 1.5 if vr >= 1.5 else (-0.5 if vr < 0.7 else 0)
         candidates.append({
             "t": t, "etf": parent, "type": typ, "p": round(price, 2), "c": chg,
             "s20": round(sma20, 2), "s50": round(sma50, 2),

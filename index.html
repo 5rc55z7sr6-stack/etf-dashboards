@@ -560,6 +560,12 @@
   .su-card .su-plan{font-family:var(--mono);font-size:10.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;color:var(--text-dim)}
   .su-card .su-plan .pl{color:var(--green)} .su-card .su-plan .st{color:var(--red)}
   .su-vr-hot{color:var(--gold);font-weight:700}
+  .su-grade{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:8px;white-space:nowrap}
+  .su-grade.a{background:rgba(63,209,126,.15);color:var(--green);border:1px solid rgba(63,209,126,.35)}
+  .su-grade.b{background:rgba(232,193,74,.12);color:var(--gold);border:1px solid rgba(232,193,74,.3)}
+  .su-grade.p{background:rgba(255,255,255,.04);color:var(--text-faint);border:1px solid var(--line)}
+  .su-card.su-pass{opacity:.5}
+  .su-card.su-pass:hover{opacity:.85}
   .su-empty{font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:14px}
   .su-foot{font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:18px}
   .se-etf-link{cursor:pointer;color:var(--gold);border-bottom:1px dashed rgba(232,193,74,.45);transition:color .15s,border-color .15s;padding:0 1px}
@@ -1850,7 +1856,7 @@ const EVENTS = [
 
 const SU_TYPES = {
   pullback_long: {hdr:'PULLBACK LONGS — leaders dipping to support', col:'var(--green)', side:'long',
-    note:'Stock beating its sector, sector beating SPY, pulled back to a rising SMA20. Buy the dip, stop below SMA20.'},
+    note:'Stock beating its sector, sector beating SPY, orderly dip to a rising SMA20 (no event candles, quiet volume preferred). Buy the dip, stop below SMA20.'},
   rip_short: {hdr:'RIP SHORTS — laggards bouncing into resistance', col:'var(--red)', side:'short',
     note:'Stock losing to a weak sector, rallied back into a falling SMA20. Short the bounce, stop above SMA20.'},
   rs_leader: {hdr:'RS LEADERS — strongest stocks at highs', col:'var(--green)', side:'long',
@@ -1961,8 +1967,14 @@ function renderSetups(){
       if(!isLong && tgt>x.p-atrAbs){ tgt=x.p-2*atrAbs; tgtBasis='2×ATR ext'; }
       const rr=stopDist>0?Math.abs(tgt-x.p)/stopDist:0;
       const vrHot=(x.vr||0)>=1.5;
-      html+=`<div class="su-card ${isLong?'long':'short'}" onclick="openHoldingsPopup('${x.etf}')" title="Click for ${x.etf} holdings">
-        <div class="su-tk-row"><span class="su-tk">${x.t}</span><span class="su-etf">${x.etf}</span>
+      // Trade grade: a desk doesn't take sub-1.5R swings, however pretty the chart.
+      const isAligned=aligned?aligned.includes(typ):true;
+      const grade = rr>=2&&isAligned ? 'A' : rr>=1.5 ? 'B' : 'PASS';
+      const gradeBadge = grade==='A' ? '<span class="su-grade a">A · take it</span>'
+        : grade==='B' ? '<span class="su-grade b">B · half size</span>'
+        : '<span class="su-grade p">PASS · &lt;1.5R</span>';
+      html+=`<div class="su-card ${isLong?'long':'short'}${grade==='PASS'?' su-pass':''}" onclick="openHoldingsPopup('${x.etf}')" title="Click for ${x.etf} holdings">
+        <div class="su-tk-row"><span class="su-tk">${x.t}</span><span class="su-etf">${x.etf}</span>${gradeBadge}
           <span class="su-px">$${x.p.toFixed(2)} <span style="color:${x.c>=0?'var(--green)':'var(--red)'}">${x.c>=0?'+':''}${x.c}%</span></span></div>
         <div class="su-metrics">
           <span>RS vs ${x.etf} 20d <b style="color:${x.rsS>=0?'var(--green)':'var(--red)'}">${x.rsS>=0?'+':''}${x.rsS}%</b></span>
