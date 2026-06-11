@@ -170,8 +170,10 @@ for etf in ETF_TICKERS:
                     sym = str(sym).strip().upper()
                     if not valid_tk(sym) or sym == etf:
                         continue
-                    name = str(row.get('holdingName', sym))
-                    raw_pct = float(row.get('holdingPercent', 0) or 0)
+                    # yfinance column names vary by version: 'Name'/'Holding Percent'
+                    # (current) vs 'holdingName'/'holdingPercent' (older)
+                    name = str(row.get('Name') or row.get('holdingName') or sym)
+                    raw_pct = float(row.get('Holding Percent') or row.get('holdingPercent') or 0)
                     # Yahoo sometimes returns 0-1 fraction, sometimes 0-100 percentage
                     pct = raw_pct if raw_pct > 1 else raw_pct * 100
                     rows.append({'t': sym, 'n': name, 'w': round(pct, 2)})
@@ -334,8 +336,30 @@ else:
 # ──────────────────────────────────────────────────────────────────────────────
 # STEP 3 — Price download for all ETFs + holdings + leveraged ETFs (5d, fast)
 # ──────────────────────────────────────────────────────────────────────────────
+# Tickers shown in the dashboard's static top-10 holdings tables that may not
+# appear in Yahoo's live topHoldings (so they'd otherwise have no price).
+STATIC_PAGE_TICKERS = [
+ 'AAON','ABB','ABT','ACM','ACN','ADBE','ADI','AEIS','AES','AI','AIR','AMBA','AMC','AME','AON','APOG',
+ 'ARE','ARQT','ARRY','ATEN','AVB','AXON','AZN','BAH','BAKKT','BALL','BBY','BDX','BEP','BHP','BIDU','BLK',
+ 'BMY','BNTX','BOX','BP','BRK.B','BSX','BTBT','CACI','CAG','CC','CCJ','CCO','CDNA','CDNS','CE','CELH',
+ 'CEVA','CF','CFLT','CGNX','CHD','CHKP','CHTR','CI','CMCSA','CME','CMG','CNP','COF','COHU','CPB','CRM',
+ 'CSIQ','CSWI','CTAS','CVS','CYBR','DCO','DD','DECK','DGHI','DHR','DKNG','DNN','DOW','DQ','DRS','DVN',
+ 'EB','ECL','ED','EFR','EL','ELV','EME','EMR','ENTG','EQNR','EQR','ES','ESLT','ESTC','EU','EVRG','EWJ',
+ 'EXAS','EXC','EXR','F','FANG','FATE','FE','FI','FIX','FORM','FOXA','FSLY','GEHC','GEN','GIS','GOLD',
+ 'GRMN','GTLB','GVA','HAL','HBM','HES','HLT','HRL','HSBC','HSY','HUBS','HWC','ICE','IDCC','IESC','IFF',
+ 'INFY','INVH','IP','IPG','IRM','IVN','J','JBHT','JCI','JOBY','KFRC','KHC','KMI','KRE','LDOS','LNG',
+ 'LNT','LUV','LYB','MAA','MARA','MDB','MDT','MDU','MET','MKC','MKSI','MLM','MPWR','MRCY','MRNA','MSTR',
+ 'MTCH','MYRG','NEO','NFLX','NI','NKE','NNN','NOW','NRG','NTLA','NVR','NVS','NWSA','NXE','OKE','ONTO',
+ 'OXY','PACB','PARA','PATH','PCAR','PDN','PH','PKG','PLS','PLXS','PNC','PNW','PPG','PPL','PRCT','QBTS',
+ 'QLYS','QUBT','RARE','RCUS','RGEN','RGTI','RH','RIOT','RMBS','ROAD','ROP','RPD','RPM','RSG','RXRX','S',
+ 'SAIA','SAIC','SAIL','SAN','SBAC','SHEL','SJM','SLAB','SMCI','SMPL','SNOW','SNPS','SOUN','SPCE','SPGI',
+ 'SPHB','SPIR','SPOT','SPR','SPSC','SQ','SRRK','STZ','SWKS','SYK','T','TAP','TEAM','TENB','TGT','TKO',
+ 'TMUS','TREX','TRGP','TRMB','TRV','TTE','TWLO','TXT','UDR','UFPI','UL','USB','UUUU','VALE','VCYT',
+ 'VRNS','VRRM','VZ','WEC','WOLF','YUM','ZBRA','ZM','ZS','ZTS','EFZ','QLD','UTSL',
+]
+
 all_price_tks = sorted(set(
-    t for t in list(all_holding_tks) + ETF_TICKERS + LEVERAGED_TICKERS
+    t for t in list(all_holding_tks) + ETF_TICKERS + LEVERAGED_TICKERS + STATIC_PAGE_TICKERS
     if valid_tk(t)
 ))
 # Skip tickers already in closes (1y data → reuse)

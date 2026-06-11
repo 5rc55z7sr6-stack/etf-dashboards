@@ -2395,7 +2395,7 @@ async function fetchFastMovers(holdings, etfTicker){
   const results=await Promise.allSettled(tickers.map(tk=>fetchOne(tk)));
   const valid=results.filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
   window._fmPool=valid.length;
-  return valid.sort((a,b)=>b.chg-a.chg).slice(0,5);
+  return valid.sort((a,b)=>Math.abs(b.chg)-Math.abs(a.chg)).slice(0,5);
 }
 
 function openHoldingsPopup(ticker){
@@ -2575,7 +2575,7 @@ function openHoldingsPopup(ticker){
     // PATH 1: workflow-supplied full holdings × cached prices
     if(liveH&&liveH.length&&tp_c&&Object.keys(tp_c).length>10){
       const movers=liveH.map(h=>{const d=tp_c[h.t];return d?{t:h.t,n:h.n,w:wtMap.get(h.t)||h.w||0,chg:d.c,price:d.p}:null;})
-        .filter(Boolean).sort((a,b)=>b.chg-a.chg);
+        .filter(Boolean).sort((a,b)=>Math.abs(b.chg)-Math.abs(a.chg));
       renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · full ETF scan`);
       return;
     }
@@ -2610,7 +2610,7 @@ function openHoldingsPopup(ticker){
 
     if(tp_c&&Object.keys(tp_c).length>10){
       const movers=merged.map(h=>{const d=tp_c[h.t];return d?{t:h.t,n:h.n,w:wtMap.get(h.t)||h.w||0,chg:d.c,price:d.p}:null;})
-        .filter(Boolean).sort((a,b)=>b.chg-a.chg);
+        .filter(Boolean).sort((a,b)=>Math.abs(b.chg)-Math.abs(a.chg));
       const src=yhHoldings.length?`${merged.length} holdings scanned`:'stored holdings';
       renderMoversRows(movers.slice(0,5),movers.length,`${ageLabel} · ${src}`);
     } else {
