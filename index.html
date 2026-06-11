@@ -652,7 +652,7 @@
 </div>
 <script>
 (function(){
-  const SECRET='fd12c522edf345b718e4b7e8bfd589ea';
+  const SECRET='f9e925a118c294d75bed8ae495f88430';
   const weekKey=Math.floor((Math.floor(Date.now()/86400000)+3)/7); // Monday-based week index
   async function codeFor(wk){
     const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(SECRET+':'+wk));
