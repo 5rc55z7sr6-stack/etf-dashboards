@@ -486,7 +486,7 @@ try:
     spy_r20 = etf_ret20.get('SPY')
 
     stocks_above_s20 = 0; stocks_total = 0; new_highs = 0; new_lows = 0
-    candidates = []
+    universe = []
     for t in stock_tks:
         s = series_of(cl3, t)
         if s is None: continue
@@ -538,49 +538,84 @@ try:
         if atr_pct is None or atr_pct > 8: continue
         if abs(chg) > 5: continue
 
-        typ = None
-        # Pullback long: orderly dip to a rising SMA20 (NOT a knife — d20 ≥ -2.5)
-        if sec_bull and up and rs_sector > 0 and -2.5 <= d20 <= 1 and price > sma50:
-            typ = 'pullback_long'
-        # Rip short: orderly bounce into a falling SMA20 (d20 ≤ +2.5)
-        elif (not sec_bull) and down and rs_sector < 0 and -1 <= d20 <= 2.5 and price < sma50:
-            typ = 'rip_short'
-        # RS leader: at highs but NOT extended (≤ 8% above SMA20) — no chasing
-        elif sec_bull and rs_sector > 3 and near_high and up and 0 <= d20 <= 8:
-            typ = 'rs_leader'
-        # RS laggard: at lows but NOT capitulated (≥ -8% below SMA20) — don't short the hole
-        elif (not sec_bull) and rs_sector < -3 and near_low and down and -8 <= d20 <= 0:
-            typ = 'rs_laggard'
-        if not typ: continue
-
-        # Score: mean-reversion-to-trend entries carry the higher win rate → priority.
-        # Volume must CONFIRM the setup: quiet pullback/rip (≤1.1×) is healthy;
-        # loud breakout/breakdown (≥1.5×) is conviction. The reverse is a penalty.
-        vr = vol_ratio or 1.0
-        score = abs(rs_sector) + abs(sector_rs) * 0.5
-        if typ in ('pullback_long', 'rip_short'):
-            score += 2.0
-            score += 1.5 if vr <= 1.1 else (-1.0 if vr >= 1.8 else 0)
-        else:
-            score += 1.5 if vr >= 1.5 else (-0.5 if vr < 0.7 else 0)
-        candidates.append({
-            "t": t, "etf": parent, "type": typ, "p": round(price, 2), "c": chg,
-            "s20": round(sma20, 2), "s50": round(sma50, 2),
-            "d20": round(d20, 2), "d50": round(d50, 2),
+        universe.append({
+            "t": t, "etf": parent, "p": price, "c": chg,
+            "s20": sma20, "s50": sma50, "d20": d20, "d50": d50,
             "atr": atr_pct, "vr": vol_ratio,
             "rsS": rs_sector, "rsE": sector_rs,
-            "hi3m": round(hi3m, 2), "lo3m": round(lo3m, 2),
-            "score": round(score, 2),
+            "hi3m": hi3m, "lo3m": lo3m,
+            "sec_bull": sec_bull, "up": up, "down": down,
         })
 
-    candidates.sort(key=lambda x: -x["score"])
-    # max 4 per type so one regime doesn't drown the list
-    per_type = {}
-    final = []
-    for cnd in candidates:
-        if per_type.get(cnd["type"], 0) >= 4: continue
+    # ── Two-pass classification: strict (A-quality windows) first, then a
+    # "near-miss" pass with slightly wider windows to fill each line to 4. ──
+    def classify(m, loose):
+        d20, rs, p = m["d20"], m["rsS"], m["p"]
+        nh = p >= m["hi3m"] * (0.96 if loose else 0.98)
+        nl = p <= m["lo3m"] * (1.04 if loose else 1.02)
+        pbL, pbH   = (-4, 2)   if loose else (-2.5, 1)    # pullback window
+        rpL, rpH   = (-2, 4)   if loose else (-1, 2.5)    # rip window
+        ldH        = 11        if loose else 8            # leader extension cap
+        lgL        = -11       if loose else -8           # laggard capitulation cap
+        rsMin      = 2         if loose else 3            # RS threshold for breakout types
+        if m["sec_bull"] and m["up"] and rs > 0 and pbL <= d20 <= pbH and p > m["s50"]:
+            return 'pullback_long'
+        if (not m["sec_bull"]) and m["down"] and rs < 0 and rpL <= d20 <= rpH and p < m["s50"]:
+            return 'rip_short'
+        if m["sec_bull"] and rs > rsMin and nh and m["up"] and 0 <= d20 <= ldH:
+            return 'rs_leader'
+        if (not m["sec_bull"]) and rs < -rsMin and nl and m["down"] and lgL <= d20 <= 0:
+            return 'rs_laggard'
+        return None
+
+    def score_of(m, typ, loose):
+        # Mean-reversion-to-trend entries carry the higher win rate → priority.
+        # Volume must CONFIRM: quiet pullback/rip (≤1.1×) healthy; loud
+        # breakout/breakdown (≥1.5×) is conviction. Near-misses pay a penalty.
+        vr = m["vr"] or 1.0
+        s = abs(m["rsS"]) + abs(m["rsE"]) * 0.5
+        if typ in ('pullback_long', 'rip_short'):
+            s += 2.0
+            s += 1.5 if vr <= 1.1 else (-1.0 if vr >= 1.8 else 0)
+        else:
+            s += 1.5 if vr >= 1.5 else (-0.5 if vr < 0.7 else 0)
+        if loose: s -= 1.5
+        return round(s, 2)
+
+    def emit(m, typ, loose):
+        return {
+            "t": m["t"], "etf": m["etf"], "type": typ,
+            "p": round(m["p"], 2), "c": m["c"],
+            "s20": round(m["s20"], 2), "s50": round(m["s50"], 2),
+            "d20": round(m["d20"], 2), "d50": round(m["d50"], 2),
+            "atr": m["atr"], "vr": m["vr"], "rsS": m["rsS"], "rsE": m["rsE"],
+            "hi3m": round(m["hi3m"], 2), "lo3m": round(m["lo3m"], 2),
+            "score": score_of(m, typ, loose), "nm": 1 if loose else 0,
+        }
+
+    PER_TYPE_TARGET = 4
+    strict = []
+    for m in universe:
+        typ = classify(m, loose=False)
+        if typ: strict.append(emit(m, typ, False))
+    strict.sort(key=lambda x: -x["score"])
+    per_type, final, taken = {}, [], set()
+    for cnd in strict:
+        if per_type.get(cnd["type"], 0) >= PER_TYPE_TARGET: continue
         per_type[cnd["type"]] = per_type.get(cnd["type"], 0) + 1
-        final.append(cnd)
+        final.append(cnd); taken.add(cnd["t"])
+    # near-miss fill
+    loose_pool = []
+    for m in universe:
+        if m["t"] in taken: continue
+        typ = classify(m, loose=True)
+        if typ and per_type.get(typ, 0) < PER_TYPE_TARGET:
+            loose_pool.append(emit(m, typ, True))
+    loose_pool.sort(key=lambda x: -x["score"])
+    for cnd in loose_pool:
+        if per_type.get(cnd["type"], 0) >= PER_TYPE_TARGET: continue
+        per_type[cnd["type"]] = per_type.get(cnd["type"], 0) + 1
+        final.append(cnd); taken.add(cnd["t"])
 
     sec_bull_n = sum(1 for e in SECTOR_ETFS if (bp_scores.get(e) or {}).get('bullish'))
     rsp = bp_scores.get('RSP') or {}
