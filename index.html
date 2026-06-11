@@ -570,6 +570,7 @@
   .su-stats th{text-align:left;color:var(--text-faint);font-weight:400;letter-spacing:.8px;padding:3px 8px;border-bottom:1px solid var(--line);font-size:8.5px}
   .su-stats td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.03)}
   .su-track{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;background:var(--card)}
+  .su-track-scroll{max-height:480px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding-right:6px}
   .su-track-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;color:var(--text-dim);padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
   .su-track-row:last-child{border-bottom:none}
   .su-track-row b{color:var(--text)}
@@ -1991,7 +1992,7 @@ function renderSetupTracking(open){
       ${s.px!=null?`<span style="margin-left:auto">now $${s.px} ${uR}</span>`:''}
     </div>`;
   }).join('');
-  el.innerHTML=`<div class="su-track"><div class="su-stats-hdr">🎫 TRACKING — published setups being scored live</div>${rows}</div>`;
+  el.innerHTML=`<div class="su-track"><div class="su-stats-hdr">🎫 TRACKING — published setups being scored live <span style="color:var(--text-faint);font-weight:400">· ${open.length} open${open.length>15?' · scroll for more':''}</span></div><div class="su-track-scroll">${rows}</div></div>`;
 }
 
 const SU_TYPES = {
