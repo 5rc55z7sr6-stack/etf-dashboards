@@ -857,13 +857,15 @@
 
   <!-- TODAY'S SETUPS -->
   <section id="setups">
-    <div class="sec-head">
+    <div class="sec-head sec-collapse-hdr" id="setupsToggleHdr" onclick="toggleSetupsSection()" title="Click to expand / collapse">
       <div>
         <div class="num">TODAY'S SETUPS / TRADE SHEET</div>
         <h3>Where to focus — concluded for you</h3>
         <p class="sub">Scans every stock in the universe (SMA20/50 structure, 20-day relative strength vs own sector, sector vs SPY, volume, ATR) and concludes: which side to trade, which sectors, which names, at what level, with what size.</p>
       </div>
+      <span class="sec-arrow">▼</span>
     </div>
+    <div class="sec-collapsible collapsed" id="setupsWrap" style="max-height:0">
 
     <!-- 1. THE CONCLUSION -->
     <div id="suConclusion" class="su-conclusion"></div>
@@ -885,6 +887,7 @@
     <!-- 5. SETUP CARDS -->
     <div id="suList" class="su-list"></div>
     <div class="su-foot">Candidates pre-screened server-side every 10 min · levels are closing-price based · not investment advice</div>
+    </div><!-- /setupsWrap -->
   </section>
 
   <!-- BEST PERFORMERS -->
@@ -1163,7 +1166,7 @@ document.querySelectorAll('#ratioFilters .chip').forEach(ch=>{
 });
 
 // Map tab id → collapsible wrap id (auto-expand when tab clicked)
-const TAB_EXPAND = {sectors:'sectorsWrap', ratios:'ratiosWrap'};
+const TAB_EXPAND = {sectors:'sectorsWrap', ratios:'ratiosWrap', setups:'setupsWrap'};
 const tabs=document.querySelectorAll('.tab');
 tabs.forEach(t=>t.addEventListener('click',()=>{
   const id=t.dataset.go;
@@ -3205,6 +3208,7 @@ function toggleCollapse(hdrId, wrapId){
 }
 function toggleThemeSection(){ toggleCollapse('themeToggleHdr','themeSignalsWrap'); }
 function toggleSectorsSection(){ toggleCollapse('sectorsToggleHdr','sectorsWrap'); }
+function toggleSetupsSection(){ toggleCollapse('setupsToggleHdr','setupsWrap'); }
 function toggleRatiosSection(){ toggleCollapse('ratiosToggleHdr','ratiosWrap'); }
 
 (function setupMobileCollapse(){
