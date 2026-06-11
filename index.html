@@ -887,7 +887,7 @@
       <span class="su-risk-lbl">POSITION SIZING</span>
       <label>Book $ <input id="suBook" type="number" value="100000" min="1000" step="1000" onchange="renderSetups()"></label>
       <label>Risk per trade % <input id="suRisk" type="number" value="1" min="0.1" max="5" step="0.1" onchange="renderSetups()"></label>
-      <span class="su-risk-note">stop = SMA20 break (or 1.5×ATR if price already past it) · size = risk ÷ stop-distance</span>
+      <span class="su-risk-note">entry = limit at key level (SMA20 / wick) · stop = always 2×ATR from entry · size = risk ÷ 2×ATR</span>
     </div>
 
     <!-- 5. SETUP CARDS -->
@@ -1946,26 +1946,36 @@ function renderSetups(){
     for(const x of rows){
       const isLong=t.side==='long';
       const atrAbs=((x.atr||2)/100)*x.p;
-      // Stop: SMA20 break — but a stop must ALWAYS be on the loss side of entry.
-      // In a pullback the price can already be below SMA20; then use 1.5×ATR instead.
-      let stop=x.s20*(isLong?0.995:1.005);
-      let stopBasis='SMA20 break';
-      // invalid side (price already past SMA20) OR too far (> 2.5×ATR) → volatility stop
-      const badSide=isLong ? stop>=x.p*0.998 : stop<=x.p*1.002;
-      if(badSide || Math.abs(x.p-stop)>2.5*atrAbs){
-        stop=isLong ? x.p-1.5*atrAbs : x.p+1.5*atrAbs;
-        stopBasis='1.5×ATR';
+      // ── ENTRY: a LEVEL, not the last print. You don't chase — you place a
+      // limit where the spike/wick exhausts into the key level (SMA20).
+      let entry, entryBasis;
+      if(typ==='pullback_long'){
+        // wait for the dip to touch SMA20 support; if already there/below, work the market
+        if(x.p>x.s20*1.002){ entry=x.s20; entryBasis='limit at SMA20 support — wait for the dip'; }
+        else { entry=x.p; entryBasis='at support now'; }
+      } else if(typ==='rip_short'){
+        // short the SPIKE into the falling SMA20, not the current print
+        if(x.p<x.s20*0.998){ entry=x.s20; entryBasis='limit on spike into falling SMA20'; }
+        else { entry=x.p; entryBasis='at resistance now'; }
+      } else if(typ==='rs_leader'){
+        // even leaders get bought on an intraday dip, floor at SMA20
+        entry=Math.max(x.s20, x.p-0.5*atrAbs); entryBasis='limit on 0.5×ATR intraday dip';
+      } else { // rs_laggard
+        // short the bounce/wick, cap at SMA20 overhead resistance
+        entry=Math.min(x.s20, x.p+0.5*atrAbs); entryBasis='limit on 0.5×ATR bounce';
       }
-      const stopDist=Math.abs(x.p-stop);
+      // ── STOP: always 2×ATR from ENTRY (house rule) ──
+      const stop=isLong ? entry-2*atrAbs : entry+2*atrAbs;
+      const stopBasis='2×ATR';
+      const stopDist=2*atrAbs;
       const shares=stopDist>0?Math.floor(riskDollar/stopDist):0;
-      const notional=shares*x.p;
-      // Target: 3-mo extreme — but must be on the profit side of entry by a
-      // meaningful margin; at the highs/lows use a 2×ATR extension instead.
+      const notional=shares*entry;
+      // ── TARGET: 3-mo extreme, measured from ENTRY; extend by ATR at extremes ──
       let tgt=isLong?x.hi3m:x.lo3m;
       let tgtBasis=isLong?'3-mo high':'3-mo low';
-      if(isLong && tgt<x.p+atrAbs){ tgt=x.p+2*atrAbs; tgtBasis='2×ATR ext'; }
-      if(!isLong && tgt>x.p-atrAbs){ tgt=x.p-2*atrAbs; tgtBasis='2×ATR ext'; }
-      const rr=stopDist>0?Math.abs(tgt-x.p)/stopDist:0;
+      if(isLong && tgt<entry+atrAbs){ tgt=entry+3*atrAbs; tgtBasis='3×ATR ext'; }
+      if(!isLong && tgt>entry-atrAbs){ tgt=entry-3*atrAbs; tgtBasis='3×ATR ext'; }
+      const rr=stopDist>0?Math.abs(tgt-entry)/stopDist:0;
       const vrHot=(x.vr||0)>=1.5;
       // Trade grade: a desk doesn't take sub-1.5R swings, however pretty the chart.
       const isAligned=aligned?aligned.includes(typ):true;
@@ -1985,7 +1995,8 @@ function renderSetups(){
           <span>Volume <b class="${vrHot?'su-vr-hot':''}">${x.vr!=null?x.vr+'× avg'+(vrHot?' 🔥':''):'–'}</b></span>
         </div>
         <div class="su-plan">
-          ${isLong?'ENTRY':'ENTRY (short)'} ~$${x.p.toFixed(2)} · <span class="st">STOP $${stop.toFixed(2)}</span> (${stopBasis}, ${(stopDist/x.p*100).toFixed(1)}% risk)
+          ${isLong?'ENTRY':'ENTRY (short)'} <b>$${entry.toFixed(2)}</b> <span style="color:var(--text-faint)">(${entryBasis}${Math.abs(entry-x.p)/x.p>0.001?' · now $'+x.p.toFixed(2):''})</span><br>
+          <span class="st">STOP $${stop.toFixed(2)}</span> (${stopBasis}, ${(stopDist/entry*100).toFixed(1)}% risk)
           · <span class="pl">TARGET $${tgt.toFixed(2)}</span> (${tgtBasis}, ${rr.toFixed(1)}R)<br>
           SIZE ${shares.toLocaleString()} sh ≈ $${Math.round(notional).toLocaleString()} (risk $${Math.round(riskDollar).toLocaleString()} = ${riskPct}% of book)
         </div>
