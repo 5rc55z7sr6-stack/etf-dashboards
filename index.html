@@ -638,6 +638,50 @@
 </style>
 </head>
 <body>
+<!-- ── WEEKLY ACCESS GATE ──────────────────────────────────────────────────────
+     Code rotates every Monday 00:00 UTC. Generate codes with gate_codes.py.
+     Client-side only: deters link-sharing, it is NOT cryptographic security. -->
+<div id="gateOverlay" style="position:fixed;inset:0;z-index:99999;background:#16191b;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;font-family:'JetBrains Mono',monospace">
+  <div style="font-size:13px;letter-spacing:3px;color:#e8c14a;font-weight:700">TRADER<span style="color:#fff">GK</span> · PRIVATE DESK</div>
+  <div style="font-size:11px;color:#8a9499">Enter this week's access code</div>
+  <input id="gateInput" type="password" autocomplete="off" placeholder="ACCESS CODE" style="background:#1e2326;border:1px solid #3a4145;color:#e9edef;font-family:inherit;font-size:14px;letter-spacing:2px;padding:10px 16px;border-radius:8px;text-align:center;width:220px;outline:none">
+  <button id="gateBtn" style="background:#e8c14a;color:#16191b;border:none;font-family:inherit;font-weight:700;font-size:11px;letter-spacing:1.5px;padding:10px 26px;border-radius:8px;cursor:pointer">UNLOCK</button>
+  <div id="gateMsg" style="font-size:10px;color:#ff5c61;height:14px"></div>
+  <div style="font-size:9px;color:#5a6468">code expires every Monday · ask GK for this week's code</div>
+</div>
+<script>
+(function(){
+  const SECRET='fd12c522edf345b718e4b7e8bfd589ea';
+  const weekKey=Math.floor((Math.floor(Date.now()/86400000)+3)/7); // Monday-based week index
+  async function codeFor(wk){
+    const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(SECRET+':'+wk));
+    return [...new Uint8Array(buf)].slice(0,3).map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+  }
+  const ov=document.getElementById('gateOverlay');
+  document.documentElement.style.overflow='hidden';
+  function open(){ov.remove();document.documentElement.style.overflow='';}
+  async function check(input){
+    const code=await codeFor(weekKey);
+    if((input||'').trim().toUpperCase()===code){
+      localStorage.setItem('gk_gate',weekKey+':'+code); open(); return true;
+    }
+    return false;
+  }
+  (async()=>{
+    const saved=localStorage.getItem('gk_gate');
+    if(saved){
+      const [wk,c]=saved.split(':');
+      if(parseInt(wk)===weekKey && c===await codeFor(weekKey)){open();return;}
+      localStorage.removeItem('gk_gate'); // expired — new week, new code
+    }
+    const inp=document.getElementById('gateInput'),btn=document.getElementById('gateBtn'),msg=document.getElementById('gateMsg');
+    async function go(){ if(!await check(inp.value)){msg.textContent='Wrong or expired code';inp.value='';} }
+    btn.addEventListener('click',go);
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+    inp.focus();
+  })();
+})();
+</script>
 
 <header>
   <div class="head-inner">
