@@ -1706,15 +1706,20 @@ function renderBanner(data){
   // ── Weighted scoring: strong-bull=+2w, bull=+1w, bear=-1w, strong-bear=-2w ──
   // Each ratio carries a weight (w) reflecting its macro importance.
   // Masters=3, carry risk=2.5, credit/breadth=2, directional=1.5, rotational=1, ambiguous=0.5
-  let score=0,max=0,bullN=0,strongBullN=0,strongBearN=0;
+  let score=0,max=0,bullN=0,strongBullN=0,strongBearN=0,neutralN=0;
   valid.forEach(r=>{
     const w=r.w||1;
+    // Dead zone: a ratio within ±0.3% of its SMA20 has no real conviction —
+    // it's ON the line, and a hair either side would flip the binary signal.
+    // Such ratios abstain: no vote, excluded from max (prevents score churn).
+    if(r.curr!=null&&r.s20&&Math.abs(r.curr-r.s20)/Math.abs(r.s20)<0.003){neutralN++;return;}
     const mult=r.cl.sig==='strong-bull'||r.cl.sig==='strong-bear'?2:1;
     const pts=mult*w;
     max+=2*w; // max possible is always 2×w (strong-bull)
     if(r.cl.bullish){score+=pts;bullN++;if(r.cl.sig==='strong-bull')strongBullN++;}
     else{score-=pts;if(r.cl.sig==='strong-bear')strongBearN++;}
   });
+  if(max===0){max=1;}
 
   const masters=valid.filter(r=>r.master),mBull=masters.filter(r=>r.cl.bullish).length;
   const pctBar=(score+max)/(2*max)*100;
@@ -1875,7 +1880,7 @@ function renderBanner(data){
   document.getElementById('bigLight').className=`rl-light ${lc}`;
   document.getElementById('bigCall').textContent=call.replace(' ▲','').replace(' ▼','');
   document.getElementById('bigCall').style.color=rbCol;
-  document.getElementById('bigScore').innerHTML=`<span style="color:var(--text)">${mBull}/4</span> masters · <span style="color:var(--text)">${bullN}/${valid.length}</span> bullish`;
+  document.getElementById('bigScore').innerHTML=`<span style="color:var(--text)">${mBull}/4</span> masters · <span style="color:var(--text)">${bullN}/${valid.length}</span> bullish${neutralN?` · <span style="color:var(--text-faint)" title="within ±0.3% of SMA20 — no conviction, abstains from the score">${neutralN} on the line</span>`:''}`;
   document.getElementById('rbScoreBig').innerHTML=`${ss}<span class="rb-score-denom">/${maxR}</span>`;
   document.getElementById('rbScoreBig').style.color=rbCol;
   document.getElementById('rbMeterFill').style.cssText=`width:${pctBar.toFixed(1)}%;background:${rbCol}`;
@@ -1965,7 +1970,7 @@ function renderSetupStats(stats){
       <span class="su-stat"><span class="v" style="color:${cl(stats.expR)}">${fm(stats.expR,'R')}</span><span class="l">EXPECTANCY / TRADE</span></span>
     </div>
     ${tt?`<table><tr><th>TYPE</th><th>ISSUED</th><th>W</th><th>L</th><th>HIT</th></tr>${tt}</table>`:''}
-    <div style="font-family:var(--mono);font-size:8.5px;color:var(--text-faint);margin-top:8px">Win = any closed trade with positive R (T2 full win, BE after T1 = +0.75R). Loss = stop −1R. Expectancy in R per closed trade — positive means the system pays.</div>
+    <div style="font-family:var(--mono);font-size:8.5px;color:var(--text-faint);margin-top:8px">Win = any closed trade with positive R (T2 full win, BE after T1 = +0.75R). Loss = stop −1R. Expectancy in R per closed trade — positive means the system pays. Fills &amp; stops are checked against the day's intraday high/low (wicks count); same-day ties resolve AGAINST the trade, so these numbers can only understate.</div>
   </div>`;
 }
 

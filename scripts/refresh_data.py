@@ -422,6 +422,7 @@ def _spark_chunk(symbols):
 
 corrected = 0
 spark_fail = 0
+day_hilo = {}   # ticker -> (day_low, day_high) for wick-accurate setup tracking
 for i in range(0, len(all_price_tks), 20):
     chunk = all_price_tks[i:i+20]
     try:
@@ -438,6 +439,9 @@ for i in range(0, len(all_price_tks), 20):
                 if ticker_prices.get(tk) != new:
                     corrected += 1
                 ticker_prices[tk] = new
+                dl, dh = meta.get("regularMarketDayLow"), meta.get("regularMarketDayHigh")
+                if dl and dh and dl > 0:
+                    day_hilo[tk] = (float(dl), float(dh))
             except Exception:
                 pass
     except Exception as e:
@@ -658,22 +662,23 @@ try:
 
     # ── Setup tracker: every published setup is logged and scored on later
     # refreshes. History persists INSIDE data.json (read old → advance → write).
-    def advance_setup(s, price, today_str):
-        """Advance one tracked setup's lifecycle. Mutates and returns s.
-        pending → triggered (limit touched, not gapped through stop)
-                → expired (untriggered past expiry) | cancelled_gap
+    def advance_setup(s, price, lo, hi, today_str):
+        """Advance one tracked setup's lifecycle using the day's LOW/HIGH so
+        intraday wicks count (a snapshot-only check misses fills and stops
+        between refreshes). Mutates and returns s.
+        pending → triggered (limit touched by the wick) | expired
         triggered → stopped (-1R) | t1 (half off at 1.5R, stop→breakeven)
         t1 → t2 (full win, r=(1.5+rr2)/2) | be (rest flat, r=+0.75)
+        Tie-breaks are CONSERVATIVE: if both stop and target were touched the
+        same day (order unknowable from hi/lo), the stop wins; after T1, the
+        breakeven exit wins over T2. The track record can only understate.
         triggered older than 21 days → timeout at market R."""
         long_side = s["side"] == "long"
         if s["status"] == "pending":
             if today_str > s["expires"]:
                 s["status"] = "expired"; s["closed"] = today_str; return s
-            hit = price <= s["entry"] if long_side else price >= s["entry"]
-            blown = price <= s["stop"] if long_side else price >= s["stop"]
-            if hit:
-                if blown:
-                    s["status"] = "cancelled_gap"; s["closed"] = today_str; return s
+            filled = (lo <= s["entry"]) if long_side else (hi >= s["entry"])
+            if filled:
                 s["status"] = "triggered"; s["trigDate"] = today_str
         if s["status"] == "triggered":
             try:
@@ -681,20 +686,23 @@ try:
                        - datetime.strptime(s.get("trigDate", today_str), "%Y-%m-%d")).days
             except Exception:
                 age = 0
-            if (price <= s["stop"]) if long_side else (price >= s["stop"]):
+            stop_hit = (lo <= s["stop"]) if long_side else (hi >= s["stop"])
+            t1_hit   = (hi >= s["t1"])  if long_side else (lo <= s["t1"])
+            if stop_hit:   # conservative: stop wins a same-day tie with T1
                 s["status"] = "stopped"; s["r"] = -1.0; s["closed"] = today_str; return s
-            if (price >= s["t1"]) if long_side else (price <= s["t1"]):
+            if t1_hit:
                 s["status"] = "t1"
             elif age > 21:
                 mr = (price - s["entry"]) / s["risk"] * (1 if long_side else -1)
                 s["status"] = "timeout"; s["r"] = round(mr, 2); s["closed"] = today_str; return s
         if s["status"] == "t1":
-            if (price >= s["t2"]) if long_side else (price <= s["t2"]):
+            be_hit = (lo <= s["entry"]) if long_side else (hi >= s["entry"])
+            t2_hit = (hi >= s["t2"])    if long_side else (lo <= s["t2"])
+            if be_hit:     # conservative: BE exit wins a same-day tie with T2
+                s["status"] = "be"; s["r"] = 0.75; s["closed"] = today_str
+            elif t2_hit:
                 rr2 = abs(s["t2"] - s["entry"]) / s["risk"]
                 s["status"] = "t2"; s["r"] = round((1.5 + rr2) / 2, 2); s["closed"] = today_str
-            elif (price <= s["entry"]) if long_side else (price >= s["entry"]):
-                # half banked at +1.5R, rest scratched at breakeven
-                s["status"] = "be"; s["r"] = 0.75; s["closed"] = today_str
         return s
 
     prev_hist = []
@@ -708,7 +716,9 @@ try:
     for s in prev_hist:
         if s.get("status") in OPEN_STATES and all(k in s for k in ("side","entry","stop","t1","t2","risk","expires")):
             tp = ticker_prices.get(s.get("t"))
-            if tp: advance_setup(s, tp["p"], today_str)
+            if tp:
+                lo, hi = day_hilo.get(s["t"], (tp["p"], tp["p"]))
+                advance_setup(s, tp["p"], lo, hi, today_str)
     open_keys = {(s.get("t"), s.get("type")) for s in prev_hist if s.get("status") in OPEN_STATES}
     for cnd in final[:16]:
         if (cnd["t"], cnd["type"]) in open_keys: continue
