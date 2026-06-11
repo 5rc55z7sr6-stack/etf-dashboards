@@ -881,7 +881,7 @@
       <span class="su-risk-lbl">POSITION SIZING</span>
       <label>Book $ <input id="suBook" type="number" value="100000" min="1000" step="1000" onchange="renderSetups()"></label>
       <label>Risk per trade % <input id="suRisk" type="number" value="1" min="0.1" max="5" step="0.1" onchange="renderSetups()"></label>
-      <span class="su-risk-note">stop = SMA20 break · size = risk ÷ stop-distance</span>
+      <span class="su-risk-note">stop = SMA20 break (or 1.5×ATR if price already past it) · size = risk ÷ stop-distance</span>
     </div>
 
     <!-- 5. SETUP CARDS -->
@@ -1939,11 +1939,26 @@ function renderSetups(){
       <div class="su-cards">`;
     for(const x of rows){
       const isLong=t.side==='long';
-      const stop=x.s20*(isLong?0.995:1.005);        // SMA20 break + 0.5% buffer
+      const atrAbs=((x.atr||2)/100)*x.p;
+      // Stop: SMA20 break — but a stop must ALWAYS be on the loss side of entry.
+      // In a pullback the price can already be below SMA20; then use 1.5×ATR instead.
+      let stop=x.s20*(isLong?0.995:1.005);
+      let stopBasis='SMA20 break';
+      // invalid side (price already past SMA20) OR too far (> 2.5×ATR) → volatility stop
+      const badSide=isLong ? stop>=x.p*0.998 : stop<=x.p*1.002;
+      if(badSide || Math.abs(x.p-stop)>2.5*atrAbs){
+        stop=isLong ? x.p-1.5*atrAbs : x.p+1.5*atrAbs;
+        stopBasis='1.5×ATR';
+      }
       const stopDist=Math.abs(x.p-stop);
       const shares=stopDist>0?Math.floor(riskDollar/stopDist):0;
       const notional=shares*x.p;
-      const tgt=isLong?x.hi3m:x.lo3m;
+      // Target: 3-mo extreme — but must be on the profit side of entry by a
+      // meaningful margin; at the highs/lows use a 2×ATR extension instead.
+      let tgt=isLong?x.hi3m:x.lo3m;
+      let tgtBasis=isLong?'3-mo high':'3-mo low';
+      if(isLong && tgt<x.p+atrAbs){ tgt=x.p+2*atrAbs; tgtBasis='2×ATR ext'; }
+      if(!isLong && tgt>x.p-atrAbs){ tgt=x.p-2*atrAbs; tgtBasis='2×ATR ext'; }
       const rr=stopDist>0?Math.abs(tgt-x.p)/stopDist:0;
       const vrHot=(x.vr||0)>=1.5;
       html+=`<div class="su-card ${isLong?'long':'short'}" onclick="openHoldingsPopup('${x.etf}')" title="Click for ${x.etf} holdings">
@@ -1958,8 +1973,8 @@ function renderSetups(){
           <span>Volume <b class="${vrHot?'su-vr-hot':''}">${x.vr!=null?x.vr+'× avg'+(vrHot?' 🔥':''):'–'}</b></span>
         </div>
         <div class="su-plan">
-          ${isLong?'ENTRY':'ENTRY (short)'} ~$${x.p.toFixed(2)} · <span class="st">STOP $${stop.toFixed(2)}</span> (${(stopDist/x.p*100).toFixed(1)}% risk)
-          · <span class="pl">TARGET $${tgt.toFixed(2)}</span> (3-mo ${isLong?'high':'low'}, ${rr.toFixed(1)}R)<br>
+          ${isLong?'ENTRY':'ENTRY (short)'} ~$${x.p.toFixed(2)} · <span class="st">STOP $${stop.toFixed(2)}</span> (${stopBasis}, ${(stopDist/x.p*100).toFixed(1)}% risk)
+          · <span class="pl">TARGET $${tgt.toFixed(2)}</span> (${tgtBasis}, ${rr.toFixed(1)}R)<br>
           SIZE ${shares.toLocaleString()} sh ≈ $${Math.round(notional).toLocaleString()} (risk $${Math.round(riskDollar).toLocaleString()} = ${riskPct}% of book)
         </div>
       </div>`;
