@@ -381,6 +381,49 @@ for tk in all_price_tks:
 print(f"ticker_prices: {len(ticker_prices)} tickers with price data")
 
 # ──────────────────────────────────────────────────────────────────────────────
+# STEP 4.5 — Correct prices via Yahoo spark quote meta (authoritative).
+# The daily-bar download sometimes has a null close for the latest session
+# (e.g. DAL 2026-06-10), which silently falls back to a stale bar. The spark
+# meta carries regularMarketPrice + chartPreviousClose and is always current.
+# ──────────────────────────────────────────────────────────────────────────────
+import urllib.request as _ur
+import json as _json
+
+def _spark_chunk(symbols):
+    url = ("https://query1.finance.yahoo.com/v7/finance/spark?symbols="
+           + ",".join(symbols) + "&range=1d&interval=1d")
+    req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with _ur.urlopen(req, timeout=20) as r:
+        return _json.load(r)
+
+corrected = 0
+spark_fail = 0
+for i in range(0, len(all_price_tks), 20):
+    chunk = all_price_tks[i:i+20]
+    try:
+        js = _spark_chunk(chunk)
+        for res in (js.get("spark", {}).get("result") or []):
+            try:
+                meta = res["response"][0]["meta"]
+                tk = meta["symbol"]
+                p = meta.get("regularMarketPrice")
+                prev = meta.get("chartPreviousClose")
+                if not p or not prev or prev <= 0:
+                    continue
+                new = {"p": round(float(p), 2), "c": round((float(p)/float(prev) - 1)*100, 2)}
+                if ticker_prices.get(tk) != new:
+                    corrected += 1
+                ticker_prices[tk] = new
+            except Exception:
+                pass
+    except Exception as e:
+        spark_fail += 1
+        if spark_fail <= 3:
+            print(f"spark chunk warning: {e}", file=sys.stderr)
+
+print(f"spark correction: {corrected} prices updated, {spark_fail} chunks failed")
+
+# ──────────────────────────────────────────────────────────────────────────────
 # STEP 5 — Write data.json
 # ──────────────────────────────────────────────────────────────────────────────
 output = {
