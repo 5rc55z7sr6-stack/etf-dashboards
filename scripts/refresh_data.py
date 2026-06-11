@@ -448,6 +448,136 @@ for i in range(0, len(all_price_tks), 20):
 print(f"spark correction: {corrected} prices updated, {spark_fail} chunks failed")
 
 # ──────────────────────────────────────────────────────────────────────────────
+# STEP 4.7 — Today's Setups scan: SMA/ATR/volume/RS analytics for every stock,
+# market internals, and pre-classified swing-trade candidates.
+# ──────────────────────────────────────────────────────────────────────────────
+SECTOR_ETFS = ['XLK','XLF','XLE','XLV','XLI','XLC','XLU','XLY','XLP','XLRE','XLB']
+THEME_ETFS  = [e for e in ETF_TICKERS if e not in SECTOR_ETFS and e not in
+               ('SPY','RSP','SHY','TLT','LQD','HYG','GLD','IWF','IWD')]
+
+# stock → parent ETF (sectors take priority over themes)
+stock_parent = {}
+for etf in SECTOR_ETFS + THEME_ETFS:
+    for h in etf_holdings_map.get(etf, []):
+        stock_parent.setdefault(h['t'], etf)
+
+stock_tks = sorted(set(stock_parent) - set(ETF_TICKERS) - set(LEVERAGED_TICKERS))
+print(f"\nSetups scan: {len(stock_tks)} stocks across {len(set(stock_parent.values()))} parent ETFs")
+
+setups_out = {"internals": {}, "list": [], "scanned": 0}
+try:
+    raw3 = yf.download(stock_tks + ETF_TICKERS, period="3mo", interval="1d",
+                       auto_adjust=True, progress=False, threads=True)
+    cl3, hi3, lo3, vo3 = raw3["Close"], raw3["High"], raw3["Low"], raw3["Volume"]
+
+    def series_of(frame, t):
+        try:
+            s = frame[t].dropna()
+            return s if len(s) >= 25 else None
+        except Exception:
+            return None
+
+    def ret20(t):
+        s = series_of(cl3, t)
+        if s is None or len(s) < 21: return None
+        return (float(s.iloc[-1]) / float(s.iloc[-21]) - 1) * 100
+
+    etf_ret20 = {e: ret20(e) for e in ETF_TICKERS}
+    spy_r20 = etf_ret20.get('SPY')
+
+    stocks_above_s20 = 0; stocks_total = 0; new_highs = 0; new_lows = 0
+    candidates = []
+    for t in stock_tks:
+        s = series_of(cl3, t)
+        if s is None: continue
+        closes = [float(x) for x in s]
+        price = ticker_prices.get(t, {}).get('p') or closes[-1]
+        chg   = ticker_prices.get(t, {}).get('c', 0)
+        sma20 = sum(closes[-20:]) / 20
+        sma50 = sum(closes[-50:]) / 50 if len(closes) >= 50 else None
+        if sma50 is None: continue
+        hi = series_of(hi3, t); lo = series_of(lo3, t); vo = series_of(vo3, t)
+        # ATR14 (true range needs aligned H/L/C)
+        atr_pct = None
+        if hi is not None and lo is not None:
+            h = [float(x) for x in hi[-15:]]; l = [float(x) for x in lo[-15:]]
+            c = closes[-16:]
+            if len(h) >= 14 and len(l) >= 14 and len(c) >= 15:
+                trs = [max(h[i]-l[i], abs(h[i]-c[i]), abs(l[i]-c[i])) for i in range(1, min(len(h), len(l), len(c)-1))]
+                if trs: atr_pct = round(sum(trs[-14:]) / len(trs[-14:]) / price * 100, 2)
+        vol_ratio = None
+        if vo is not None and len(vo) >= 21:
+            v = [float(x) for x in vo]
+            avg20 = sum(v[-21:-1]) / 20
+            if avg20 > 0: vol_ratio = round(v[-1] / avg20, 2)
+        hi3m = max(closes); lo3m = min(closes)
+        near_high = price >= hi3m * 0.98
+        near_low  = price <= lo3m * 1.02
+        d20 = (price / sma20 - 1) * 100
+        d50 = (price / sma50 - 1) * 100
+        stocks_total += 1
+        if price > sma20: stocks_above_s20 += 1
+        if near_high: new_highs += 1
+        if near_low: new_lows += 1
+
+        parent = stock_parent.get(t)
+        bp = bp_scores.get(parent) or {}
+        p_r20 = etf_ret20.get(parent)
+        s_r20 = ret20(t)
+        if s_r20 is None or p_r20 is None: continue
+        rs_sector  = round(s_r20 - p_r20, 2)            # stock vs own ETF, 20d
+        sector_rs  = round(p_r20 - spy_r20, 2) if spy_r20 is not None else 0  # ETF vs SPY
+
+        sec_bull = bool(bp.get('bullish'))
+        up = sma20 > sma50; down = sma20 < sma50
+        typ = None
+        if sec_bull and up and rs_sector > 0 and -4 <= d20 <= 1 and price > sma50:
+            typ = 'pullback_long'
+        elif (not sec_bull) and down and rs_sector < 0 and -1 <= d20 <= 4 and price < sma50:
+            typ = 'rip_short'
+        elif sec_bull and rs_sector > 3 and near_high and up:
+            typ = 'rs_leader'
+        elif (not sec_bull) and rs_sector < -3 and near_low and down:
+            typ = 'rs_laggard'
+        if not typ: continue
+        score = abs(rs_sector) + abs(sector_rs) * 0.5 + (1.5 if (vol_ratio or 0) >= 1.5 else 0)
+        candidates.append({
+            "t": t, "etf": parent, "type": typ, "p": round(price, 2), "c": chg,
+            "s20": round(sma20, 2), "s50": round(sma50, 2),
+            "d20": round(d20, 2), "d50": round(d50, 2),
+            "atr": atr_pct, "vr": vol_ratio,
+            "rsS": rs_sector, "rsE": sector_rs,
+            "hi3m": round(hi3m, 2), "lo3m": round(lo3m, 2),
+            "score": round(score, 2),
+        })
+
+    candidates.sort(key=lambda x: -x["score"])
+    # max 4 per type so one regime doesn't drown the list
+    per_type = {}
+    final = []
+    for cnd in candidates:
+        if per_type.get(cnd["type"], 0) >= 4: continue
+        per_type[cnd["type"]] = per_type.get(cnd["type"], 0) + 1
+        final.append(cnd)
+
+    sec_bull_n = sum(1 for e in SECTOR_ETFS if (bp_scores.get(e) or {}).get('bullish'))
+    rsp = bp_scores.get('RSP') or {}
+    setups_out = {
+        "internals": {
+            "sectorsBull": sec_bull_n, "sectorsTotal": len(SECTOR_ETFS),
+            "pctAboveS20": round(stocks_above_s20 / stocks_total * 100, 1) if stocks_total else None,
+            "newHighs": new_highs, "newLows": new_lows, "universe": stocks_total,
+            "rspBull": bool(rsp.get('bullish')), "rspPct": rsp.get('pct'),
+        },
+        "list": final[:16],
+        "scanned": stocks_total,
+    }
+    print(f"Setups: {len(final[:16])} candidates from {stocks_total} stocks "
+          f"({', '.join(f'{k}:{v}' for k,v in per_type.items())})")
+except Exception as e:
+    print(f"Setups scan failed (non-fatal): {e}", file=sys.stderr)
+
+# ──────────────────────────────────────────────────────────────────────────────
 # STEP 5 — Write data.json
 # ──────────────────────────────────────────────────────────────────────────────
 output = {
@@ -457,6 +587,7 @@ output = {
     "ticker_prices": ticker_prices,
     "etf_holdings":  etf_holdings_map,
     "bp_scores":     bp_scores,          # pre-computed ETF/SPY relative strength — no CORS needed
+    "setups":        setups_out,         # Today's Setups: internals + swing candidates
 }
 with open("data.json", "w") as f:
     json.dump(output, f, separators=(",",":"))

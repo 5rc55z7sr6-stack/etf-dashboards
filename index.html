@@ -529,6 +529,39 @@
   .se-box{background:#10191c;border:1px solid #2a3d44;border-radius:14px;max-width:480px;width:100%;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.6);transform:translateY(10px) scale(.98);transition:transform .22s cubic-bezier(.4,0,.2,1)}
   .se-overlay.open .se-box{transform:none}
   .se-top{padding:22px 24px 0}
+  /* ── Today's Setups ── */
+  .su-conclusion{border:1px solid rgba(232,193,74,.35);border-left:4px solid var(--gold);border-radius:10px;padding:18px 20px;margin:18px 0 14px;background:rgba(232,193,74,.05)}
+  .su-conclusion .su-c-hdr{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--gold);margin-bottom:8px;font-weight:700}
+  .su-conclusion .su-c-main{font-size:17px;font-weight:700;color:var(--text);line-height:1.45;margin-bottom:8px}
+  .su-conclusion .su-c-sub{font-size:12.5px;color:var(--text-dim);line-height:1.6}
+  .su-conclusion .su-c-avoid{font-family:var(--mono);font-size:11px;color:var(--red);margin-top:10px}
+  .su-internals{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+  .su-int-chip{font-family:var(--mono);font-size:10.5px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text-dim);display:flex;align-items:center;gap:7px}
+  .su-int-chip b{font-size:13px}
+  .su-int-chip.good b{color:var(--green)} .su-int-chip.bad b{color:var(--red)} .su-int-chip.mid b{color:var(--gold)}
+  .su-events{font-family:var(--mono);font-size:11px;color:var(--text-dim);border:1px dashed rgba(255,92,97,.4);border-radius:8px;padding:10px 14px;margin-bottom:14px}
+  .su-events .su-ev-lbl{color:var(--red);font-weight:700;letter-spacing:1px;margin-right:8px}
+  .su-riskbar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;font-family:var(--mono);font-size:10.5px;color:var(--text-dim);margin-bottom:16px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+  .su-riskbar .su-risk-lbl{color:var(--gold);font-weight:700;letter-spacing:1px}
+  .su-riskbar input{width:90px;background:var(--bg);border:1px solid var(--line);color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 7px;border-radius:5px;margin-left:5px}
+  .su-riskbar .su-risk-note{color:var(--text-faint);font-size:9.5px;margin-left:auto}
+  .su-group-hdr{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.5px;margin:20px 0 10px;display:flex;align-items:center;gap:10px}
+  .su-group-hdr .ln{flex:1;height:1px;background:var(--line)}
+  .su-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+  .su-card{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--card);cursor:pointer;transition:border-color .15s}
+  .su-card:hover{border-color:var(--gold)}
+  .su-card.long{border-left:3px solid var(--green)} .su-card.short{border-left:3px solid var(--red)}
+  .su-card .su-tk-row{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+  .su-card .su-tk{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)}
+  .su-card .su-etf{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);border:1px solid var(--line);border-radius:8px;padding:1px 7px}
+  .su-card .su-px{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--text)}
+  .su-card .su-metrics{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-family:var(--mono);font-size:10.5px;color:var(--text-dim);margin:8px 0}
+  .su-card .su-metrics b{color:var(--text)}
+  .su-card .su-plan{font-family:var(--mono);font-size:10.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;color:var(--text-dim)}
+  .su-card .su-plan .pl{color:var(--green)} .su-card .su-plan .st{color:var(--red)}
+  .su-vr-hot{color:var(--gold);font-weight:700}
+  .su-empty{font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:14px}
+  .su-foot{font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:18px}
   .se-etf-link{cursor:pointer;color:var(--gold);border-bottom:1px dashed rgba(232,193,74,.45);transition:color .15s,border-color .15s;padding:0 1px}
   .se-etf-link:hover{color:#fff;border-bottom-color:#fff}
   .se-verdict{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
@@ -597,6 +630,7 @@
   <div class="wrap">
     <button class="tab active" data-go="hero">Overview</button>
     <button class="tab live-tab" data-go="live">⬤ Live Signal</button>
+    <button class="tab" data-go="setups">🎯 Today's Setups</button>
     <button class="tab" data-go="performers">🏆 Best Performers</button>
     <button class="tab" data-go="sectors">ETFs + Themes</button>
     <button class="tab" data-go="ratios">Ratios</button>
@@ -819,6 +853,38 @@
       <div class="cav"><h5>Narrative can persist beyond fundamentals</h5><p>Quantum/space/nuclear ETFs can stay elevated on narrative alone. The ratio signal is your reality check — if it's rolling over, the narrative is fading.</p></div>
       <div class="cav"><h5>Not investment advice</h5><p>Educational framework only. All signals are lagging, based on closing prices, and should be layered on top of your own risk management and position sizing rules.</p></div>
     </div>
+  </section>
+
+  <!-- TODAY'S SETUPS -->
+  <section id="setups">
+    <div class="sec-head">
+      <div>
+        <div class="num">TODAY'S SETUPS / TRADE SHEET</div>
+        <h3>Where to focus — concluded for you</h3>
+        <p class="sub">Scans every stock in the universe (SMA20/50 structure, 20-day relative strength vs own sector, sector vs SPY, volume, ATR) and concludes: which side to trade, which sectors, which names, at what level, with what size.</p>
+      </div>
+    </div>
+
+    <!-- 1. THE CONCLUSION -->
+    <div id="suConclusion" class="su-conclusion"></div>
+
+    <!-- 2. INTERNALS STRIP -->
+    <div id="suInternals" class="su-internals"></div>
+
+    <!-- 3. EVENT RISK -->
+    <div id="suEvents" class="su-events"></div>
+
+    <!-- 4. RISK / SIZING CONTROL -->
+    <div class="su-riskbar">
+      <span class="su-risk-lbl">POSITION SIZING</span>
+      <label>Book $ <input id="suBook" type="number" value="100000" min="1000" step="1000" onchange="renderSetups()"></label>
+      <label>Risk per trade % <input id="suRisk" type="number" value="1" min="0.1" max="5" step="0.1" onchange="renderSetups()"></label>
+      <span class="su-risk-note">stop = SMA20 break · size = risk ÷ stop-distance</span>
+    </div>
+
+    <!-- 5. SETUP CARDS -->
+    <div id="suList" class="su-list"></div>
+    <div class="su-foot">Candidates pre-screened server-side every 10 min · levels are closing-price based · not investment advice</div>
   </section>
 
   <!-- BEST PERFORMERS -->
@@ -1577,6 +1643,8 @@ function renderBanner(data){
   const masters=valid.filter(r=>r.master),mBull=masters.filter(r=>r.cl.bullish).length;
   const pctBar=(score+max)/(2*max)*100;
   const scorePct=Math.round(score/max*100);
+  window._regimePct=scorePct;
+  try{renderSetups();}catch(e){}
 
   // ── Key signals for nuanced advice ────────────────────────────────────────
   const get=(key,theme)=>data.find(r=>r.key===key&&(theme===undefined||r.theme===theme));
@@ -1770,6 +1838,135 @@ function renderAll(aD){
   if(el)el.textContent=`(${validN} ratios)`;
 }
 
+/* ── TODAY'S SETUPS ──────────────────────────────────────────────────────────
+   Renders the trade sheet from window._setups (server-side scan) + regime score.
+   EVENTS: edit this list manually — known macro/event risk for the week.     */
+const EVENTS = [
+  // {d:'2026-06-17', txt:'FOMC rate decision 20:00 CET'},
+];
+
+const SU_TYPES = {
+  pullback_long: {hdr:'PULLBACK LONGS — leaders dipping to support', col:'var(--green)', side:'long',
+    note:'Stock beating its sector, sector beating SPY, pulled back to a rising SMA20. Buy the dip, stop below SMA20.'},
+  rip_short: {hdr:'RIP SHORTS — laggards bouncing into resistance', col:'var(--red)', side:'short',
+    note:'Stock losing to a weak sector, rallied back into a falling SMA20. Short the bounce, stop above SMA20.'},
+  rs_leader: {hdr:'RS LEADERS — strongest stocks at highs', col:'var(--green)', side:'long',
+    note:'Top relative strength near 3-month highs. Breakout/momentum candidates — only in supportive tape.'},
+  rs_laggard: {hdr:'RS LAGGARDS — weakest stocks at lows', col:'var(--red)', side:'short',
+    note:'Worst relative strength near 3-month lows. Breakdown candidates for continued weakness.'},
+};
+
+function suConcl(pct, itn){
+  const breadth = itn.pctAboveS20==null?50:itn.pctAboveS20;
+  const sectors = itn.sectorsBull+'/'+itn.sectorsTotal;
+  const hl = itn.newHighs - itn.newLows;
+  if(pct>=30 && breadth>=55)
+    return {main:'RISK-ON. Trade the long side: buy pullbacks in leading sectors, hold winners.',
+      sub:`Regime score ${pct} with ${sectors} sectors above trend and ${breadth}% of stocks above SMA20 — participation confirms the move. Focus on Pullback Longs and RS Leaders below.`,
+      avoid:'AVOID: shorts, inverse ETFs, fading strength.'};
+  if(pct>=30)
+    return {main:'BULLISH BUT NARROW. Long only the confirmed leaders — skip broad exposure.',
+      sub:`Regime score ${pct} is positive but only ${breadth}% of stocks are above SMA20 (${sectors} sectors bullish) — a thin advance. Trade RS Leaders with tight stops; pass on marginal pullback setups.`,
+      avoid:'AVOID: chasing laggards "catching up" — narrow tapes punish that.'};
+  if(pct>0)
+    return {main:'SELECTIVE LONGS ONLY. Small size, strongest names, quick targets.',
+      sub:`Regime score ${pct}: mildly positive, mixed internals (${breadth}% above SMA20, highs−lows ${hl>=0?'+':''}${hl}). Take only A-grade Pullback Longs; treat every position as a rental, not an investment.`,
+      avoid:'AVOID: full-size positions, illiquid names, holding through events.'};
+  if(pct>=-30)
+    return {main:'CORRECTING TAPE. Primary edge is SHORT — sell rips in the weakest sectors. Longs only as hedged relative-strength holds.',
+      sub:`Regime score ${pct} with ${sectors} sectors above trend, ${breadth}% of stocks above SMA20, highs−lows ${hl>=0?'+':''}${hl}. Rip Shorts and RS Laggards are the aligned trades; "leaders" here are defensive holds, not new buys.`,
+      avoid:'AVOID: bottom-fishing, leveraged longs, adding to losers.'};
+  return {main:'RISK-OFF. Short side only — or stand aside. Capital preservation is the trade.',
+    sub:`Regime score ${pct}: broad breakdown (${breadth}% above SMA20, ${sectors} sectors bullish). Sell rips, own defensive/inverse exposure, keep size small as volatility expands both ways.`,
+    avoid:'AVOID: all new longs, averaging down, "it can\'t go lower".'};
+}
+
+function renderSetups(){
+  const su=window._setups, pct=window._regimePct;
+  const sec=document.getElementById('suConclusion');
+  if(!su||!sec) return;
+  const itn=su.internals||{};
+
+  // 1. Conclusion (needs regime score — render placeholder until banner computed)
+  if(pct===undefined){
+    sec.innerHTML='<div class="su-c-hdr">⚖ THE CONCLUSION</div><div class="su-c-sub">Computing regime…</div>';
+  } else {
+    const c=suConcl(pct,itn);
+    sec.innerHTML=`<div class="su-c-hdr">⚖ THE CONCLUSION — what this market pays for right now</div>
+      <div class="su-c-main">${c.main}</div>
+      <div class="su-c-sub">${c.sub}</div>
+      <div class="su-c-avoid">⛔ ${c.avoid}</div>`;
+  }
+
+  // 2. Internals strip
+  const cls=(v,goodHi,lo,hi)=>v==null?'mid':(goodHi? (v>=hi?'good':v<=lo?'bad':'mid') : (v<=lo?'good':v>=hi?'bad':'mid'));
+  const hl=itn.newHighs-itn.newLows;
+  document.getElementById('suInternals').innerHTML=[
+    `<span class="su-int-chip ${cls(itn.sectorsBull,true,3,6)}">SECTORS ABOVE TREND <b>${itn.sectorsBull}/${itn.sectorsTotal}</b></span>`,
+    `<span class="su-int-chip ${cls(itn.pctAboveS20,true,35,55)}">STOCKS &gt; SMA20 <b>${itn.pctAboveS20==null?'–':itn.pctAboveS20+'%'}</b></span>`,
+    `<span class="su-int-chip ${hl>0?'good':hl<0?'bad':'mid'}">3-MO HIGHS−LOWS <b>${hl>=0?'+':''}${hl}</b> <span style="opacity:.55">(${itn.newHighs}▲ ${itn.newLows}▼)</span></span>`,
+    `<span class="su-int-chip ${itn.rspBull?'good':'bad'}">EQUAL-WEIGHT vs SPY <b>${itn.rspBull?'HEALTHY':'NARROW'}</b> <span style="opacity:.55">${itn.rspPct!=null?(itn.rspPct>=0?'+':'')+itn.rspPct.toFixed(1)+'% vs SMA20':''}</span></span>`,
+    `<span class="su-int-chip mid">UNIVERSE <b>${su.scanned||0}</b> stocks scanned</span>`,
+  ].join('');
+
+  // 3. Events
+  const evEl=document.getElementById('suEvents');
+  const todo=EVENTS.filter(e=>new Date(e.d+'T23:59')>=new Date()).slice(0,4);
+  evEl.innerHTML=`<span class="su-ev-lbl">⚠ EVENT RISK</span>`+(todo.length
+    ? todo.map(e=>`${new Date(e.d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} — ${e.txt}`).join(' &nbsp;·&nbsp; ')
+    : 'No events listed. Check the macro calendar before holding through CPI / FOMC / earnings. (Edit the EVENTS list in this file to track your own.)');
+
+  // 4+5. Setup cards with levels + sizing
+  const book=parseFloat(document.getElementById('suBook')?.value)||100000;
+  const riskPct=parseFloat(document.getElementById('suRisk')?.value)||1;
+  const riskDollar=book*riskPct/100;
+  const aligned = pct===undefined?null : pct>0?['pullback_long','rs_leader'] : ['rip_short','rs_laggard'];
+  const order=['pullback_long','rip_short','rs_leader','rs_laggard']
+    .sort((a,b)=>{ if(!aligned)return 0; return (aligned.includes(b)?1:0)-(aligned.includes(a)?1:0); });
+  let html='';
+  for(const typ of order){
+    const t=SU_TYPES[typ];
+    const rows=(su.list||[]).filter(x=>x.type===typ);
+    if(!rows.length) continue;
+    const tag = aligned ? (aligned.includes(typ)
+      ? '<span style="color:var(--gold)">★ ALIGNED WITH REGIME</span>'
+      : '<span style="color:var(--text-faint)">⚠ counter-trend — half size or skip</span>') : '';
+    html+=`<div class="su-group-hdr" style="color:${t.col}">${t.hdr} <span class="ln"></span> ${tag}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin:-4px 0 10px">${t.note}</div>
+      <div class="su-cards">`;
+    for(const x of rows){
+      const isLong=t.side==='long';
+      const stop=x.s20*(isLong?0.995:1.005);        // SMA20 break + 0.5% buffer
+      const stopDist=Math.abs(x.p-stop);
+      const shares=stopDist>0?Math.floor(riskDollar/stopDist):0;
+      const notional=shares*x.p;
+      const tgt=isLong?x.hi3m:x.lo3m;
+      const rr=stopDist>0?Math.abs(tgt-x.p)/stopDist:0;
+      const vrHot=(x.vr||0)>=1.5;
+      html+=`<div class="su-card ${isLong?'long':'short'}" onclick="openHoldingsPopup('${x.etf}')" title="Click for ${x.etf} holdings">
+        <div class="su-tk-row"><span class="su-tk">${x.t}</span><span class="su-etf">${x.etf}</span>
+          <span class="su-px">$${x.p.toFixed(2)} <span style="color:${x.c>=0?'var(--green)':'var(--red)'}">${x.c>=0?'+':''}${x.c}%</span></span></div>
+        <div class="su-metrics">
+          <span>RS vs ${x.etf} 20d <b style="color:${x.rsS>=0?'var(--green)':'var(--red)'}">${x.rsS>=0?'+':''}${x.rsS}%</b></span>
+          <span>${x.etf} vs SPY <b style="color:${x.rsE>=0?'var(--green)':'var(--red)'}">${x.rsE>=0?'+':''}${x.rsE}%</b></span>
+          <span>vs SMA20 <b>${x.d20>=0?'+':''}${x.d20}%</b></span>
+          <span>vs SMA50 <b>${x.d50>=0?'+':''}${x.d50}%</b></span>
+          <span>ATR(14) <b>${x.atr!=null?x.atr+'%':'–'}</b></span>
+          <span>Volume <b class="${vrHot?'su-vr-hot':''}">${x.vr!=null?x.vr+'× avg'+(vrHot?' 🔥':''):'–'}</b></span>
+        </div>
+        <div class="su-plan">
+          ${isLong?'ENTRY':'ENTRY (short)'} ~$${x.p.toFixed(2)} · <span class="st">STOP $${stop.toFixed(2)}</span> (${(stopDist/x.p*100).toFixed(1)}% risk)
+          · <span class="pl">TARGET $${tgt.toFixed(2)}</span> (3-mo ${isLong?'high':'low'}, ${rr.toFixed(1)}R)<br>
+          SIZE ${shares.toLocaleString()} sh ≈ $${Math.round(notional).toLocaleString()} (risk $${Math.round(riskDollar).toLocaleString()} = ${riskPct}% of book)
+        </div>
+      </div>`;
+    }
+    html+='</div>';
+  }
+  document.getElementById('suList').innerHTML = html ||
+    '<div class="su-empty">No qualifying setups in the current scan — that is itself information: stand aside until structure improves.</div>';
+}
+
 /* ── loadDataJson: fetch data.json pre-computed by GitHub Action (same-origin, instant) ── */
 async function loadDataJson(){
   try{
@@ -1799,6 +1996,10 @@ async function loadDataJson(){
     }
     if(json.bp_scores && typeof json.bp_scores==='object'){
       window._bpScores=json.bp_scores; // pre-computed ETF/SPY relative strength
+    }
+    if(json.setups && typeof json.setups==='object'){
+      window._setups=json.setups; // Today's Setups scan
+      try{renderSetups();}catch(e){console.warn('renderSetups failed:',e);}
     }
     return json;
   }catch(e){console.warn('loadDataJson failed:',e);return null;}
