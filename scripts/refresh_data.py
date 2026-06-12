@@ -1,4 +1,4 @@
-import json, time, sys, re
+import json, time, sys, re, os, subprocess
 from datetime import datetime, timezone, timedelta
 import yfinance as yf
 import pandas as pd
@@ -586,6 +586,30 @@ try:
         if loose: s -= 1.5
         return round(s, 2)
 
+    def add_trading_days(dt, n):
+        """dt + n trading sessions (weekends skipped; holidays ignored —
+        close enough for setup expiry, and always errs on the early side)."""
+        cur, added = dt, 0
+        while added < n:
+            cur += timedelta(days=1)
+            if cur.weekday() < 5:
+                added += 1
+        return cur
+
+    def trading_days_between(a_str, b_str):
+        """Trading sessions from date a to date b (YYYY-MM-DD strings)."""
+        try:
+            a = datetime.strptime(a_str, "%Y-%m-%d").date()
+            b = datetime.strptime(b_str, "%Y-%m-%d").date()
+        except Exception:
+            return 0
+        n, cur = 0, a
+        while cur < b:
+            cur += timedelta(days=1)
+            if cur.weekday() < 5:
+                n += 1
+        return n
+
     def trade_plan(m, typ):
         """Entry/stop/T1/T2 computed server-side so the tracker scores exactly
         what was published. Entry is a resting limit at a level, never market.
@@ -620,7 +644,9 @@ try:
             "entry": round(entry, 2), "stop": round(stop, 2),
             "t1": round(t1, 2), "t2": round(t2, 2), "risk": round(risk, 4),
             "t2b": t2b, "trig": trig,
-            "expires": (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d"),
+            # 5 trading sessions = one real market week; a Friday setup no
+            # longer loses 2 of its 7 calendar days to the weekend
+            "expires": add_trading_days(datetime.now(timezone.utc), 5).strftime("%Y-%m-%d"),
         }
 
     def emit(m, typ, loose):
@@ -672,7 +698,7 @@ try:
         Tie-breaks are CONSERVATIVE: if both stop and target were touched the
         same day (order unknowable from hi/lo), the stop wins; after T1, the
         breakeven exit wins over T2. The track record can only understate.
-        triggered older than 21 days → timeout at market R."""
+        triggered older than 15 trading sessions → timeout at market R."""
         long_side = s["side"] == "long"
         if s["status"] == "pending":
             if today_str > s["expires"]:
@@ -681,18 +707,16 @@ try:
             if filled:
                 s["status"] = "triggered"; s["trigDate"] = today_str
         if s["status"] == "triggered":
-            try:
-                age = (datetime.strptime(today_str, "%Y-%m-%d")
-                       - datetime.strptime(s.get("trigDate", today_str), "%Y-%m-%d")).days
-            except Exception:
-                age = 0
+            # timeout after 15 trading sessions (~3 market weeks), not
+            # calendar days — weekends no longer eat into the trade's clock
+            age = trading_days_between(s.get("trigDate", today_str), today_str)
             stop_hit = (lo <= s["stop"]) if long_side else (hi >= s["stop"])
             t1_hit   = (hi >= s["t1"])  if long_side else (lo <= s["t1"])
             if stop_hit:   # conservative: stop wins a same-day tie with T1
                 s["status"] = "stopped"; s["r"] = -1.0; s["closed"] = today_str; return s
             if t1_hit:
-                s["status"] = "t1"
-            elif age > 21:
+                s["status"] = "t1"; s["t1Date"] = today_str
+            elif age > 15:
                 mr = (price - s["entry"]) / s["risk"] * (1 if long_side else -1)
                 s["status"] = "timeout"; s["r"] = round(mr, 2); s["closed"] = today_str; return s
         if s["status"] == "t1":
@@ -725,11 +749,67 @@ try:
                     lo = hi = tp["p"]
                 advance_setup(s, tp["p"], lo, hi, today_str)
     open_keys = {(s.get("t"), s.get("type")) for s in prev_hist if s.get("status") in OPEN_STATES}
+    # Market context frozen at publication — the self-evaluation layer needs
+    # to know what the tape looked like when each idea was issued, with no
+    # possibility of hindsight (these numbers are computed BEFORE the outcome).
+    mkt_ctx = {
+        "pa20": round(stocks_above_s20 / stocks_total * 100, 1) if stocks_total else None,
+        "hl": new_highs - new_lows,
+        "secBull": sum(1 for e in SECTOR_ETFS if (bp_scores.get(e) or {}).get('bullish')),
+    }
     for cnd in final[:16]:
         if (cnd["t"], cnd["type"]) in open_keys: continue
-        rec = {k: cnd[k] for k in ("t","etf","type","nm","side","entry","stop","t1","t2","risk","expires")}
-        rec.update({"created": today_str, "status": "pending"})
+        rec = {k: cnd.get(k) for k in ("t","etf","type","nm","side","entry","stop","t1","t2",
+                                       "risk","expires","score","atr","vr","rsS","rsE","d20","t2b")}
+        rec.update({"created": today_str, "status": "pending", "mkt": mkt_ctx})
         prev_hist.append(rec); open_keys.add((cnd["t"], cnd["type"]))
+    # ── Permanent archive: EVERY published proposal lands here when it
+    # resolves (stopped / t2 / be / timeout / expired) — nothing is ever
+    # deleted, unlike the 35-day window inside data.json. Each record keeps
+    # its full lifecycle (created→trigDate→t1Date→closed, final R) plus the
+    # publication-time features (score/atr/vr/RS/mkt) AND the daily OHLC path
+    # of the trade, so future versions of the system can replay every trade
+    # against alternative rules (different stops, targets, entries).
+    try:
+        try:
+            arch = json.load(open("archive.json"))
+        except Exception:
+            arch = []
+        akeys = {(a.get("t"), a.get("type"), a.get("created")) for a in arch}
+        new_arch = 0
+        for s in prev_hist:
+            if s.get("status") in OPEN_STATES: continue
+            k = (s.get("t"), s.get("type"), s.get("created"))
+            if k in akeys: continue
+            rec = dict(s)
+            try:
+                o4, c4 = raw3["Open"][s["t"]], cl3[s["t"]]
+                h4, l4 = hi3[s["t"]], lo3[s["t"]]
+                path = []
+                for idx in c4.index:
+                    dstr = idx.strftime("%Y-%m-%d")
+                    if not (s.get("created", "") <= dstr <= s.get("closed", "9999")):
+                        continue
+                    bar = [float(o4.get(idx)), float(h4.get(idx)),
+                           float(l4.get(idx)), float(c4.get(idx))]
+                    if any(v != v for v in bar):   # NaN guard
+                        continue
+                    path.append([dstr] + [round(v, 2) for v in bar])
+                if path:
+                    rec["path"] = path
+            except Exception:
+                pass
+            arch.append(rec); akeys.add(k); new_arch += 1
+        if new_arch:
+            json.dump(arch, open("archive.json", "w"), separators=(",", ":"))
+            # the workflow's commit step only re-adds data.json — stage the
+            # archive here so it rides along in the same data commit
+            if os.environ.get("GITHUB_ACTIONS") == "true":
+                subprocess.run(["git", "add", "archive.json"], check=False)
+            print(f"Archive: +{new_arch} resolved setups (total {len(arch)})")
+    except Exception as e:
+        print(f"Archive warning (non-fatal): {e}", file=sys.stderr)
+
     cutoff35 = (datetime.now(timezone.utc) - timedelta(days=35)).strftime("%Y-%m-%d")
     cutoff30 = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
     hist = [s for s in prev_hist if s.get("status") in OPEN_STATES

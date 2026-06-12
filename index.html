@@ -1926,19 +1926,37 @@ function renderAll(aD){
 const EVENTS = [
   // manual extras, e.g. {d:'2026-06-25', txt:'NVDA earnings AMC'},
 ];
-// Recurring macro calendar — FOMC decision days + triple witching are official;
-// CPI dates are approximate (BLS publishes ~mid-month) and marked ≈.
-const AUTO_EVENTS = [
-  {d:'2026-06-17',txt:'FOMC rate decision'},{d:'2026-07-29',txt:'FOMC rate decision'},
-  {d:'2026-09-16',txt:'FOMC rate decision'},{d:'2026-10-28',txt:'FOMC rate decision'},
-  {d:'2026-12-09',txt:'FOMC rate decision'},
-  {d:'2026-06-19',txt:'Triple witching (quad expiry)'},{d:'2026-09-18',txt:'Triple witching'},
-  {d:'2026-12-18',txt:'Triple witching'},
-  {d:'2026-06-10',txt:'≈ CPI release'},{d:'2026-07-14',txt:'≈ CPI release'},
-  {d:'2026-08-12',txt:'≈ CPI release'},{d:'2026-09-11',txt:'≈ CPI release'},
-  {d:'2026-10-13',txt:'≈ CPI release'},{d:'2026-11-12',txt:'≈ CPI release'},
-  {d:'2026-12-10',txt:'≈ CPI release'},
-];
+// Self-rolling macro calendar — regenerates for the current + next year, so
+// it never goes silent in January. Triple witching is EXACT (3rd Friday of
+// Mar/Jun/Sep/Dec — pure calendar math). FOMC uses the official Fed table
+// where known; for years not yet in the table it falls back to the Fed's
+// typical 8-meeting pattern snapped to a Wednesday, marked ≈. CPI is always
+// approximate (BLS publishes ~mid-month) and marked ≈.
+const FOMC_KNOWN = {
+  2026: ['2026-01-28','2026-03-18','2026-04-29','2026-06-17','2026-07-29',
+         '2026-09-16','2026-10-28','2026-12-09'],
+};
+function autoEvents(){
+  const ev=[], y0=new Date().getFullYear();
+  const fmt=d=>d.toISOString().slice(0,10);
+  const nthFriday=(y,m,n)=>{const d=new Date(Date.UTC(y,m,1));
+    return new Date(Date.UTC(y,m,1+(5-d.getUTCDay()+7)%7+(n-1)*7));};
+  const snapToWed=d=>{let off=(3-d.getUTCDay()+7)%7; if(off>3)off-=7;
+    const w=new Date(d); w.setUTCDate(d.getUTCDate()+off); return w;};
+  for(const y of [y0,y0+1]){
+    [2,5,8,11].forEach(m=>ev.push({d:fmt(nthFriday(y,m,3)),txt:'Triple witching (quad expiry)'}));
+    if(FOMC_KNOWN[y]) FOMC_KNOWN[y].forEach(d=>ev.push({d,txt:'FOMC rate decision'}));
+    else [[0,28],[2,18],[3,29],[5,17],[6,29],[8,16],[9,28],[11,9]]
+      .forEach(([m,dd])=>ev.push({d:fmt(snapToWed(new Date(Date.UTC(y,m,dd)))),txt:'≈ FOMC (verify fed calendar)'}));
+    for(let m=0;m<12;m++){
+      const d=new Date(Date.UTC(y,m,12));
+      while(d.getUTCDay()===0||d.getUTCDay()===6)d.setUTCDate(d.getUTCDate()+1);
+      ev.push({d:fmt(d),txt:'≈ CPI release'});
+    }
+  }
+  return ev;
+}
+const AUTO_EVENTS=autoEvents();
 
 const SU_STATUS = {
   pending:{lbl:'WAITING TRIGGER',cls:'wait'}, triggered:{lbl:'● LIVE',cls:'live'},
