@@ -761,7 +761,10 @@ try:
         if (cnd["t"], cnd["type"]) in open_keys: continue
         rec = {k: cnd.get(k) for k in ("t","etf","type","nm","side","entry","stop","t1","t2",
                                        "risk","expires","score","atr","vr","rsS","rsE","d20","t2b")}
-        rec.update({"created": today_str, "status": "pending", "mkt": mkt_ctx})
+        # cts = exact publication timestamp (ms) — anchors the TradingView box
+        # to the real moment the setup appeared, on any chart timeframe
+        rec.update({"created": today_str, "cts": int(time.time() * 1000),
+                    "status": "pending", "mkt": mkt_ctx})
         prev_hist.append(rec); open_keys.add((cnd["t"], cnd["type"]))
     # ── Permanent archive: EVERY published proposal lands here when it
     # resolves (stopped / t2 / be / timeout / expired) — nothing is ever
