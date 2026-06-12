@@ -733,24 +733,34 @@ try:
     recent = [s for s in hist if (s.get("created") or "") >= cutoff30]
     CLOSED_STATES = ("stopped", "t2", "be", "timeout")
     closed = [s for s in recent if s.get("status") in CLOSED_STATES]
+    # A trade that reached T1 is ALREADY a win: half banked at +1.5R, stop at
+    # breakeven — worst case +0.75R locked. Count it immediately, don't wait
+    # for T2; the final R only improves (t2) or stays (be) when it closes.
+    t1_open = [s for s in recent if s.get("status") == "t1"]
     trig_n = sum(1 for s in recent if s.get("status") not in ("pending", "expired", "cancelled_gap"))
     wins   = [s for s in closed if (s.get("r") or 0) > 0]
     losses = [s for s in closed if (s.get("r") or 0) <= 0]
+    win_rs  = [s["r"] for s in wins] + [0.75] * len(t1_open)     # t1 = locked minimum
+    all_rs  = [s.get("r") or 0 for s in closed] + [0.75] * len(t1_open)
+    n_scored = len(closed) + len(t1_open)
     by_type = {}
     for s in recent:
         bt = by_type.setdefault(s["type"], {"n": 0, "w": 0, "l": 0})
         bt["n"] += 1
-        if s.get("status") in CLOSED_STATES:
+        if s.get("status") == "t1":
+            bt["w"] += 1
+        elif s.get("status") in CLOSED_STATES:
             if (s.get("r") or 0) > 0: bt["w"] += 1
             else: bt["l"] += 1
     stats = {
         "generated": len(recent),
         "trigRate": round(trig_n / len(recent) * 100, 1) if recent else None,
-        "closed": len(closed), "wins": len(wins), "losses": len(losses),
-        "hitRate": round(len(wins) / len(closed) * 100, 1) if closed else None,
-        "avgWinR": round(sum(s["r"] for s in wins) / len(wins), 2) if wins else None,
+        "closed": len(closed), "wins": len(wins) + len(t1_open), "losses": len(losses),
+        "t1Locked": len(t1_open),
+        "hitRate": round((len(wins) + len(t1_open)) / n_scored * 100, 1) if n_scored else None,
+        "avgWinR": round(sum(win_rs) / len(win_rs), 2) if win_rs else None,
         "avgLossR": round(sum(s["r"] for s in losses) / len(losses), 2) if losses else None,
-        "expR": round(sum(s["r"] for s in closed) / len(closed), 2) if closed else None,
+        "expR": round(sum(all_rs) / n_scored, 2) if n_scored else None,
         "byType": by_type,
     }
     open_view = []

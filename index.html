@@ -1965,13 +1965,13 @@ function renderSetupStats(stats){
     <div class="su-stats-row">
       <span class="su-stat"><span class="v">${stats.generated}</span><span class="l">SETUPS ISSUED</span></span>
       <span class="su-stat"><span class="v">${fm(stats.trigRate,'%')}</span><span class="l">TRIGGERED</span></span>
-      <span class="su-stat"><span class="v" style="color:${(stats.hitRate||0)>=50?'var(--green)':'var(--red)'}">${fm(stats.hitRate,'%')}</span><span class="l">HIT RATE (${stats.wins||0}W/${stats.losses||0}L)</span></span>
+      <span class="su-stat"><span class="v" style="color:${(stats.hitRate||0)>=50?'var(--green)':'var(--red)'}">${fm(stats.hitRate,'%')}</span><span class="l">HIT RATE (${stats.wins||0}W/${stats.losses||0}L${stats.t1Locked?` · ${stats.t1Locked} at TP1 🔒`:''})</span></span>
       <span class="su-stat"><span class="v" style="color:var(--green)">${fm(stats.avgWinR,'R')}</span><span class="l">AVG WIN</span></span>
       <span class="su-stat"><span class="v" style="color:var(--red)">${fm(stats.avgLossR,'R')}</span><span class="l">AVG LOSS</span></span>
       <span class="su-stat"><span class="v" style="color:${cl(stats.expR)}">${fm(stats.expR,'R')}</span><span class="l">EXPECTANCY / TRADE</span></span>
     </div>
     ${tt?`<table><tr><th>TYPE</th><th>ISSUED</th><th>W</th><th>L</th><th>HIT</th></tr>${tt}</table>`:''}
-    <div style="font-family:var(--mono);font-size:8.5px;color:var(--text-faint);margin-top:8px">Win = any closed trade with positive R (T2 full win, BE after T1 = +0.75R). Loss = stop −1R. Expectancy in R per closed trade — positive means the system pays. Fills &amp; stops are checked against the day's intraday high/low (wicks count); same-day ties resolve AGAINST the trade, so these numbers can only understate.</div>
+    <div style="font-family:var(--mono);font-size:8.5px;color:var(--text-faint);margin-top:8px">Win = TP1 hit (counted IMMEDIATELY — half banked at +1.5R, stop moves to breakeven, so ≥ +0.75R is locked) or any closed trade with positive R. Loss = stop −1R. Expectancy in R per scored trade — positive means the system pays. Fills &amp; stops are checked against the day's intraday high/low (wicks count); same-day ties resolve AGAINST the trade, so these numbers can only understate.</div>
   </div>`;
 }
 
