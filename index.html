@@ -571,9 +571,15 @@
   .su-stats td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.03)}
   .su-track{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;background:var(--card)}
   .su-track-scroll{max-height:800px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding-right:6px}
-  .su-track-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;color:var(--text-dim);padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  /* spreadsheet-style grid: STATUS | TICKER | SIDE | ENTRY | STOP | T1 | T2 | NOW | P/L */
+  .su-track-hd,.su-track-row{display:grid;grid-template-columns:118px 62px 110px repeat(5,minmax(76px,1fr)) 72px;gap:0 12px;align-items:center}
+  .su-track-hd{font-family:var(--mono);font-size:8.5px;letter-spacing:1.2px;color:var(--text-faint);padding:4px 0 7px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:2}
+  .su-track-row{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
   .su-track-row:last-child{border-bottom:none}
-  .su-track-row b{color:var(--text)}
+  .su-track-row b{color:var(--text);font-weight:600}
+  .su-track-hd .num,.su-track-row .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .su-track-row .tkr{font-weight:700;color:var(--text);letter-spacing:.4px}
+  @media(max-width:860px){.su-track-hd,.su-track-row{grid-template-columns:96px 52px 78px repeat(5,minmax(58px,1fr)) 58px;gap:0 7px;font-size:9.5px}}
   .su-st-badge{font-size:8.5px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:8px;white-space:nowrap}
   .su-st-badge.wait{background:rgba(255,255,255,.05);color:var(--text-dim);border:1px solid var(--line)}
   .su-st-badge.live{background:rgba(63,209,126,.13);color:var(--green);border:1px solid rgba(63,209,126,.3)}
@@ -2035,19 +2041,30 @@ function renderSetupTracking(open){
   if(!el) return;
   if(!open||!open.length){ el.innerHTML=''; return; }
   const rank={t1:0,triggered:1,pending:2};
+  const $=v=>v==null?'–':'$'+Number(v).toFixed(2);
   const rows=[...open].sort((a,b)=>(rank[a.status]??3)-(rank[b.status]??3)).map(s=>{
     const st=SU_STATUS[s.status]||{lbl:s.status,cls:'wait'};
     const isL=s.side==='long';
-    const uR=s.uR!=null?`<span style="color:${s.uR>=0?'var(--green)':'var(--red)'};font-weight:700">${s.uR>=0?'+':''}${s.uR}R</span>`:'';
+    const sideCol=isL?'var(--green)':'var(--red)';
+    const uR=s.uR!=null?`<span style="color:${s.uR>=0?'var(--green)':'var(--red)'};font-weight:700">${s.uR>=0?'+':''}${s.uR}R</span>`:'<span style="color:var(--text-faint)">–</span>';
+    const stopCell=s.status==='t1'?`<b>${$(s.entry)}</b> <span style="color:var(--gold)">BE</span>`:`<b>${$(s.stop)}</b>`;
     return `<div class="su-track-row">
-      <span class="su-st-badge ${st.cls}">${st.lbl}</span>
-      <b>${s.t}</b><span style="color:var(--text-faint)">${isL?'LONG':'SHORT'}${s.nm?' · near-miss':''}</span>
-      <span>entry <b>$${s.entry}</b></span><span>stop <b>$${s.status==='t1'?s.entry+' (BE)':s.stop}</b></span>
-      <span>T1 $${s.t1} · T2 $${s.t2}</span>
-      ${s.px!=null?`<span style="margin-left:auto">now $${s.px} ${uR}</span>`:''}
+      <span><span class="su-st-badge ${st.cls}">${st.lbl}</span></span>
+      <span class="tkr">${s.t}</span>
+      <span style="color:${sideCol}">${isL?'LONG':'SHORT'}${s.nm?` <span style="color:var(--gold);font-size:8.5px">nm</span>`:''}</span>
+      <span class="num"><b>${$(s.entry)}</b></span>
+      <span class="num">${stopCell}</span>
+      <span class="num">${$(s.t1)}</span>
+      <span class="num">${$(s.t2)}</span>
+      <span class="num">${s.px!=null?'<b>'+$(s.px)+'</b>':'–'}</span>
+      <span class="num">${uR}</span>
     </div>`;
   }).join('');
-  el.innerHTML=`<div class="su-track"><div class="su-stats-hdr">🎫 TRACKING — published setups being scored live <span style="color:var(--text-faint);font-weight:400">· ${open.length} open${open.length>25?' · scroll for more':''}</span></div><div class="su-track-scroll">${rows}</div></div>`;
+  const hd=`<div class="su-track-hd">
+    <span>STATUS</span><span>TICKER</span><span>SIDE</span>
+    <span class="num">ENTRY</span><span class="num">STOP</span><span class="num">T1</span><span class="num">T2</span><span class="num">NOW</span><span class="num">P/L</span>
+  </div>`;
+  el.innerHTML=`<div class="su-track"><div class="su-stats-hdr">🎫 TRACKING — published setups being scored live <span style="color:var(--text-faint);font-weight:400">· ${open.length} open${open.length>25?' · scroll for more':''}</span></div><div class="su-track-scroll">${hd}${rows}</div></div>`;
 }
 
 const SU_TYPES = {
