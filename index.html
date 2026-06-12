@@ -944,6 +944,9 @@
     <!-- 2b. TRACK RECORD (backtest of our own published setups) -->
     <div id="suStats"></div>
 
+    <!-- 2b2. SELF-EVALUATION ADVISOR (proposals only — never auto-applied) -->
+    <div id="suAdvisor"></div>
+
     <!-- 2c. OPEN POSITIONS TRACKER -->
     <div id="suTracking"></div>
 
@@ -1993,6 +1996,40 @@ function renderSetupStats(stats){
   </div>`;
 }
 
+function renderSetupAdvisor(adv){
+  const el=document.getElementById('suAdvisor');
+  if(!el) return;
+  if(!adv){ el.innerHTML=''; return; }
+  const sevC={act:'var(--gold)',watch:'var(--amber)',info:'var(--text-dim)'};
+  const sevL={act:'PROPOSAL',watch:'EARLY SIGNAL',info:'INFO'};
+  let inner;
+  if(adv.findings&&adv.findings.length){
+    inner=adv.findings.map(f=>`
+      <div style="border-left:3px solid ${sevC[f.sev]||'var(--text-dim)'};background:rgba(255,255,255,.02);padding:10px 12px;margin-bottom:8px;border-radius:0 6px 6px 0">
+        <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:1.2px;color:${sevC[f.sev]||'var(--text-dim)'}">${sevL[f.sev]||f.sev}</span>
+          <b style="font-size:12.5px">${f.title}</b>
+          ${f.dr!=null?`<span style="font-family:var(--mono);font-size:10px;font-weight:700;color:${f.dr>=0?'var(--green)':'var(--red)'}">${f.dr>=0?'+':''}${f.dr}R/trade</span>`:''}
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text-faint)">n=${f.n}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.55">${f.ev}</div>
+        <div style="font-size:11px;margin-top:6px"><span style="color:var(--gold);font-weight:700">→ ${f.action}</span>
+          <span style="font-family:var(--mono);font-size:8.5px;color:var(--red);border:1px solid rgba(255,92,97,.4);padding:1px 7px;border-radius:8px;margin-left:7px;white-space:nowrap">NOT APPLIED — awaiting GK confirmation</span></div>
+      </div>`).join('');
+  } else {
+    inner=`<div style="font-family:var(--mono);font-size:10.5px;color:var(--text-faint);line-height:1.8">
+      Collecting evidence — advice unlocks as closed trades accumulate (no conclusions are drawn from thin samples):<br>
+      ${Object.entries(adv.needs||{}).map(([k,v])=>`· ${k}: <b style="color:var(--text-dim)">${v}</b>`).join('<br>')}
+    </div>`;
+  }
+  const chk=adv.replayCheck;
+  el.innerHTML=`<div class="su-stats" style="margin-top:10px">
+    <div class="su-stats-hdr">🧠 SELF-EVALUATION — the system audits its own strategy${chk?` <span style="color:var(--text-faint);font-weight:400">· replay engine reproduces ${chk.match}/${chk.n} real outcomes</span>`:''}</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-bottom:9px;line-height:1.6">${adv.nArchived||0} proposals archived forever · ${adv.nResolved||0} closed · ${adv.nExpired||0} expired untriggered${adv.trigRate!=null?` · ${adv.trigRate}% lifetime trigger rate`:''}. Every advice line below comes from REPLAYING the archived trades under one changed rule. Proposals are never applied automatically — the live strategy only changes when GK confirms.</div>
+    ${inner}
+  </div>`;
+}
+
 function renderSetupTracking(open){
   const el=document.getElementById('suTracking');
   if(!el) return;
@@ -2077,8 +2114,9 @@ function renderSetups(){
     `<span class="su-int-chip mid">UNIVERSE <b>${su.scanned||0}</b> stocks scanned</span>`,
   ].join('');
 
-  // 2b/2c. Track record + live tracking
+  // 2b/2b2/2c. Track record + self-evaluation advisor + live tracking
   renderSetupStats(su.stats);
+  renderSetupAdvisor(su.advisor);
   renderSetupTracking(su.open);
 
   // 3. Events — auto macro calendar (FOMC / triple witching / ≈CPI) + manual extras

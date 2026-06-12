@@ -810,6 +810,181 @@ try:
     except Exception as e:
         print(f"Archive warning (non-fatal): {e}", file=sys.stderr)
 
+    # ── STEP 4.8 — Self-evaluation advisor ────────────────────────────────────
+    # Replays every archived trade on its stored daily price path under
+    # ALTERNATIVE rules (tighter/wider stop, closer entries, different T1,
+    # no breakeven move) and turns statistically-backed differences into
+    # written proposals. ADVICE ONLY: nothing here ever modifies the live
+    # strategy — GK reads the report and confirms changes by hand.
+    def _replay(tr, stop_mult=2.0, t1_r=1.5, be_move=True, market_entry=False):
+        """Counterfactual outcome of one archived trade, in R units of the
+        VARIANT risk. Same conservative tie-breaks as the live tracker:
+        stop beats T1 on the same bar, breakeven beats T2 after T1.
+        Returns None if the variant never fills or data is missing."""
+        path = tr.get("path") or []
+        if not path or not tr.get("risk") or not tr.get("entry"):
+            return None
+        long_side = tr.get("side") == "long"
+        risk_v = (tr["risk"] / 2.0) * stop_mult     # live risk = 2×ATR
+        if risk_v <= 0:
+            return None
+        entry = path[0][4] if market_entry else tr["entry"]
+        d = 1 if long_side else -1
+        stop = entry - d * risk_v
+        t1 = entry + d * t1_r * risk_v
+        t2 = tr.get("t2")
+        state = "in" if market_entry else "wait"
+        for _, o, h, l, c in path:
+            if state == "wait":
+                if (l <= entry) if long_side else (h >= entry):
+                    state = "in"          # fall through: stop checked same bar
+                else:
+                    continue
+            if state == "in":
+                if (l <= stop) if long_side else (h >= stop):
+                    return -1.0
+                if (h >= t1) if long_side else (l <= t1):
+                    state = "t1" if be_move else "run"
+                else:
+                    continue
+            if state == "t1":
+                if (l <= entry) if long_side else (h >= entry):
+                    return round(t1_r / 2, 3)        # half banked, half at BE
+                if t2 is not None and ((h >= t2) if long_side else (l <= t2)):
+                    return round((t1_r + abs(t2 - entry) / risk_v) / 2, 3)
+            elif state == "run":
+                if (l <= stop) if long_side else (h >= stop):
+                    return -1.0
+                if t2 is not None and ((h >= t2) if long_side else (l <= t2)):
+                    return round(abs(t2 - entry) / risk_v, 3)
+        if state == "wait":
+            return None                              # variant never filled
+        mr = (path[-1][4] - entry) / risk_v * d      # mark-to-last-close
+        if state == "t1":
+            return round((t1_r + max(mr, 0.0)) / 2, 3)
+        return round(mr, 3)
+
+    advisor = {"asof": today_str, "findings": [], "status": "collecting"}
+    try:
+        try:
+            arch_all = json.load(open("archive.json"))
+        except Exception:
+            arch_all = []
+        RES_STATES = ("stopped", "t2", "be", "timeout")
+        resolved = [a for a in arch_all if a.get("status") in RES_STATES]
+        trig_res = [a for a in resolved if a.get("path")]
+        expired_p = [a for a in arch_all if a.get("status") == "expired" and a.get("path")]
+        advisor.update({"nArchived": len(arch_all), "nResolved": len(resolved),
+                        "nExpired": sum(1 for a in arch_all if a.get("status") == "expired")})
+        F = advisor["findings"]
+        mean = lambda xs: round(sum(xs) / len(xs), 3) if xs else None
+
+        # 0. Trust metric: the replay engine must reproduce reality before its
+        # counterfactuals deserve any weight (±0.35R tolerance: replay sees
+        # full daily bars where the live tracker saw a snapshot on day one).
+        chk = [(a["r"], _replay(a)) for a in trig_res if a.get("r") is not None]
+        chk = [(ar, rr) for ar, rr in chk if rr is not None]
+        if chk:
+            advisor["replayCheck"] = {"n": len(chk),
+                                      "match": sum(1 for ar, rr in chk if abs(ar - rr) <= 0.35)}
+
+        # 1. Stop width + T1 distance + breakeven rule (need 20 closed trades)
+        if len(trig_res) >= 20:
+            def variant_delta(**kw):
+                pairs = [(_replay(a), _replay(a, **kw)) for a in trig_res]
+                pairs = [(b, v) for b, v in pairs if b is not None and v is not None]
+                if len(pairs) < 20: return None, 0
+                return round(mean([v for _, v in pairs]) - mean([b for b, _ in pairs]), 2), len(pairs)
+            for kw, title, action in (
+                ({"stop_mult": 1.5}, "Tighter stop pays", "Propose stop 1.5×ATR instead of 2×ATR"),
+                ({"stop_mult": 2.5}, "Wider stop pays", "Propose stop 2.5×ATR instead of 2×ATR"),
+                ({"t1_r": 1.0}, "Earlier first target pays", "Propose T1 at 1R instead of 1.5R"),
+                ({"t1_r": 2.0}, "Later first target pays", "Propose T1 at 2R instead of 1.5R"),
+                ({"be_move": False}, "Skipping the breakeven move pays", "Propose holding full stop after T1 (no BE move)"),
+            ):
+                dr, n = variant_delta(**kw)
+                if dr is not None and dr >= 0.15:
+                    F.append({"sev": "act", "title": title, "dr": dr, "n": n,
+                              "ev": f"Replaying all {n} closed trades with this one change moves expectancy by {dr:+}R per trade. Same entries, same conservative tie-breaks — only this rule differs.",
+                              "action": action})
+
+        # 2. Entry proximity — two independent lines of evidence
+        if len(expired_p) >= 10:
+            hyp = [r for r in (_replay(a, market_entry=True) for a in expired_p) if r is not None]
+            if len(hyp) >= 10:
+                m = mean(hyp)
+                if m is not None and m >= 0.3:
+                    F.append({"sev": "act", "title": "Expired setups were winners you missed", "dr": m, "n": len(hyp),
+                              "ev": f"{len(hyp)} setups expired untriggered. Entering those at market on day one (same stop/targets) would have averaged {m:+}R within the setup window.",
+                              "action": "Propose entries closer to market: 0.2×ATR offsets instead of 0.3–0.5×ATR, or market-on-open for A-grades"})
+                elif m is not None and m <= -0.2:
+                    F.append({"sev": "info", "title": "Letting setups expire is saving money", "dr": m, "n": len(hyp),
+                              "ev": f"Hypothetical market entries on the {len(hyp)} expired setups would have averaged {m:+}R. The resting-limit discipline is filtering out losers.",
+                              "action": "Keep resting limits exactly as they are"})
+        if len(resolved) + advisor["nExpired"] >= 15:
+            tr_rate = round(len(resolved) / (len(resolved) + advisor["nExpired"]) * 100, 1)
+            advisor["trigRate"] = tr_rate
+            if tr_rate < 35:
+                F.append({"sev": "watch", "title": "Most setups never trigger", "n": len(resolved) + advisor["nExpired"],
+                          "ev": f"Only {tr_rate}% of archived setups ever filled. Entries may be parked too deep below/above the market.",
+                          "action": "Consider smaller limit offsets (entries nearer to the market price)"})
+            elif tr_rate > 85:
+                F.append({"sev": "watch", "title": "Nearly everything triggers", "n": len(resolved) + advisor["nExpired"],
+                          "ev": f"{tr_rate}% of archived setups filled — limits this close to the print behave like market orders (no pullback edge captured).",
+                          "action": "Consider deeper limit offsets, or require a level (SMA20) instead of an ATR offset"})
+        if len(trig_res) >= 15:
+            fast_stop = [a for a in trig_res if a.get("status") == "stopped"
+                         and trading_days_between(a.get("trigDate", ""), a.get("closed", "")) <= 2]
+            fr = round(len(fast_stop) / len(trig_res) * 100, 1)
+            if fr >= 40:
+                F.append({"sev": "watch", "title": "Stops dying within 2 sessions", "n": len(trig_res),
+                          "ev": f"{fr}% of triggered trades hit the stop within 2 sessions of filling — fills are catching falling knives, not pullbacks.",
+                          "action": "Propose entry confirmation (e.g. fill only if the day closes back above the level) or wider 2.5×ATR stop"})
+
+        # 3. Per-type edge (10 closed per type to speak, 20 to act)
+        by_t = {}
+        for a in resolved:
+            by_t.setdefault(a.get("type", "?"), []).append(a.get("r") or 0)
+        for typ, rs in by_t.items():
+            if len(rs) < 10: continue
+            m = mean(rs)
+            sev = "act" if len(rs) >= 20 else "watch"
+            if m is not None and m < -0.1:
+                F.append({"sev": sev, "title": f"No edge detected: {typ}", "dr": m, "n": len(rs),
+                          "ev": f"{len(rs)} closed {typ} trades average {m:+}R. The market is not paying for this pattern right now.",
+                          "action": f"Propose demoting {typ} to half-size or PASS until expectancy recovers"})
+            elif m is not None and m >= 0.5:
+                F.append({"sev": sev, "title": f"Strong edge: {typ}", "dr": m, "n": len(rs),
+                          "ev": f"{len(rs)} closed {typ} trades average {m:+}R — the system's best pattern.",
+                          "action": f"Propose taking every A-grade {typ} at full size"})
+
+        # 4. Timeout drag + near-miss audit
+        tmo = [a.get("r") or 0 for a in resolved if a.get("status") == "timeout"]
+        if len(tmo) >= 8 and (mean(tmo) or 0) < 0:
+            F.append({"sev": "watch", "title": "Stale trades are bleeding", "dr": mean(tmo), "n": len(tmo),
+                      "ev": f"{len(tmo)} trades hit the 15-session timeout averaging {mean(tmo):+}R — winners pay within ~2 weeks, the rest decay.",
+                      "action": "Propose cutting untouched trades after 10 sessions instead of 15"})
+        nm_rs = [a.get("r") or 0 for a in resolved if a.get("nm")]
+        st_rs = [a.get("r") or 0 for a in resolved if not a.get("nm")]
+        if len(nm_rs) >= 10 and len(st_rs) >= 10:
+            dm = round((mean(nm_rs) or 0) - (mean(st_rs) or 0), 2)
+            if dm <= -0.3:
+                F.append({"sev": "act", "title": "Near-miss fills are diluting the edge", "dr": dm, "n": len(nm_rs),
+                          "ev": f"Near-miss setups average {mean(nm_rs):+}R vs {mean(st_rs):+}R for strict ones ({dm:+}R gap). Filling lines to 4 ideas costs money.",
+                          "action": "Propose publishing strict-screen setups only (fewer ideas, better ideas)"})
+
+        advisor["status"] = "active" if F else "collecting"
+        if not F:
+            advisor["needs"] = {
+                "stop / T1 / breakeven replay": f"{len(trig_res)}/20 closed trades",
+                "entry-proximity experiment": f"{len(expired_p)}/10 expired setups",
+                "per-pattern edge report": "10 closed trades per type",
+            }
+        print(f"Advisor: {advisor['status']}, {len(F)} findings "
+              f"({len(resolved)} resolved, {advisor['nExpired']} expired archived)")
+    except Exception as e:
+        print(f"Advisor warning (non-fatal): {e}", file=sys.stderr)
+
     cutoff35 = (datetime.now(timezone.utc) - timedelta(days=35)).strftime("%Y-%m-%d")
     cutoff30 = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
     hist = [s for s in prev_hist if s.get("status") in OPEN_STATES
@@ -876,6 +1051,7 @@ try:
         "stats": stats,
         "open": open_view,
         "hist": hist,
+        "advisor": advisor,   # self-evaluation report — proposals only, never auto-applied
     }
     print(f"Setups: {len(final[:16])} candidates from {stocks_total} stocks "
           f"({', '.join(f'{k}:{v}' for k,v in per_type.items())})")
