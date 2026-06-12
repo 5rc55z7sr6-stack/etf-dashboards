@@ -579,7 +579,15 @@
   .su-track-row b{color:var(--text);font-weight:600}
   .su-track-hd .num,.su-track-row .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
   .su-track-row .tkr{font-weight:700;color:var(--text);letter-spacing:.4px}
-  @media(max-width:860px){.su-track-hd,.su-track-row{grid-template-columns:96px 52px 78px repeat(5,minmax(58px,1fr)) 58px;gap:0 7px;font-size:9.5px}}
+  .su-track-sep{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;padding:10px 0 5px;border-bottom:1px solid var(--line)}
+  .su-track-sum{display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:10px 8px 2px;border-top:1px solid var(--line);margin-top:8px}
+  /* mobile: solid header (no bleed-through) + sideways scroll instead of squashed columns */
+  @media(max-width:860px){
+    .su-track-scroll{overflow-x:auto}
+    .su-track-hd,.su-track-row{grid-template-columns:92px 50px 70px repeat(5,minmax(62px,1fr)) 56px;gap:0 7px;font-size:9.5px;min-width:660px}
+    .su-track-hd{background:#22292c !important;box-shadow:0 3px 8px rgba(0,0,0,.45)}
+    .su-track-sep,.su-track-sum{min-width:660px}
+  }
   .su-st-badge{font-size:8.5px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:8px;white-space:nowrap}
   .su-st-badge.wait{background:rgba(255,255,255,.05);color:var(--text-dim);border:1px solid var(--line)}
   .su-st-badge.live{background:rgba(63,209,126,.13);color:var(--green);border:1px solid rgba(63,209,126,.3)}
@@ -2042,7 +2050,18 @@ function renderSetupTracking(open){
   if(!open||!open.length){ el.innerHTML=''; return; }
   const rank={t1:0,triggered:1,pending:2};
   const $=v=>v==null?'–':'$'+Number(v).toFixed(2);
-  const rows=[...open].sort((a,b)=>(rank[a.status]??3)-(rank[b.status]??3)).map(s=>{
+  // Longs first, then shorts. Inside each side: live trades ranked by open
+  // P/L (best winners on top), waiting-trigger limits at the bottom.
+  const sorted=[...open].sort((a,b)=>{
+    const sd=(a.side==='short'?1:0)-(b.side==='short'?1:0);
+    if(sd) return sd;
+    const la=(rank[a.status]??3)<2, lb=(rank[b.status]??3)<2;
+    if(la!==lb) return la?-1:1;
+    if(la&&lb) return (b.uR??-1e9)-(a.uR??-1e9);
+    return (rank[a.status]??3)-(rank[b.status]??3);
+  });
+  const nL=open.filter(s=>s.side==='long').length, nS=open.length-nL;
+  const rowOf=s=>{
     const st=SU_STATUS[s.status]||{lbl:s.status,cls:'wait'};
     const isL=s.side==='long';
     const sideCol=isL?'var(--green)':'var(--red)';
@@ -2059,12 +2078,32 @@ function renderSetupTracking(open){
       <span class="num">${s.px!=null?'<b>'+$(s.px)+'</b>':'–'}</span>
       <span class="num">${uR}</span>
     </div>`;
-  }).join('');
+  };
+  let rows='', lastSide=null;
+  for(const s of sorted){
+    if(s.side!==lastSide){
+      lastSide=s.side;
+      const isL=s.side==='long';
+      rows+=`<div class="su-track-sep" style="color:${isL?'var(--green)':'var(--red)'}">${isL?'▲ LONGS':'▼ SHORTS'} · ${isL?nL:nS} · best first</div>`;
+    }
+    rows+=rowOf(s);
+  }
+  // SUM row — open R across all LIVE trades (waiting triggers carry no P/L)
+  const liveTr=open.filter(s=>s.uR!=null);
+  const winR=liveTr.reduce((a,s)=>a+(s.uR>0?s.uR:0),0);
+  const lossR=liveTr.reduce((a,s)=>a+(s.uR<0?s.uR:0),0);
+  const netR=winR+lossR;
+  const sum=`<div class="su-track-sum">
+    <span style="margin-right:auto">Σ OPEN P/L · ${liveTr.length} live trades</span>
+    <span style="color:var(--green)">in profit +${winR.toFixed(2)}R</span>
+    <span style="color:var(--red)">in loss ${lossR.toFixed(2)}R</span>
+    <span style="color:${netR>=0?'var(--green)':'var(--red)'};font-weight:700">net ${netR>=0?'+':''}${netR.toFixed(2)}R</span>
+  </div>`;
   const hd=`<div class="su-track-hd">
     <span>STATUS</span><span>TICKER</span><span>SIDE</span>
     <span class="num">ENTRY</span><span class="num">STOP</span><span class="num">T1</span><span class="num">T2</span><span class="num">NOW</span><span class="num">P/L</span>
   </div>`;
-  el.innerHTML=`<div class="su-track"><div class="su-stats-hdr">🎫 TRACKING — published setups being scored live <span style="color:var(--text-faint);font-weight:400">· ${open.length} open${open.length>25?' · scroll for more':''}</span></div><div class="su-track-scroll">${hd}${rows}</div></div>`;
+  el.innerHTML=`<div class="su-track"><div class="su-stats-hdr">🎫 TRACKING — published setups being scored live <span style="color:var(--text-faint);font-weight:400">· ${open.length} open${open.length>25?' · scroll for more':''}</span></div><div class="su-track-scroll">${hd}${rows}</div>${sum}</div>`;
 }
 
 const SU_TYPES = {
