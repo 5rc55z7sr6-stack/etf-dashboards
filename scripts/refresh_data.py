@@ -10,7 +10,6 @@ CORE_R = [
     {"key":"SPY/TLT",   "num":"SPY",  "den":"TLT",  "master":True,  "inv":False},
     {"key":"CPER/GLD",  "num":"CPER", "den":"GLD",  "master":True,  "inv":False},
     {"key":"QQQ/SPY",   "num":"QQQ",  "den":"SPY",  "master":False, "inv":False},
-    {"key":"SMH/SPY",   "num":"SMH",  "den":"SPY",  "master":False, "inv":False},
     {"key":"IWM/SPY",   "num":"IWM",  "den":"SPY",  "master":False, "inv":False},
     {"key":"RSP/SPY",   "num":"RSP",  "den":"SPY",  "master":False, "inv":False},
     {"key":"GLD/SPY",   "num":"GLD",  "den":"SPY",  "master":False, "inv":True },
@@ -28,8 +27,9 @@ CORE_R = [
     {"key":"EWJ/SPY",   "num":"EWJ",  "den":"SPY",  "master":False, "inv":False},
     {"key":"COPX/GLD",  "num":"COPX", "den":"GLD",  "master":False, "inv":False},
     {"key":"SKYY/SPY",  "num":"SKYY", "den":"SPY",  "master":False, "inv":False},
-    {"key":"XBI/SPY",   "num":"XBI",  "den":"SPY",  "master":False, "inv":False},
-    {"key":"INDA/SPY",  "num":"INDA", "den":"SPY",  "master":False, "inv":False},
+    # SMH/SPY, XBI/SPY, INDA/SPY live in THEME_R only — duplicating them here
+    # made each one vote twice in the front-end regime score (orphan rows fall
+    # back to weight 1 because the JS config no longer carries them as core).
 ]
 THEME_R = [
     {"key":"SMH/SPY",   "num":"SMH",  "den":"SPY",  "master":False, "inv":False, "theme":True},
@@ -718,6 +718,11 @@ try:
             tp = ticker_prices.get(s.get("t"))
             if tp:
                 lo, hi = day_hilo.get(s["t"], (tp["p"], tp["p"]))
+                # Creation day: the day's wicks predate the setup, so a fill or
+                # stop "hit" by a pre-publication wick would be fiction. Use the
+                # live snapshot only; full wick accuracy starts the next session.
+                if s.get("created") == today_str:
+                    lo = hi = tp["p"]
                 advance_setup(s, tp["p"], lo, hi, today_str)
     open_keys = {(s.get("t"), s.get("type")) for s in prev_hist if s.get("status") in OPEN_STATES}
     for cnd in final[:16]:
