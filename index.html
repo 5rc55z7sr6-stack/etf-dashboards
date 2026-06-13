@@ -1613,7 +1613,7 @@ function buildBPCard(e,rank){
     <div class="bp-pct" style="color:${col}">${pctStr} <span style="font-size:9px;opacity:.6">vs SPY SMA20</span></div>
     <div class="pc-sma-row" style="margin-top:5px">
       <span class="sma-pill ${e.bullish?'above':'below'}">${e.bullish?'▲ ABOVE':'▼ BELOW'} SMA20</span>
-      <span class="sma50-txt">SMA20 ${e.s20>e.s50?'▲':'▼'} SMA50</span>
+      <span class="sma50-txt">SMA20 <span style="color:${e.s20>e.s50?'var(--green)':'var(--red)'};font-weight:700;font-size:11px">${e.s20>e.s50?'▲':'▼'}</span> SMA50</span>
     </div>
     <div class="bp-meta" style="margin-top:3px">5d momentum ${chg5Str}</div>
     <div class="bp-spark">${bpSpark(e.closes,e.bullish)}</div>
