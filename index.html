@@ -205,6 +205,8 @@
   .pc-theme-badge{position:absolute;bottom:10px;left:12px;font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:2px 6px;border-radius:2px;background:rgba(160,175,175,.08);color:rgba(160,175,175,.45);font-weight:600;text-transform:uppercase;border:1px solid rgba(160,175,175,.15)}
   .pc-lens{position:absolute;bottom:12px;right:12px;font-family:var(--mono);font-size:8.5px;letter-spacing:.5px;padding:2px 6px;border-radius:2px;text-transform:uppercase;border:1px solid var(--line-bright);color:var(--text-faint)}
   .pulse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:11px}
+  .ratio-rest-card{display:none}
+  #livePulseGrid.show-all-ratios .ratio-rest-card{display:flex}
   .signal-group-hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
   .signal-group-hdr:not(:first-child){margin-top:24px}
   .sg-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;white-space:nowrap}
@@ -725,8 +727,8 @@
   <div class="wrap">
     <button class="tab active" data-go="hero">Overview</button>
     <button class="tab live-tab" data-go="live">⬤ Live Signal</button>
-    <button class="tab" data-go="setups">🎯 Today's Setups</button>
     <button class="tab" data-go="performers">🏆 Best Performers</button>
+    <button class="tab" data-go="setups">🎯 Today's Setups</button>
     <button class="tab" data-go="sectors">ETFs + Themes</button>
     <button class="tab" data-go="ratios">Ratios</button>
     <button class="tab" data-go="regime">Regimes</button>
@@ -809,11 +811,6 @@
       <div class="pulse-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
     </div>
 
-    <div class="breakdown" id="liveBreakdown" style="display:none">
-      <div class="breakdown-title">All Signals at a Glance</div>
-      <div class="bd-grid" id="bdGrid"></div>
-    </div>
-
     <div class="sec-head" style="margin-top:16px">
       <div>
         <div class="num">ALL RATIO CARDS · <span id="ratioCardsCount"></span></div>
@@ -823,7 +820,77 @@
     </div>
     <div id="livePulseGrid" style="padding-top:12px"><div class="live-spinner-wrap"><div class="spinner"></div>Fetching live ratio data…</div></div>
 
-    <div class="sec-head sec-collapse-hdr" id="themeToggleHdr" onclick="toggleThemeSection()" title="Click to expand / collapse" style="margin-top:16px">
+    <div class="sec-head sec-collapse-hdr" id="bdToggleHdr" onclick="toggleBreakdownSection()" title="Click to expand / collapse" style="margin-top:16px">
+      <div>
+        <div class="num">ALL SIGNALS AT A GLANCE</div>
+        <h3 style="margin:4px 0 2px">Every ratio, ranked</h3>
+        <p style="margin:0">Click to expand the full signal breakdown</p>
+      </div>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-collapsible collapsed" id="bdWrap" style="max-height:0">
+      <div class="breakdown" id="liveBreakdown" style="margin-top:14px">
+        <div class="bd-grid" id="bdGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGIME -->
+  <section id="regime">
+    <div class="sec-head"><div><div class="num">SECTION 01 / REGIME ARCHETYPES</div><h3>Read them together</h3><p>Score each lens +1/−1 by its 50-day MA slope. Net the score across lenses.</p></div></div>
+    <div class="regimes">
+      <div class="reg on"><div class="glow"></div>
+        <div class="rlab">REGIME A · NET POSITIVE</div><h4>Risk-On / Reflation</h4>
+        <div class="blk"><div class="bh">Signals aligned</div><div class="bt">Core ratios bullish. SMH/SPY rising, ARKK/SPY rising. Green light for all themes.</div></div>
+        <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Long cyclicals + themes:</span> ITA, AIQ, QTUM, BOTZ, NASA. Add speculative sleeve. Press leaders.</div></div>
+      </div>
+      <div class="reg off"><div class="glow"></div>
+        <div class="rlab">REGIME B · NET NEGATIVE</div><h4>Risk-Off / Flight to Safety</h4>
+        <div class="blk"><div class="bh">Signals aligned</div><div class="bt">Credit, breadth, equity ratios falling. ARKK/SPY breaking down.</div></div>
+        <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Defensives only: XLP, XLU, TLT, GLD, cash.</span> Cut ALL theme exposure. Exception: ITA/defense may hold if geopolitical bid persists.</div></div>
+      </div>
+      <div class="reg narrow"><div class="glow"></div>
+        <div class="rlab">REGIME C · MIXED / FRAGILE</div><h4>Narrow / Late-Cycle</h4>
+        <div class="blk"><div class="bh">Signals diverge</div><div class="bt">Index rising but breadth/credit flat. ARKK/SPY rolling over.</div></div>
+        <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Hold leaders, tighten stops.</span> Trim speculative themes first. ITA/defense may be the one theme that survives here.</div></div>
+      </div>
+    </div>
+    <p style="margin-top:20px;font-size:13px;color:var(--text-dim);max-width:80ch">Theme rule: <b style="color:var(--text)">themes are the last to add and first to cut.</b> Defense (ITA) is the only theme that can diverge from the broad regime — it tracks geopolitics, not just risk appetite.</p>
+  </section>
+
+  <!-- PLAYBOOK -->
+  <section id="playbook">
+    <div class="sec-head"><div><div class="num">SECTION 02 / EXECUTION</div><h3>The rotation + theme playbook</h3></div></div>
+    <div class="play">
+      <div class="step"><div class="sn">1</div><h4>Confirm regime first</h4><p>Get ≥2 of 4 master gauges bullish. That's the green light for ANY risk. Without it — no theme ETFs, no small caps, no high-beta. The live signal engine scores this for you automatically.</p></div>
+      <div class="step"><div class="sn">2</div><h4>Check theme switches</h4><p><b style="color:var(--text)">SMH/SPY green</b> → add AIQ, QTUM, BOTZ, CHAT. <b style="color:var(--text)">ITA/SPY green</b> → add ITA, XAR, SHLD. <b style="color:var(--text)">ARKK/SPY green</b> → add speculative sleeve (NASA, ARKG). Each flipping red = cut that category first.</p></div>
+      <div class="step"><div class="sn">3</div><h4>Size small, cut fast</h4><p>Theme ETFs are high-beta and carry concentration risk. Max 5–10% per theme. Treat the SMA20 cross as a stop trigger — if the ratio breaks below SMA20, cut the position. Never average down into a red signal.</p></div>
+    </div>
+    <div class="triggers">
+      <div class="trig"><span class="cond">SMH/SPY below SMA50</span><span class="act">Cut AI/quantum/robotics themes. <b>Semis lead tech — if the canary dies, themes follow.</b></span></div>
+      <div class="trig"><span class="cond">ARKK/SPY rolling over SMA20</span><span class="act"><b>Exit speculative themes first</b> (space, genomics, crypto equity).</span></div>
+      <div class="trig"><span class="cond">HYG/LQD breaks SMA50 down</span><span class="act"><b>Risk-off — exit ALL themes.</b> Credit leading equity lower is the clearest warning.</span></div>
+      <div class="trig"><span class="cond">ITA/SPY rising in risk-off</span><span class="act">Defense can be a diversifier. <b>Hold ITA/XAR/SHLD as a separate geopolitical sleeve.</b></span></div>
+      <div class="trig"><span class="cond">Cadence</span><span class="act">Review theme signals <b>daily</b>. Regime re-score <b>weekly</b>. Higher volatility on themes — check stops intraday around catalysts.</span></div>
+    </div>
+  </section>
+
+  <!-- CAVEATS -->
+  <section id="caveats">
+    <div class="sec-head"><div><div class="num">SECTION 03 / RISK NOTES</div><h3>Where this breaks</h3></div></div>
+    <div class="caveats">
+      <div class="cav"><h5>Theme ETFs are high-beta</h5><p>ARKK, NASA, UFO, QTUM, ARKG can fall 50–80% in a bear market. They amplify the regime — never hold through a red-light signal.</p></div>
+      <div class="cav"><h5>AUM & liquidity vary widely</h5><p>GLD ~$155.1B vs. UFO ~$1.2B. Thin theme funds can gap on news. Use limit orders; verify spreads before sizing.</p></div>
+      <div class="cav"><h5>Defense is the exception</h5><p>ITA/XAR/SHLD can rise in risk-off if geopolitical tensions are the driver. All other themes track the broad risk cycle.</p></div>
+      <div class="cav"><h5>ARKK/SPY as speculative proxy</h5><p>ARKK's portfolio changes over time (active). It remains the best liquid proxy for speculative risk appetite but subject to Cathie Wood's decisions.</p></div>
+      <div class="cav"><h5>Narrative can persist beyond fundamentals</h5><p>Quantum/space/nuclear ETFs can stay elevated on narrative alone. The ratio signal is your reality check — if it's rolling over, the narrative is fading.</p></div>
+      <div class="cav"><h5>Not investment advice</h5><p>Educational framework only. All signals are lagging, based on closing prices, and should be layered on top of your own risk management and position sizing rules.</p></div>
+    </div>
+  </section>
+
+  <!-- THEME SIGNAL LIGHTS -->
+  <section id="themeLights">
+    <div class="sec-head sec-collapse-hdr" id="themeToggleHdr" onclick="toggleThemeSection()" title="Click to expand / collapse">
       <div>
         <div class="num">SIGNAL ENGINE / THEME INDICATORS</div>
         <h3 style="margin:4px 0 2px">Theme Signal Lights</h3>
@@ -838,7 +905,6 @@
         <div class="pulse-card theme-card"><div class="live-spinner-wrap" style="padding:16px"><div class="spinner"></div></div></div>
       </div>
     </div>
-
     <div class="live-note">Data via Yahoo Finance (~15 min delay) · SMA20 = trend · SMA50 = regime · Copper proxy = CPER · GLD/SPY inverted · Theme signals: SMH/SPY (tech themes), ITA/SPY (defense), ARKK/SPY (speculative) · Theme ETFs are high-beta — last to add, first to cut · Not investment advice.</div>
   </section>
 
@@ -846,7 +912,7 @@
   <section id="sectors">
     <div class="sec-head sec-collapse-hdr" id="sectorsToggleHdr" onclick="toggleSectorsSection()" title="Click to expand / collapse">
       <div>
-        <div class="num">SECTION 01 / SECTOR · ASSET-CLASS · THEME ETFs</div>
+        <div class="num">SECTION 04 / SECTOR · ASSET-CLASS · THEME ETFs</div>
         <h3>The most liquid fund per industry &amp; theme</h3>
         <p>US sectors, global ETFs, macro asset classes — plus trending thematic industries (defense, space, quantum, AI, nuclear and more) that cut across GICS sectors.</p>
       </div>
@@ -879,7 +945,7 @@
   <section id="ratios">
     <div class="sec-head sec-collapse-hdr" id="ratiosToggleHdr" onclick="toggleRatiosSection()" title="Click to expand / collapse">
       <div>
-        <div class="num">SECTION 02 / INTERMARKET RATIOS + THEME RATIOS</div>
+        <div class="num">SECTION 05 / INTERMARKET RATIOS + THEME RATIOS</div>
         <h3>What each ratio means &amp; how to position</h3>
         <p>The last three ratios map themes onto the same framework: SMH/SPY (tech-AI), ITA/SPY (defense), ARKK/SPY (speculative).</p>
       </div>
@@ -897,62 +963,33 @@
     </div>
   </section>
 
-  <!-- REGIME -->
-  <section id="regime">
-    <div class="sec-head"><div><div class="num">SECTION 03 / REGIME ARCHETYPES</div><h3>Read them together</h3><p>Score each lens +1/−1 by its 50-day MA slope. Net the score across lenses.</p></div></div>
-    <div class="regimes">
-      <div class="reg on"><div class="glow"></div>
-        <div class="rlab">REGIME A · NET POSITIVE</div><h4>Risk-On / Reflation</h4>
-        <div class="blk"><div class="bh">Signals aligned</div><div class="bt">Core ratios bullish. SMH/SPY rising, ARKK/SPY rising. Green light for all themes.</div></div>
-        <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Long cyclicals + themes:</span> ITA, AIQ, QTUM, BOTZ, NASA. Add speculative sleeve. Press leaders.</div></div>
+  <!-- BEST PERFORMERS -->
+  <section id="performers">
+    <div class="sec-head">
+      <div>
+        <div class="num">BEST PERFORMERS / RELATIVE STRENGTH RANKING</div>
+        <h3>Who is beating the market?</h3>
+        <p>Each ETF is measured as <b>ETF / SPY ratio</b> — then ranked by how far that ratio sits <b>above its own 20-day SMA</b>. This removes the market tide and shows which ETF is genuinely outperforming. Strong Bull = ratio above both SMA20 and SMA50.</p>
       </div>
-      <div class="reg off"><div class="glow"></div>
-        <div class="rlab">REGIME B · NET NEGATIVE</div><h4>Risk-Off / Flight to Safety</h4>
-        <div class="blk"><div class="bh">Signals aligned</div><div class="bt">Credit, breadth, equity ratios falling. ARKK/SPY breaking down.</div></div>
-        <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Defensives only: XLP, XLU, TLT, GLD, cash.</span> Cut ALL theme exposure. Exception: ITA/defense may hold if geopolitical bid persists.</div></div>
-      </div>
-      <div class="reg narrow"><div class="glow"></div>
-        <div class="rlab">REGIME C · MIXED / FRAGILE</div><h4>Narrow / Late-Cycle</h4>
-        <div class="blk"><div class="bh">Signals diverge</div><div class="bt">Index rising but breadth/credit flat. ARKK/SPY rolling over.</div></div>
-        <div class="blk"><div class="bh">Position</div><div class="bt"><span class="hl">Hold leaders, tighten stops.</span> Trim speculative themes first. ITA/defense may be the one theme that survives here.</div></div>
-      </div>
+      <button class="refresh-btn" id="bpRefreshBtn" onclick="loadBestPerformers()"><span class="spinner-sm"></span>↺ Refresh</button>
     </div>
-    <p style="margin-top:20px;font-size:13px;color:var(--text-dim);max-width:80ch">Theme rule: <b style="color:var(--text)">themes are the last to add and first to cut.</b> Defense (ITA) is the only theme that can diverge from the broad regime — it tracks geopolitics, not just risk appetite.</p>
-  </section>
-
-  <!-- PLAYBOOK -->
-  <section id="playbook">
-    <div class="sec-head"><div><div class="num">SECTION 04 / EXECUTION</div><h3>The rotation + theme playbook</h3></div></div>
-    <div class="play">
-      <div class="step"><div class="sn">1</div><h4>Confirm regime first</h4><p>Get ≥2 of 4 master gauges bullish. That's the green light for ANY risk. Without it — no theme ETFs, no small caps, no high-beta. The live signal engine scores this for you automatically.</p></div>
-      <div class="step"><div class="sn">2</div><h4>Check theme switches</h4><p><b style="color:var(--text)">SMH/SPY green</b> → add AIQ, QTUM, BOTZ, CHAT. <b style="color:var(--text)">ITA/SPY green</b> → add ITA, XAR, SHLD. <b style="color:var(--text)">ARKK/SPY green</b> → add speculative sleeve (NASA, ARKG). Each flipping red = cut that category first.</p></div>
-      <div class="step"><div class="sn">3</div><h4>Size small, cut fast</h4><p>Theme ETFs are high-beta and carry concentration risk. Max 5–10% per theme. Treat the SMA20 cross as a stop trigger — if the ratio breaks below SMA20, cut the position. Never average down into a red signal.</p></div>
+    <div class="bp-methodology">
+      <span class="bp-m-item"><span style="color:var(--green)">▲▲ STRONG BULL</span> — ETF/SPY ratio above SMA20 AND SMA20 above SMA50</span>
+      <span class="bp-m-sep">·</span>
+      <span class="bp-m-item"><span style="color:#7aaa90">▲ BULL</span> — ratio above SMA20 only</span>
+      <span class="bp-m-sep">·</span>
+      <span class="bp-m-item"><span style="color:#9e7070">▼ BEAR</span> — ratio below SMA20</span>
+      <span class="bp-m-sep">·</span>
+      <span class="bp-m-item"><span style="color:var(--red)">▼▼ STRONG BEAR</span> — ratio below both SMAs</span>
     </div>
-    <div class="triggers">
-      <div class="trig"><span class="cond">SMH/SPY below SMA50</span><span class="act">Cut AI/quantum/robotics themes. <b>Semis lead tech — if the canary dies, themes follow.</b></span></div>
-      <div class="trig"><span class="cond">ARKK/SPY rolling over SMA20</span><span class="act"><b>Exit speculative themes first</b> (space, genomics, crypto equity).</span></div>
-      <div class="trig"><span class="cond">HYG/LQD breaks SMA50 down</span><span class="act"><b>Risk-off — exit ALL themes.</b> Credit leading equity lower is the clearest warning.</span></div>
-      <div class="trig"><span class="cond">ITA/SPY rising in risk-off</span><span class="act">Defense can be a diversifier. <b>Hold ITA/XAR/SHLD as a separate geopolitical sleeve.</b></span></div>
-      <div class="trig"><span class="cond">Cadence</span><span class="act">Review theme signals <b>daily</b>. Regime re-score <b>weekly</b>. Higher volatility on themes — check stops intraday around catalysts.</span></div>
-    </div>
-  </section>
-
-  <!-- CAVEATS -->
-  <section id="caveats" style="border-bottom:none">
-    <div class="sec-head"><div><div class="num">SECTION 05 / RISK NOTES</div><h3>Where this breaks</h3></div></div>
-    <div class="caveats">
-      <div class="cav"><h5>Theme ETFs are high-beta</h5><p>ARKK, NASA, UFO, QTUM, ARKG can fall 50–80% in a bear market. They amplify the regime — never hold through a red-light signal.</p></div>
-      <div class="cav"><h5>AUM & liquidity vary widely</h5><p>GLD ~$155.1B vs. UFO ~$1.2B. Thin theme funds can gap on news. Use limit orders; verify spreads before sizing.</p></div>
-      <div class="cav"><h5>Defense is the exception</h5><p>ITA/XAR/SHLD can rise in risk-off if geopolitical tensions are the driver. All other themes track the broad risk cycle.</p></div>
-      <div class="cav"><h5>ARKK/SPY as speculative proxy</h5><p>ARKK's portfolio changes over time (active). It remains the best liquid proxy for speculative risk appetite but subject to Cathie Wood's decisions.</p></div>
-      <div class="cav"><h5>Narrative can persist beyond fundamentals</h5><p>Quantum/space/nuclear ETFs can stay elevated on narrative alone. The ratio signal is your reality check — if it's rolling over, the narrative is fading.</p></div>
-      <div class="cav"><h5>Not investment advice</h5><p>Educational framework only. All signals are lagging, based on closing prices, and should be layered on top of your own risk management and position sizing rules.</p></div>
+    <div id="bpGroups">
+      <div class="bp-loading"><div class="spinner" style="border-top-color:var(--gold)"></div><span>Fetching relative strength data…</span></div>
     </div>
   </section>
 
   <!-- TODAY'S SETUPS -->
   <section id="setups">
-    <div class="sec-head sec-collapse-hdr" id="setupsToggleHdr" onclick="toggleSetupsSection()" title="Click to expand / collapse">
+    <div class="sec-head sec-collapse-hdr open" id="setupsToggleHdr" onclick="toggleSetupsSection()" title="Click to expand / collapse">
       <div>
         <div class="num">TODAY'S SETUPS / TRADE SHEET</div>
         <h3>Where to focus — concluded for you</h3>
@@ -960,7 +997,7 @@
       </div>
       <span class="sec-arrow">▼</span>
     </div>
-    <div class="sec-collapsible collapsed" id="setupsWrap" style="max-height:0">
+    <div class="sec-collapsible" id="setupsWrap" style="max-height:none">
 
     <!-- 1. THE CONCLUSION -->
     <div id="suConclusion" class="su-conclusion"></div>
@@ -992,30 +1029,6 @@
     <div id="suList" class="su-list"></div>
     <div class="su-foot">Candidates pre-screened server-side every 10 min · levels are closing-price based · not investment advice</div>
     </div><!-- /setupsWrap -->
-  </section>
-
-  <!-- BEST PERFORMERS -->
-  <section id="performers">
-    <div class="sec-head">
-      <div>
-        <div class="num">BEST PERFORMERS / RELATIVE STRENGTH RANKING</div>
-        <h3>Who is beating the market?</h3>
-        <p>Each ETF is measured as <b>ETF / SPY ratio</b> — then ranked by how far that ratio sits <b>above its own 20-day SMA</b>. This removes the market tide and shows which ETF is genuinely outperforming. Strong Bull = ratio above both SMA20 and SMA50.</p>
-      </div>
-      <button class="refresh-btn" id="bpRefreshBtn" onclick="loadBestPerformers()"><span class="spinner-sm"></span>↺ Refresh</button>
-    </div>
-    <div class="bp-methodology">
-      <span class="bp-m-item"><span style="color:var(--green)">▲▲ STRONG BULL</span> — ETF/SPY ratio above SMA20 AND SMA20 above SMA50</span>
-      <span class="bp-m-sep">·</span>
-      <span class="bp-m-item"><span style="color:#7aaa90">▲ BULL</span> — ratio above SMA20 only</span>
-      <span class="bp-m-sep">·</span>
-      <span class="bp-m-item"><span style="color:#9e7070">▼ BEAR</span> — ratio below SMA20</span>
-      <span class="bp-m-sep">·</span>
-      <span class="bp-m-item"><span style="color:var(--red)">▼▼ STRONG BEAR</span> — ratio below both SMAs</span>
-    </div>
-    <div id="bpGroups">
-      <div class="bp-loading"><div class="spinner" style="border-top-color:var(--gold)"></div><span>Fetching relative strength data…</span></div>
-    </div>
   </section>
 
     <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
@@ -1487,8 +1500,9 @@ function spark(vals,bull){
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polygon points="0,${H} ${pts} ${W},${H}" fill="${col}" opacity="0.09"/><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${lastX}" cy="${lastY}" r="2.3" fill="${col}"/></svg>`;
 }
 
-function buildCard(r,isThemeBig){
-  if(r.error)return `<div class="pulse-card${isThemeBig?' theme-card':''}"><div class="pc-header"><div class="signal-light dim"></div><div class="pc-pair">${r.key}</div></div><div class="pc-label">${r.label}</div><div style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px">Data unavailable</div></div>`;
+function buildCard(r,isThemeBig,extraClass){
+  const xc=extraClass?' '+extraClass:'';
+  if(r.error)return `<div class="pulse-card${isThemeBig?' theme-card':''}${xc}"><div class="pc-header"><div class="signal-light dim"></div><div class="pc-pair">${r.key}</div></div><div class="pc-label">${r.label}</div><div style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px">Data unavailable</div></div>`;
   const{sig,bullish,above20}=r.cl;
   const col=sig==='strong-bull'?'#3fd17e':sig==='strong-bear'?'#ff5c61':bullish?'#7aaa90':'#9e7070';
   // Fix: invert pct sign for GLD/SPY so displayed % matches the bullish/bearish verdict
@@ -1497,7 +1511,7 @@ function buildCard(r,isThemeBig){
   const fmt=v=>v>=100?v.toFixed(2):v>=10?v.toFixed(3):v.toFixed(4);
   const arr=r.curr>r.prev5?'↗':'↘';
   const tExtra=r.themeDesc?`<div style="font-family:var(--mono);font-size:9.5px;color:${col};margin-top:-4px;line-height:1.5;border-left:2px solid ${col};padding-left:8px">${r.themeDesc}</div>`:'';
-  return `<div class="pulse-card ${sig}${isThemeBig?' theme-card':''}">
+  return `<div class="pulse-card ${sig}${isThemeBig?' theme-card':''}${xc}">
     <div class="pc-header"><div class="signal-light ${slc(sig)}"></div><div class="pc-pair">${r.key}</div><div class="pc-verdict-chip ${sig}">${SIG_LABEL[sig]}</div></div>
     <div class="pc-label">${r.label}</div>${tExtra}
     <div class="pc-vals">
@@ -1526,36 +1540,35 @@ function renderSplitGrid(data,id){
   });
   const errs=data.filter(r=>r.error);
   const N=8; // cards shown per group before "Show all"
-  const bull5=bull.slice(0,N), bullRest=bull.slice(N);
-  const bear5=bear.slice(0,N), bearRest=bear.slice(N);
+  // Keep each group's overflow INLINE under its own colored header (hidden until
+  // expanded) so all bullish cards stay together and all bearish together —
+  // expanding no longer drops extra bull cards below the bearish block.
+  const bullRest=bull.slice(N), bearRest=bear.slice(N);
   const total=bull.length+bear.length;
+  const card=r=>buildCard(r,false);
+  const restCard=r=>buildCard(r,false,'ratio-rest-card');
   let h='';
-  if(bull5.length){
+  if(bull.length){
     h+=`<div class="signal-group-hdr bull-hdr"><span class="sg-label">▲ Bullish</span><span class="sg-count">${bull.length} ratio${bull.length>1?'s':''}</span><div class="sg-line"></div></div>`;
-    h+=`<div class="pulse-grid">${bull5.map(r=>buildCard(r,false)).join('')}</div>`;
+    h+=`<div class="pulse-grid">${bull.slice(0,N).map(card).join('')}${bullRest.map(restCard).join('')}</div>`;
   }
-  if(bear5.length){
+  if(bear.length){
     h+=`<div class="signal-group-hdr bear-hdr"><span class="sg-label">▼ Bearish</span><span class="sg-count">${bear.length} ratio${bear.length>1?'s':''}</span><div class="sg-line"></div></div>`;
-    h+=`<div class="pulse-grid">${bear5.map(r=>buildCard(r,false)).join('')}</div>`;
+    h+=`<div class="pulse-grid">${bear.slice(0,N).map(card).join('')}${bearRest.map(restCard).join('')}</div>`;
   }
-  const hasRest=bullRest.length||bearRest.length;
-  if(hasRest){
-    h+=`<div id="ratioCardsRest" style="display:none">`;
-    if(bullRest.length) h+=`<div class="pulse-grid">${bullRest.map(r=>buildCard(r,false)).join('')}</div>`;
-    if(bearRest.length) h+=`<div class="pulse-grid">${bearRest.map(r=>buildCard(r,false)).join('')}</div>`;
-    h+=`</div>`;
-    const remaining=bullRest.length+bearRest.length;
+  const remaining=bullRest.length+bearRest.length;
+  if(remaining){
     h+=`<button class="show-all-ratios-btn" id="showAllRatiosBtn" onclick="toggleAllRatioCards()"><span>Show all ${total} ratio cards &nbsp;(${remaining} more)</span><span class="btn-arrow">▼</span></button>`;
   }
-  if(errs.length) h+=`<div class="pulse-grid" style="margin-top:10px;opacity:.4">${errs.map(r=>buildCard(r,false)).join('')}</div>`;
+  if(errs.length) h+=`<div class="pulse-grid" style="margin-top:10px;opacity:.4">${errs.map(card).join('')}</div>`;
   document.getElementById(id).innerHTML=h||'<div class="live-error-msg">No data</div>';
 }
 function toggleAllRatioCards(){
-  const rest=document.getElementById('ratioCardsRest');
+  const root=document.getElementById('livePulseGrid');
   const btn=document.getElementById('showAllRatiosBtn');
-  if(!rest||!btn)return;
-  const open=rest.style.display==='none';
-  rest.style.display=open?'block':'none';
+  if(!root||!btn)return;
+  const open=!root.classList.contains('show-all-ratios');
+  root.classList.toggle('show-all-ratios',open);
   btn.classList.toggle('open',open);
   const span=btn.querySelector('span:first-child');
   if(span) span.textContent=open?'Show less':'Show all ratio cards';
@@ -3569,6 +3582,7 @@ function toggleCollapse(hdrId, wrapId){
   }
 }
 function toggleThemeSection(){ toggleCollapse('themeToggleHdr','themeSignalsWrap'); }
+function toggleBreakdownSection(){ toggleCollapse('bdToggleHdr','bdWrap'); }
 function toggleSectorsSection(){ toggleCollapse('sectorsToggleHdr','sectorsWrap'); }
 function toggleSetupsSection(){ toggleCollapse('setupsToggleHdr','setupsWrap'); }
 function toggleRatiosSection(){ toggleCollapse('ratiosToggleHdr','ratiosWrap'); }
