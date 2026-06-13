@@ -730,11 +730,25 @@ try:
         return s
 
     prev_hist = []
-    try:
-        with open("data.json") as _pf:
-            prev_hist = (json.load(_pf).get("setups") or {}).get("hist") or []
-    except Exception:
-        pass
+    # Setups now live in Cloudflare KV (paywalled), NOT the public data.json — so
+    # the tracker must read its previous state from KV to carry open/triggered
+    # positions forward across runs. Falls back to data.json for local dev runs.
+    _kt = os.environ.get("CF_KV_TOKEN"); _ka = os.environ.get("CF_ACCOUNT_ID"); _kn = os.environ.get("CF_KV_NS")
+    if _kt and _ka and _kn:
+        try:
+            import urllib.request as _ureq
+            _u = f"https://api.cloudflare.com/client/v4/accounts/{_ka}/storage/kv/namespaces/{_kn}/values/latest"
+            _r = _ureq.Request(_u, headers={"Authorization": f"Bearer {_kt}", "User-Agent": "Mozilla/5.0"})
+            prev_hist = (json.load(_ureq.urlopen(_r, timeout=20)).get("hist")) or []
+            print(f"   Prev setups from KV: {len(prev_hist)} hist rows")
+        except Exception as e:
+            print(f"prev setups from KV failed (non-fatal): {e}", file=sys.stderr)
+    if not prev_hist:
+        try:
+            with open("data.json") as _pf:
+                prev_hist = (json.load(_pf).get("setups") or {}).get("hist") or []
+        except Exception:
+            pass
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     OPEN_STATES = ("pending", "triggered", "t1")
     for s in prev_hist:
