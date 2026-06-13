@@ -1071,10 +1071,34 @@ output = {
     "ticker_prices": ticker_prices,
     "etf_holdings":  etf_holdings_map,
     "bp_scores":     bp_scores,          # pre-computed ETF/SPY relative strength — no CORS needed
-    "setups":        setups_out,         # Today's Setups: internals + swing candidates
+    # NOTE: "setups" is intentionally NOT in the public data.json. Today's Setups /
+    # alerts are protected: they are pushed to a private Cloudflare KV store below
+    # and served only behind a valid weekly code by the api.tradergk.com Worker.
 }
 with open("data.json", "w") as f:
     json.dump(output, f, separators=(",",":"))
+
+# ──────────────────────────────────────────────────────────────────────────────
+# STEP 5b — Push protected setups to Cloudflare KV (server-side gated)
+# Only runs in CI where the CF_* secrets are present. Non-fatal on failure so a
+# KV hiccup never breaks the public data refresh.
+# ──────────────────────────────────────────────────────────────────────────────
+_kv_token = os.environ.get("CF_KV_TOKEN")
+_kv_acc   = os.environ.get("CF_ACCOUNT_ID")
+_kv_ns    = os.environ.get("CF_KV_NS")
+if _kv_token and _kv_acc and _kv_ns:
+    try:
+        import urllib.request
+        body = json.dumps(setups_out, separators=(",", ":")).encode()
+        url = f"https://api.cloudflare.com/client/v4/accounts/{_kv_acc}/storage/kv/namespaces/{_kv_ns}/values/latest"
+        req = urllib.request.Request(url, data=body, method="PUT",
+            headers={"Authorization": f"Bearer {_kv_token}", "Content-Type": "text/plain"})
+        with urllib.request.urlopen(req, timeout=25) as r:
+            print(f"   Setups → Cloudflare KV: pushed ({len(body)} bytes, HTTP {r.status})")
+    except Exception as e:
+        print(f"KV push failed (non-fatal): {e}", file=sys.stderr)
+else:
+    print("   Setups → Cloudflare KV: skipped (CF_* env not set — local run)")
 
 ok = sum(1 for r in results if not r.get("error"))
 live_h = sum(1 for v in etf_holdings_map.values() if v and v[0].get('w',0) > 0)

@@ -207,6 +207,20 @@
   .pulse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:11px}
   .ratio-rest-card{display:none}
   #livePulseGrid.show-all-ratios .ratio-rest-card{display:flex}
+  /* Trades tab server-side lock */
+  .trades-lock{display:flex;align-items:center;justify-content:center;padding:60px 16px}
+  .trades-lock .tl-box{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:420px;text-align:center;background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:38px 30px}
+  .tl-ico{font-size:34px;line-height:1}
+  .tl-title{font-family:var(--mono);font-size:13px;letter-spacing:3px;font-weight:700;color:var(--gold)}
+  .tl-title span{color:var(--text-faint)}
+  .tl-sub{margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.55}
+  .tl-input{background:var(--bg-elev);border:1px solid var(--line-bright);color:var(--text);font-family:var(--mono);font-size:14px;letter-spacing:2px;padding:11px 16px;border-radius:8px;text-align:center;width:230px;outline:none}
+  .tl-input:focus{border-color:var(--gold)}
+  .tl-btn{background:var(--gold);color:#16191b;border:none;font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:1.5px;padding:11px 30px;border-radius:8px;cursor:pointer}
+  .tl-btn:disabled{opacity:.55;cursor:default}
+  .tl-msg{font-family:var(--mono);font-size:10px;color:var(--red);min-height:13px}
+  .tl-msg.ok{color:var(--green)}
+  .tl-hint{font-family:var(--mono);font-size:9px;color:var(--text-faint)}
   .signal-group-hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
   .signal-group-hdr:not(:first-child){margin-top:24px}
   .sg-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;white-space:nowrap}
@@ -668,51 +682,10 @@
 </style>
 </head>
 <body>
-<!-- ── WEEKLY ACCESS GATE ──────────────────────────────────────────────────────
-     Code rotates every Monday 00:00 UTC. Generate codes with gate_codes.py.
-     Client-side only: deters link-sharing, it is NOT cryptographic security. -->
-<div id="gateOverlay" style="position:fixed;inset:0;z-index:99999;background:#16191b;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;font-family:'JetBrains Mono',monospace">
-  <div style="font-size:13px;letter-spacing:3px;color:#e8c14a;font-weight:700">TRADER<span style="color:#fff">GK</span> · PRIVATE DESK</div>
-  <div style="font-size:11px;color:#8a9499">Enter this week's access code</div>
-  <input id="gateInput" type="password" autocomplete="off" placeholder="ACCESS CODE" style="background:#1e2326;border:1px solid #3a4145;color:#e9edef;font-family:inherit;font-size:14px;letter-spacing:2px;padding:10px 16px;border-radius:8px;text-align:center;width:220px;outline:none">
-  <button id="gateBtn" style="background:#e8c14a;color:#16191b;border:none;font-family:inherit;font-weight:700;font-size:11px;letter-spacing:1.5px;padding:10px 26px;border-radius:8px;cursor:pointer">UNLOCK</button>
-  <div id="gateMsg" style="font-size:10px;color:#ff5c61;height:14px"></div>
-  <div style="font-size:9px;color:#5a6468">code expires every Monday · ask GK for this week's code</div>
-</div>
-<script>
-(function(){
-  const SECRET='f9e925a118c294d75bed8ae495f88430';
-  const weekKey=Math.floor((Math.floor(Date.now()/86400000)+3)/7); // Monday-based week index
-  async function codeFor(wk){
-    const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(SECRET+':'+wk));
-    return [...new Uint8Array(buf)].slice(0,3).map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
-  }
-  const ov=document.getElementById('gateOverlay');
-  document.documentElement.style.overflow='hidden';
-  function open(){ov.remove();document.documentElement.style.overflow='';}
-  async function check(input){
-    const code=await codeFor(weekKey);
-    if((input||'').trim().toUpperCase()===code){
-      localStorage.setItem('gk_gate',weekKey+':'+code); open(); return true;
-    }
-    return false;
-  }
-  (async()=>{
-    const saved=localStorage.getItem('gk_gate');
-    if(saved){
-      const [wk,c]=saved.split(':');
-      if(parseInt(wk)===weekKey && c===await codeFor(weekKey)){open();return;}
-      localStorage.removeItem('gk_gate'); // expired — new week, new code
-    }
-    const inp=document.getElementById('gateInput'),btn=document.getElementById('gateBtn'),msg=document.getElementById('gateMsg');
-    async function go(){ if(!await check(inp.value)){msg.textContent='Wrong or expired code';inp.value='';} }
-    btn.addEventListener('click',go);
-    inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
-    inp.focus();
-  })();
-})();
-</script>
-
+<!-- The whole dashboard is PUBLIC. Only the Trades tab (Best Performers +
+     Today's Setups) is protected — and that protection is enforced SERVER-SIDE
+     by the api.tradergk.com Cloudflare Worker, which only returns the setup data
+     for a valid weekly code. See the Trades lock + tradesUnlock() further down. -->
 <header>
   <div class="head-inner">
     <div class="brand"><span class="mark">TRADER<span style="opacity:.6">GK</span></span></div>
@@ -964,6 +937,20 @@
 
   <!-- TRADES (Best Performers + Today's Setups) -->
   <div id="trades">
+  <!-- Server-side gated: content stays hidden until api.tradergk.com returns
+       data for a valid weekly code (see tradesUnlock). -->
+  <div id="tradesLock" class="trades-lock">
+    <div class="tl-box">
+      <div class="tl-ico">🔒</div>
+      <div class="tl-title">TRADER<span>GK</span> · TRADES</div>
+      <p class="tl-sub">Best Performers &amp; Today's Setups are protected. Enter this week's access code to unlock.</p>
+      <input id="tradesCode" type="password" autocomplete="off" placeholder="ACCESS CODE" class="tl-input" onkeydown="if(event.key==='Enter')tradesUnlock()">
+      <button id="tradesUnlockBtn" class="tl-btn" onclick="tradesUnlock()">UNLOCK</button>
+      <div id="tradesMsg" class="tl-msg"></div>
+      <div class="tl-hint">code rotates every Monday · ask GK for this week's code</div>
+    </div>
+  </div>
+  <div id="tradesBody" style="display:none">
   <!-- BEST PERFORMERS -->
   <section id="performers">
     <div class="sec-head">
@@ -1031,6 +1018,7 @@
     <div class="su-foot">Candidates pre-screened server-side every 10 min · levels are closing-price based · not investment advice</div>
     </div><!-- /setupsWrap -->
   </section>
+  </div><!-- /tradesBody -->
   </div><!-- /trades -->
 
     <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
@@ -2375,10 +2363,8 @@ async function loadDataJson(){
       window._bpScores=json.bp_scores; // pre-computed ETF/SPY relative strength
       saveBPCache(json.bp_scores, json.ts||Date.now()); // persist for instant first paint
     }
-    if(json.setups && typeof json.setups==='object'){
-      window._setups=json.setups; // Today's Setups scan
-      try{renderSetups();}catch(e){console.warn('renderSetups failed:',e);}
-    }
+    // NOTE: setups are NOT in the public data.json anymore — they are fetched
+    // from the gated api.tradergk.com Worker by tradesUnlock() after a valid code.
     return json;
   }catch(e){console.warn('loadDataJson failed:',e);return null;}
 }
@@ -2464,6 +2450,48 @@ async function loadLiveData(){
 loadBestPerformers();
 loadLiveData().then(()=>loadBestPerformers());
 setInterval(()=>{loadLiveData().then(()=>loadBestPerformers());},5*60*1000);
+
+/* ================================================================
+   TRADES TAB — server-side gate
+   The setups/alerts live in Cloudflare KV and are returned by the
+   api.tradergk.com Worker ONLY for a valid weekly code. The code is
+   verified on Cloudflare's servers — an un-coded visitor receives
+   nothing, so the alerts are never exposed in the page or data.json.
+================================================================ */
+const TRADES_API='https://api.tradergk.com/trades';
+async function tradesUnlock(silentCode){
+  const inp=document.getElementById('tradesCode');
+  const msg=document.getElementById('tradesMsg');
+  const btn=document.getElementById('tradesUnlockBtn');
+  const silent=typeof silentCode==='string';
+  const code=(silent?silentCode:(inp?inp.value:'')||'').trim().toUpperCase();
+  if(!code){ if(msg){msg.classList.remove('ok');msg.textContent='Enter this week’s code';} return false; }
+  if(btn&&!silent){btn.disabled=true;btn.textContent='CHECKING…';}
+  try{
+    const r=await fetch(TRADES_API+'?code='+encodeURIComponent(code),{cache:'no-store'});
+    if(r.status===200){
+      const payload=await r.json();
+      window._setups=payload;                       // KV value === the setups object
+      localStorage.setItem('gk_trades_code',code);  // remember for the week
+      const lock=document.getElementById('tradesLock'); if(lock)lock.style.display='none';
+      const body=document.getElementById('tradesBody'); if(body)body.style.display='';
+      try{renderSetups();}catch(e){}
+      try{loadBestPerformers();}catch(e){}
+      return true;
+    }
+    if(silent) localStorage.removeItem('gk_trades_code'); // saved code expired
+    if(!silent && msg){msg.classList.remove('ok');msg.textContent=(r.status===401?'Wrong or expired code':'Service busy — try again');}
+    return false;
+  }catch(e){
+    if(!silent && msg){msg.classList.remove('ok');msg.textContent='Network error — try again';}
+    return false;
+  }finally{
+    if(btn&&!silent){btn.disabled=false;btn.textContent='UNLOCK';}
+    if(inp&&!silent)inp.value='';
+  }
+}
+// Silently re-unlock with a remembered code on load (fails quietly if expired).
+(function(){const s=localStorage.getItem('gk_trades_code');if(s)tradesUnlock(s);})();
 
 /* ================================================================
    HOLDINGS DATA & ACCORDION
