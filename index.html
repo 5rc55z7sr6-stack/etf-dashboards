@@ -557,8 +557,16 @@
   .su-card .su-px{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--text)}
   .su-card .su-metrics{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-family:var(--mono);font-size:10.5px;color:var(--text-dim);margin:8px 0}
   .su-card .su-metrics b{color:var(--text)}
-  .su-card .su-plan{font-family:var(--mono);font-size:10.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;color:var(--text-dim)}
-  .su-card .su-plan .pl{color:var(--green)} .su-card .su-plan .st{color:var(--red)}
+  /* clean trade ticket: each level on its own aligned row */
+  .su-card .su-levels{border-top:1px solid var(--line);margin-top:9px;padding-top:10px;display:grid;grid-template-columns:46px 82px 1fr;gap:6px 10px;align-items:baseline;font-family:var(--mono)}
+  .su-card .su-lv-lbl{font-size:8.5px;font-weight:700;letter-spacing:.8px;padding:2px 0;border-radius:5px;text-align:center}
+  .su-card .su-lv-lbl.e{background:rgba(232,193,74,.14);color:var(--gold)}
+  .su-card .su-lv-lbl.s{background:rgba(255,92,97,.15);color:var(--red)}
+  .su-card .su-lv-lbl.t{background:rgba(63,209,126,.14);color:var(--green)}
+  .su-card .su-lv-px{font-size:14px;font-weight:700;color:var(--text);text-align:right;font-variant-numeric:tabular-nums;letter-spacing:.2px}
+  .su-card .su-lv-note{font-size:9.5px;color:var(--text-faint);align-self:center;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+  .su-card .su-foot{font-family:var(--mono);font-size:9.5px;line-height:1.5;color:var(--text-faint);margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)}
+  .su-card .su-foot b{color:var(--text-dim);font-weight:600}
   .su-vr-hot{color:var(--gold);font-weight:700}
   .su-stats{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;background:var(--card)}
   .su-stats-hdr{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px}
@@ -2200,7 +2208,9 @@ function renderSetups(){
   let html='';
   for(const typ of order){
     const t=SU_TYPES[typ];
-    const rows=(su.list||[]).filter(x=>x.type===typ);
+    // best-first within each group: strict before near-miss, then by score
+    const rows=(su.list||[]).filter(x=>x.type===typ)
+      .sort((a,b)=>(a.nm?1:0)-(b.nm?1:0) || (b.score||0)-(a.score||0));
     if(!rows.length) continue;
     const tag = aligned ? (aligned.includes(typ)
       ? '<span style="color:var(--gold)">★ ALIGNED WITH REGIME</span>'
@@ -2253,13 +2263,13 @@ function renderSetups(){
           <span>ATR(14) <b>${x.atr!=null?x.atr+'%':'–'}</b></span>
           <span>Volume <b class="${vrHot?'su-vr-hot':''}">${x.vr!=null?x.vr+'× avg'+(vrHot?' 🔥':''):'–'}</b></span>
         </div>
-        <div class="su-plan">
-          ${isLong?'ENTRY':'ENTRY (short)'} <b>$${entry.toFixed(2)}</b> <span style="color:var(--text-faint)">(${entryBasis}${Math.abs(entry-x.p)/x.p>0.001?' · now $'+x.p.toFixed(2):''})</span><br>
-          <span class="st">STOP $${stop.toFixed(2)}</span> (2×ATR, ${(stopDist/entry*100).toFixed(1)}% risk)
-          · <span class="pl">T1 $${t1.toFixed(2)}</span> (1.5R — sell ½, stop→BE)
-          · <span class="pl">T2 $${t2.toFixed(2)}</span> (${t2Basis}, ${rr2.toFixed(1)}R · wtd ${rr.toFixed(1)}R)<br>
-          SIZE ${shares.toLocaleString()} sh ≈ $${Math.round(notional).toLocaleString()} (risk $${Math.round(riskDollar).toLocaleString()} = ${riskPct}% of book)${x.expires?` · <span style="color:var(--text-faint)">auto-cancels ${x.expires} if untriggered</span>`:''}
+        <div class="su-levels">
+          <span class="su-lv-lbl e">ENTRY</span><span class="su-lv-px">$${entry.toFixed(2)}</span><span class="su-lv-note">${entryBasis}${Math.abs(entry-x.p)/x.p>0.001?` · now $${x.p.toFixed(2)}`:''}</span>
+          <span class="su-lv-lbl s">STOP</span><span class="su-lv-px" style="color:var(--red)">$${stop.toFixed(2)}</span><span class="su-lv-note">2×ATR · ${(stopDist/entry*100).toFixed(1)}% risk</span>
+          <span class="su-lv-lbl t">T1</span><span class="su-lv-px" style="color:var(--green)">$${t1.toFixed(2)}</span><span class="su-lv-note">1.5R · sell ½, stop→BE</span>
+          <span class="su-lv-lbl t">T2</span><span class="su-lv-px" style="color:var(--green)">$${t2.toFixed(2)}</span><span class="su-lv-note">${rr2.toFixed(1)}R · ${t2Basis}</span>
         </div>
+        <div class="su-foot">SIZE <b>${shares.toLocaleString()} sh</b> ≈ $${Math.round(notional).toLocaleString()} · risk $${Math.round(riskDollar).toLocaleString()} (${riskPct}% of book) · blended ${rr.toFixed(1)}R${x.expires?` · auto-cancels ${x.expires}`:''}</div>
       </div>`;
     }
     html+='</div>';
