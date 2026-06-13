@@ -31,6 +31,10 @@ jobs:
 
       - name: Fetch & compute signal data
         run: python scripts/refresh_data.py
+        env:
+          CF_KV_TOKEN: ${{ secrets.CF_KV_TOKEN }}
+          CF_ACCOUNT_ID: b1b8d024020467974ed0106236222db6
+          CF_KV_NS: 6281daef4328413c86d0ddebc11d7c2e
 
       - name: Commit and push data.json
         run: |
