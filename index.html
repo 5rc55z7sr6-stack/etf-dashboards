@@ -1674,17 +1674,44 @@ function renderBPScores(scores, source){
     '<div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:16px">No data available.</div>';
 }
 
+// ── Best Performers localStorage cache (same idea as the ratio cache) ───────
+// So the "Who is beating the market?" tab always paints instantly from the
+// last good data — even before this session's data.json fetch returns, or if
+// it fails entirely. No more hanging "Loading…" spinner.
+const BP_CACHE_KEY='etf_bp_cache_v1';
+function saveBPCache(scores,ts){
+  try{ localStorage.setItem(BP_CACHE_KEY,JSON.stringify({ts:ts||Date.now(),scores})); }catch(e){}
+}
+function loadBPCache(){
+  try{
+    const raw=localStorage.getItem(BP_CACHE_KEY); if(!raw)return null;
+    const o=JSON.parse(raw);
+    if(!o||!o.scores||Object.keys(o.scores).length<5)return null;
+    return o;
+  }catch(e){ return null; }
+}
+
 async function loadBestPerformers(){
   const btn = document.getElementById('bpRefreshBtn');
   if(btn){ btn.disabled=true; btn.classList.add('loading'); }
 
-  // ── FAST PATH: use pre-computed scores from data.json (no CORS needed) ────
+  // ── FAST PATH: pre-computed scores from data.json (no CORS needed) ────────
   if(window._bpScores && Object.keys(window._bpScores).length > 5){
     const ageMin = window.tickerPricesTs ? Math.round((Date.now()-window.tickerPricesTs)/60000) : null;
     const src = ageMin!==null ? `updated ${ageMin}m ago` : 'via GitHub Actions';
     renderBPScores(window._bpScores, src);
+    saveBPCache(window._bpScores, window.tickerPricesTs);   // refresh the cache
     if(btn){ btn.disabled=false; btn.classList.remove('loading'); }
     return;
+  }
+
+  // ── CACHE PATH: data.json not in yet (or failed) — paint last good data ───
+  const cached = loadBPCache();
+  if(cached){
+    const ageMin = Math.round((Date.now()-cached.ts)/60000);
+    renderBPScores(cached.scores, ageMin<600?`updated ${ageMin}m ago`:'cached');
+    if(btn){ btn.disabled=false; btn.classList.remove('loading'); }
+    return;   // a live data.json refresh will repaint via the fast path shortly
   }
 
   // ── SLOW PATH: live CORS fetch fallback (when data.json bp_scores missing) ─
@@ -2311,6 +2338,7 @@ async function loadDataJson(){
     }
     if(json.bp_scores && typeof json.bp_scores==='object'){
       window._bpScores=json.bp_scores; // pre-computed ETF/SPY relative strength
+      saveBPCache(json.bp_scores, json.ts||Date.now()); // persist for instant first paint
     }
     if(json.setups && typeof json.setups==='object'){
       window._setups=json.setups; // Today's Setups scan
@@ -2396,7 +2424,9 @@ async function loadLiveData(){
   }
   loading=false;if(btn){btn.disabled=false;btn.classList.remove('loading');}
 }
-// loadLiveData loads data.json first (populates _bpScores), then loadBestPerformers uses it instantly
+// Paint Best Performers instantly from the localStorage cache (if any) so the
+// tab never shows a hanging spinner on open; then load live data and repaint.
+loadBestPerformers();
 loadLiveData().then(()=>loadBestPerformers());
 setInterval(()=>{loadLiveData().then(()=>loadBestPerformers());},5*60*1000);
 
