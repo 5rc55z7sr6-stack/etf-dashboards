@@ -727,8 +727,7 @@
   <div class="wrap">
     <button class="tab active" data-go="hero">Overview</button>
     <button class="tab live-tab" data-go="live">⬤ Live Signal</button>
-    <button class="tab" data-go="performers">🏆 Best Performers</button>
-    <button class="tab" data-go="setups">🎯 Today's Setups</button>
+    <button class="tab" data-go="trades">📊 Trades</button>
     <button class="tab" data-go="sectors">ETFs + Themes</button>
     <button class="tab" data-go="ratios">Ratios</button>
     <button class="tab" data-go="regime">Regimes</button>
@@ -963,6 +962,8 @@
     </div>
   </section>
 
+  <!-- TRADES (Best Performers + Today's Setups) -->
+  <div id="trades">
   <!-- BEST PERFORMERS -->
   <section id="performers">
     <div class="sec-head">
@@ -1030,6 +1031,7 @@
     <div class="su-foot">Candidates pre-screened server-side every 10 min · levels are closing-price based · not investment advice</div>
     </div><!-- /setupsWrap -->
   </section>
+  </div><!-- /trades -->
 
     <footer>ETF ROTATION DESK + THEMES · Research: StockCharts / John Murphy, ETF.com, VettaFi, State Street, iShares, ARK Invest, GlobalX, Defiance, Tema, Procure, SEC filings.<br>Educational framework — not investment advice. AUM & correlations approximate and time-sensitive.</footer>
 </div>
@@ -1305,7 +1307,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>{
   setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}),50);
 }));
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)tabs.forEach(t=>t.classList.toggle('active',t.dataset.go===e.target.id));});},{rootMargin:'-45% 0px -50% 0px'});
-['hero','live','sectors','ratios','regime','playbook','caveats','performers','holdings'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
+['hero','live','sectors','ratios','regime','playbook','caveats','trades','holdings'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
 const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target);}});},{threshold:0.07});
 document.querySelectorAll('section,.master,.rcard,.reg,.step').forEach(el=>{el.classList.add('reveal');ro.observe(el);});
 
