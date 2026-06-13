@@ -221,6 +221,8 @@
   .tl-msg{font-family:var(--mono);font-size:10px;color:var(--red);min-height:13px}
   .tl-msg.ok{color:var(--green)}
   .tl-hint{font-family:var(--mono);font-size:9px;color:var(--text-faint)}
+  .tl-cta{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;border:1px solid rgba(232,193,74,.4);padding:9px 16px;border-radius:8px;margin-top:4px}
+  .tl-cta:hover{background:rgba(232,193,74,.1)}
   /* /trades page shows ONLY the Trades area; home page hides it (lives at /trades) */
   html.trades-only #hero,
   html.trades-only .wrap>section{display:none!important}
@@ -958,7 +960,8 @@
       <input id="tradesCode" type="password" autocomplete="off" placeholder="ACCESS CODE" class="tl-input" onkeydown="if(event.key==='Enter')tradesUnlock()">
       <button id="tradesUnlockBtn" class="tl-btn" onclick="tradesUnlock()">UNLOCK</button>
       <div id="tradesMsg" class="tl-msg"></div>
-      <div class="tl-hint">code rotates every Monday · ask GK for this week's code</div>
+      <a href="/join" class="tl-cta">Need a key? Get weekly access — $500/wk →</a>
+      <div class="tl-hint">7-day key · pay by card or crypto · enter it above to unlock</div>
     </div>
   </div>
   <div id="tradesBody" style="display:none">

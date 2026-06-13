@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TraderGK — Access Key</title>
+<style>
+  :root{--bg:#16191b;--card:#1e2326;--line:#2c3338;--text:#e9edef;--dim:#9aa4ab;--faint:#5a6468;--gold:#e8c14a;--green:#3fd17e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.55}
+  .wrap{max-width:520px;margin:0 auto;padding:60px 20px;text-align:center}
+  .brand{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:3px;font-weight:700;color:var(--gold)}
+  .brand span{color:var(--faint)}
+  h1{font-size:26px;margin:24px 0 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:30px;margin-top:22px}
+  .keybox{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;letter-spacing:2px;background:#12161800;border:1.5px dashed var(--gold);color:var(--gold);padding:18px;border-radius:10px;word-break:break-all;cursor:pointer}
+  .spinner{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:10px auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .go{display:inline-block;margin-top:22px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;background:var(--gold);color:#16191b;padding:14px 30px;border-radius:10px;text-decoration:none}
+  .sub{color:var(--dim);font-size:13px;margin-top:14px}
+  .copyhint{font-size:11px;color:var(--faint);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">TRADER<span>GK</span> · TRADES</div>
+  <h1 id="title">Confirming your payment…</h1>
+  <div class="card" id="card">
+    <div class="spinner" id="spin"></div>
+    <div class="sub" id="status">Waiting for the payment network to confirm. This can take a few seconds (crypto can take a little longer).</div>
+  </div>
+  <p class="sub">A copy is also emailed to you. Keep your key — it unlocks the Trades page for 7 days.</p>
+</div>
+<script>
+const API='https://api.tradergk.com';
+const q=new URLSearchParams(location.search);
+const sid=q.get('session_id'), n=q.get('n');
+const ref = sid ? 'session_id='+encodeURIComponent(sid) : n ? 'n='+encodeURIComponent(n) : '';
+const title=document.getElementById('title'), card=document.getElementById('card'), status=document.getElementById('status'), spin=document.getElementById('spin');
+
+function showKey(key){
+  title.textContent='You’re in ✓';
+  card.innerHTML='<div class="keybox" id="kb" title="click to copy">'+key+'</div>'+
+    '<div class="copyhint">click the key to copy</div>'+
+    '<a class="go" href="/trades">Open Trades →</a>';
+  document.getElementById('kb').onclick=()=>{navigator.clipboard?.writeText(key);document.querySelector('.copyhint').textContent='copied!';};
+}
+function fail(t){ spin.style.display='none'; title.textContent='Hmm…'; status.textContent=t; }
+
+if(!ref){ fail('Missing payment reference. If you paid, check your email for the access key, or contact support.'); }
+else {
+  let tries=0;
+  (async function poll(){
+    tries++;
+    try{
+      const r=await fetch(API+'/key?'+ref,{cache:'no-store'});
+      const d=await r.json();
+      if(d.status==='ready'&&d.key){ showKey(d.key); return; }
+    }catch(e){}
+    if(tries>40){ fail('Still confirming. Your key has been emailed to you the moment payment clears — please check your inbox, or come back to this page shortly.'); return; }
+    setTimeout(poll, 3000);
+  })();
+}
+</script>
+</body>
+</html>
