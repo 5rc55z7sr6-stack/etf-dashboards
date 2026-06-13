@@ -557,6 +557,11 @@
   .su-card .su-px{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--text)}
   .su-card .su-metrics{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-family:var(--mono);font-size:10.5px;color:var(--text-dim);margin:8px 0}
   .su-card .su-metrics b{color:var(--text)}
+  /* SMA20-vs-SMA50 trend: stacked rows + colored triangle (▲ 20>50 up, ▼ 20<50 down) */
+  .su-card .su-trend{grid-column:1/-1;display:flex;align-items:center;gap:9px;margin-top:4px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.07)}
+  .su-card .su-tri{font-size:16px;line-height:1;width:14px;text-align:center}
+  .su-card .su-trend-vals{display:flex;flex-direction:column;line-height:1.5}
+  .su-card .su-trend-lbl{font-size:9px;color:var(--text-faint);margin-left:auto;text-align:right;line-height:1.3}
   /* clean trade ticket: each level on its own aligned row */
   .su-card .su-levels{border-top:1px solid var(--line);margin-top:9px;padding-top:10px;display:grid;grid-template-columns:46px 82px 1fr;gap:6px 10px;align-items:baseline;font-family:var(--mono)}
   .su-card .su-lv-lbl{font-size:8.5px;font-weight:700;letter-spacing:.8px;padding:2px 0;border-radius:5px;text-align:center}
@@ -2271,6 +2276,10 @@ function renderSetups(){
       const rr2=stopDist>0?Math.abs(t2-entry)/stopDist:0;
       const rr=(1.5+rr2)/2;   // weighted: half the book exits at T1 (1.5R), half at T2
       const vrHot=(x.vr||0)>=1.5;
+      // SMA20 above SMA50 = uptrend (green ▲). Use actual SMA values when
+      // present, else derive: price is relatively closer to the higher SMA,
+      // so when sma20>sma50 the price sits nearer sma20 → d20 < d50.
+      const s20up=(x.s20!=null&&x.s50!=null)?x.s20>x.s50:(x.d20<x.d50);
       // Grade: A needs a STRUCTURAL target (a real 3-mo level, not a synthetic
       // extension), regime alignment, and the strict screen. Everything else B.
       const isAligned=aligned?aligned.includes(typ):true;
@@ -2285,10 +2294,16 @@ function renderSetups(){
         <div class="su-metrics">
           <span>RS vs ${x.etf} 20d <b style="color:${x.rsS>=0?'var(--green)':'var(--red)'}">${x.rsS>=0?'+':''}${x.rsS}%</b></span>
           <span>${x.etf} vs SPY <b style="color:${x.rsE>=0?'var(--green)':'var(--red)'}">${x.rsE>=0?'+':''}${x.rsE}%</b></span>
-          <span>vs SMA20 <b>${x.d20>=0?'+':''}${x.d20}%</b></span>
-          <span>vs SMA50 <b>${x.d50>=0?'+':''}${x.d50}%</b></span>
           <span>ATR(14) <b>${x.atr!=null?x.atr+'%':'–'}</b></span>
           <span>Volume <b class="${vrHot?'su-vr-hot':''}">${x.vr!=null?x.vr+'× avg'+(vrHot?' 🔥':''):'–'}</b></span>
+          <span class="su-trend">
+            <span class="su-tri" style="color:${s20up?'var(--green)':'var(--red)'}">${s20up?'▲':'▼'}</span>
+            <span class="su-trend-vals">
+              <span>vs SMA20 <b>${x.d20>=0?'+':''}${x.d20}%</b></span>
+              <span>vs SMA50 <b>${x.d50>=0?'+':''}${x.d50}%</b></span>
+            </span>
+            <span class="su-trend-lbl">SMA20 ${s20up?'&gt;':'&lt;'} SMA50<br>${s20up?'uptrend':'downtrend'}</span>
+          </span>
         </div>
         <div class="su-levels">
           <span class="su-lv-lbl e">ENTRY</span><span class="su-lv-px">$${entry.toFixed(2)}</span><span class="su-lv-note">${entryBasis}${Math.abs(entry-x.p)/x.p>0.001?` · now $${x.p.toFixed(2)}`:''}</span>
