@@ -57,7 +57,8 @@ else {
       const d=await r.json();
       if(d.status==='ready'&&d.key){ showKey(d.key); return; }
     }catch(e){}
-    if(tries>40){ fail('Still confirming. Your key has been emailed to you the moment payment clears — please check your inbox, or come back to this page shortly.'); return; }
+    if(tries===6){ status.textContent='Payment received — generating your key. This can take up to a minute, hang tight…'; }
+    if(tries>120){ fail('Your payment is confirmed and your key has been generated — it was emailed to you. If it’s not on screen, refresh this page (the link still works for a few minutes) or check your email.'); return; }
     setTimeout(poll, 3000);
   })();
 }
