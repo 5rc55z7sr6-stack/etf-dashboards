@@ -2326,7 +2326,12 @@ async function loadDataJson(){
     // Data always comes from GitHub Pages (refreshed every 10 min by the workflow).
     // On mirrors (Cloudflare Pages) a relative fetch would serve a stale copy:
     // data commits carry [skip ci], which Cloudflare also honors and skips.
-    const DATA_ORIGIN=location.hostname==='tradergk.github.io'?'.':'https://tradergk.github.io/etf-dashboards';
+    // On GitHub Pages or the custom domain (tradergk.com), data.json is served
+    // from the same origin → relative fetch. Anywhere else (localhost preview,
+    // an old mirror) → pull it from the GitHub Pages origin directly.
+    const _host=location.hostname;
+    const SAME_ORIGIN=['tradergk.github.io','tradergk.com','www.tradergk.com'];
+    const DATA_ORIGIN=SAME_ORIGIN.includes(_host)?'.':'https://tradergk.github.io/etf-dashboards';
     const res=await fetch(DATA_ORIGIN+'/data.json?_='+Math.floor(Date.now()/60000),{cache:'no-cache'});
     if(!res.ok)return null;
     const json=await res.json();
